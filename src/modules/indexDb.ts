@@ -1,7 +1,7 @@
 const databaseName = 'library';
 let db;
 function openOrCreatIDB() {
-  return new Promise((resolve,reject) => {
+  return new Promise((resolve, reject) => {
     const request = window.indexedDB.open(databaseName);
     request.onerror = function (event) {
       console.log('数据库打开报错');
@@ -42,7 +42,7 @@ function add(bookData) {
   let id = getRandomBookId()
   let request = db.transaction(['books'], 'readwrite')//新建事务,指定表名,以及操作readonly/readwrite
     .objectStore('books')//上面的操作会创建一个IDBtransaction对象,通过这个对象的objectstore方法拿到IDBObjectstore对象
-    .add({id,bookData});//最后通过表格对象的(add)方法,写入记录
+    .add({ id, bookData });//最后通过表格对象的(add)方法,写入记录
 
   request.onsuccess = function (event) {
     console.log('数据写入成功');
@@ -58,30 +58,30 @@ function read(id) {
   let objectStore = transaction.objectStore('books');
   let request = objectStore.get(id);//参数是主键的值
 
-  request.onerror = function(event) {
+  request.onerror = function (event) {
     console.log('事务失败');
   };
 
-  request.onsuccess = function( event) {
-     if (request.result) {
-       console.log('bookData' + request.result.bookData)
-     } else {
-       console.log('未获得数据记录');
-     }
+  request.onsuccess = function (event) {
+    if (request.result) {
+      console.log('bookData' + request.result.bookData)
+    } else {
+      console.log('未获得数据记录');
+    }
   };
 }
 
 function readAll() {
   let objectStore = db.transaction('books').objectStore('books');
-  let allBooks =  [];
-  return new Promise((resolve,reject) => {
+  let allBooks = [];
+  return new Promise((resolve, reject) => {
     const openCursor = objectStore.openCursor();
     openCursor.onsuccess = function (event) {//新建指针对象的openCursor()方法是一个异步操作
       let cursor = event.target.result;
       if (cursor) {
-      //console.log(cursor);
-      //  console.log('Id: ' + cursor.key);
-      //  console.log('bookData',cursor.value.bookData)
+        //console.log(cursor);
+        //  console.log('Id: ' + cursor.key);
+        //  console.log('bookData',cursor.value.bookData)
         allBooks.push(cursor.value)
         cursor.continue();
       } else {
@@ -89,7 +89,7 @@ function readAll() {
         resolve(allBooks)
       }
     };
-    openCursor.onerror = function(event) {
+    openCursor.onerror = function (event) {
       console.log('迭代失败');
       reject()
     };
@@ -97,11 +97,11 @@ function readAll() {
 
 }
 
-function update(id,bookData) {
+function update(id, bookData) {
   let request = db.transaction(['books'], 'readwrite')
     .objectStore('books')
-    .put({id,bookData});
-    //put()方法自动更新了主键为1的记录
+    .put({ id, bookData });
+  //put()方法自动更新了主键为1的记录
 
   request.onsuccess = function (event) {
     console.log('数据更新成功');
@@ -122,7 +122,7 @@ function remove(id) {
   };
 }
 
-function getRandomBookId(){
+function getRandomBookId() {
   const array = new Uint32Array(1);
   crypto.getRandomValues(array);
   //console.log(array[0]);
@@ -131,4 +131,4 @@ function getRandomBookId(){
 
 //存?主键:随机生成?存
 
-export default {add,read,remove,update,readAll,openOrCreatIDB}
+export default { add, read, remove, update, readAll, openOrCreatIDB }
