@@ -5,11 +5,15 @@ const fileInput = ref<HTMLInputElement | null>(null)
 onMounted(() => {
     fileInput.value?.addEventListener('change', handleBookChange)
 })
+function importBook() {
+    fileInput.value?.click()
+}
 </script>
 <template>
     <div>
-        <label for="book">添加图书</label>
-        <input ref="fileInput" type="file" accept=".txt,.epub" multiple>
+        <!-- <label for="book">添加图书</label> -->
+        <button @click="importBook">import book</button>
+        <input ref="fileInput" type="file" v-show="false" accept=".txt,.epub" multiple style="display:none;">
     </div>
 </template>
 
