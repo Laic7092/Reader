@@ -64,7 +64,7 @@ function divideTxtContent(txtContent: string) {
 }
 
 function divideByChapter(paraArr: Array<string>) {
-  const patt = /^第{0,1}[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,6}[卷篇章回部话集幕册计讲场节]([^\pP]{0,15})$/;
+  const patt = /^第?[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,9}[卷篇章回部话集幕册计讲场节](?:\s|$)/;
   let chapterArr: Array<Chapter> = [];
   let cnt = 0
   paraArr.forEach((para, idx) => {
