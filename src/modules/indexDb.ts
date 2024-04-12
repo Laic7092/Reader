@@ -1,5 +1,6 @@
 const databaseName = 'library';
 let db;
+openOrCreatIDB()
 function openOrCreatIDB() {
   return new Promise((resolve, reject) => {
     const request = window.indexedDB.open(databaseName);
@@ -36,7 +37,6 @@ function openOrCreatIDB() {
   })
 
 }
-
 
 function add(bookData) {
   let id = getRandomBookId()
@@ -131,4 +131,4 @@ function getRandomBookId() {
 
 //存?主键:随机生成?存
 
-export default { add, read, remove, update, readAll, openOrCreatIDB }
+export default { add, read, remove, update, readAll }

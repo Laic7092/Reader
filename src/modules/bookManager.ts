@@ -5,11 +5,7 @@ let fileTypes = "text/plain";
 let currentBookName = '';
 
 let books = new Map();
-library.openOrCreatIDB().then((db) => {
-  library.readAll().then((res) => {
-    console.log("allFiles", res)
-  })
-})
+
 function renderBookshelf(allBooks) {
   allBooks.forEach(element => {
     books.set(element.id, element.bookData)
