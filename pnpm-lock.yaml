@@ -8,6 +8,9 @@ dependencies:
   chardet:
     specifier: ^2.0.0
     version: 2.0.0
+  mitt:
+    specifier: ^3.0.1
+    version: 3.0.1
   vue:
     specifier: ^3.4.21
     version: 3.4.21(typescript@5.4.5)
@@ -599,6 +602,10 @@ packages:
     dependencies:
       brace-expansion: 2.0.1
     dev: true
+
+  /mitt@3.0.1:
+    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
+    dev: false
 
   /muggle-string@0.4.1:
     resolution: {integrity: sha512-VNTrAak/KhO2i8dqqnqnAHOa3cYBwXEZe9h+D5h/1ZqFSTEFHdM65lR7RoIqq3tBBYavsOXV84NoHXZ0AkPyqQ==}
