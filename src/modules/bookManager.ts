@@ -1,4 +1,5 @@
 import library from "./indexDb.js";
+import chardet from 'chardet';
 
 let fileTypes = "text/plain";
 let currentBookName = '';
@@ -39,13 +40,17 @@ function renderBookshelf(allBooks) {
   bookshelf.appendChild(ul)
 }
 
-function handleBookChange(event) {
-  let bookEle = event.target;
-  if (bookEle.files.length <= 0) return;
-  let addedBook = bookEle.files[0];
-  currentBookName = addedBook.name;
-  if (validBookType(addedBook.type)) {
-    getAddedBook(addedBook);
+
+function handleBookChange(event: Event) {
+  const fileInput = event.target as HTMLInputElement;
+  const fileList = fileInput.files
+  if (!fileList || fileList.length <= 0) return;
+  let curFile = fileList[0];
+  currentBookName = curFile.name;
+  if (validBookType(curFile.type)) {
+    getCharCode(curFile).then(encoding => {
+      getAddedBook(curFile, encoding);
+    })
   }
 }
 
@@ -58,19 +63,29 @@ function getAddedBook(addedBook, encode) {
   let fileReader = new FileReader();
   fileReader.onload = function (event) {
     let result = event.target.result;
-    if (typeof result !== "string")
-      return;
-    if (result.indexOf("�") === -1) {
-      divideTxtContent(result);
-    }
-    else {
-      getAddedBook(addedBook, 'gb2312');
-    }
+    divideTxtContent(result);
   };
-  //fileReader.readAsArrayBuffer(addedBook)
-  //fileReader.readAsBinaryString(addedBook)
-  //fileReader.readAsDataURL(addedBook)
   fileReader.readAsText(addedBook, encode);
+}
+
+function getCharCode(file: File) {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.onload = (event) => {
+      const buffer = event.target?.result;
+      if (buffer instanceof ArrayBuffer) {
+        const analyse = chardet.analyse(new Uint8Array(buffer.byteLength > 1024 ? buffer.slice(0, 1024) : buffer))
+        resolve(analyse.length > 0 ? analyse[0].name : undefined)
+      } else {
+        resolve(undefined)
+      }
+    };
+    fileReader.onerror = (event) => {
+      reject(event)
+    }
+    fileReader.readAsArrayBuffer(file)
+  })
+
 }
 
 function divideTxtContent(txtContent) {
@@ -87,7 +102,7 @@ function divideTxtContent(txtContent) {
 }
 
 function divideByChapter(paraArr) {
-  const patt = /^\s*(第{0,1})[\s两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,10}([卷篇章回部话集幕册计讲场节])(.{0,15})$/;
+  const patt = /^\s*第{0,1}[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,6}[卷篇章回部话集幕册计讲场节]([^\pP]{0,15})$/;
   let chapterArr = [];
   // let startLine = 0, endLine = 0;
   let cnt = 0
@@ -100,7 +115,6 @@ function divideByChapter(paraArr) {
     }
   });
   let abc = Math.floor(cnt / chapterArr.length)
-  console.log('abc', abc)
   return chapterArr.filter(item => {
     let a = Math.abs(item.chapterName.length - abc)
     console.log(a)
