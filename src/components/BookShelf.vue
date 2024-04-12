@@ -61,7 +61,7 @@ function removeBook(id: string) {
   <div class="container">
     <div class="book" v-for="book in books" :key="book.id" @click="pickBook(book)">
       <img src="/vite.svg">
-      <div>
+      <div class="auto-Elliptical" :title="book.name">
         {{ book.name }}
       </div>
       <button @click.stop="removeBook(book.id)">remove</button>
@@ -74,19 +74,20 @@ function removeBook(id: string) {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 2fr;
-  grid-gap: 10px;
+  grid-gap: 1em;
 
   /* 设置网格间隔 */
   .book {
     background-color: #f0f0f0;
-    padding: 20px;
+    padding: 1em;
     border: 1px solid #ccc;
     color: #000;
     cursor: pointer;
+    overflow: hidden;
 
     img {
-      width: 100px;
-      height: 100px;
+      width: 5em;
+      height: 5em;
     }
   }
 }

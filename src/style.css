@@ -81,9 +81,10 @@ p {
 }
 
 .auto-Elliptical {
-  text-wrap: nowrap;
-  text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (width <=949px) or (orientation: portrait) {
