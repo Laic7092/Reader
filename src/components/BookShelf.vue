@@ -49,7 +49,7 @@ function init() {
   })
 }
 
-function pickBook(val) {
+function pickBook(val: Book) {
   emit('pickBook', val)
 }
 </script>

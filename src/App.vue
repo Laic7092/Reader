@@ -3,19 +3,22 @@ import { ref } from 'vue';
 import BookShelf from './components/BookShelf.vue';
 import ImportBook from './components/ImportBook.vue';
 import Reader from './components/Reader.vue'
+import { Book } from './modules/indexDb';
 
 const readerVisible = ref(false)
 
-function showReader() {
+const curBook = ref<Book>()
+function pickBook(book: Book) {
+  curBook.value = book
   readerVisible.value = true
 }
 </script>
 
 <template>
-  <Reader v-if="readerVisible" v-model="readerVisible" />
+  <Reader v-if="readerVisible && curBook" v-model="readerVisible" :curBook="curBook" />
   <div v-show="!readerVisible">
     <ImportBook />
-    <BookShelf @pickBook="showReader" />
+    <BookShelf @pickBook="pickBook" />
   </div>
 </template>
 
