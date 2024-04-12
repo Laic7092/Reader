@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import bus, { CRUD, STATUS } from '../modules/pubSub'
-import { readAll, Book } from "../modules/indexDb"
+import { readAll, remove, Book } from "../modules/indexDb"
 import { onBeforeMount, onUnmounted, ref } from 'vue';
 
 const emit = defineEmits<{
@@ -12,11 +12,11 @@ interface SubMap {
 }
 const subMap: SubMap = {
   [CRUD.ADD]: (val: any) => {
-    console.log(val, 'subMap');
+    books.value.push(val)
   },
-  // [CRUD.REMOVE]: (val: any) => {
-  //   console.log(val, 'subMap');
-  // },
+  [CRUD.REMOVE]: (id: string) => {
+    books.value.splice(books.value.findIndex((book) => book.id === id), 1)
+  },
   // [CRUD.UPDATE]: (val: any) => {
   //   console.log(val, 'subMap');
   // },
@@ -52,6 +52,10 @@ function init() {
 function pickBook(val: Book) {
   emit('pickBook', val)
 }
+
+function removeBook(id: string) {
+  remove(id)
+}
 </script>
 <template>
   <div class="container">
@@ -60,6 +64,7 @@ function pickBook(val: Book) {
       <div>
         {{ book.name }}
       </div>
+      <button @click.stop="removeBook(book.id)">remove</button>
     </div>
   </div>
 </template>

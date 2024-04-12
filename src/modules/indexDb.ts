@@ -140,6 +140,7 @@ function remove(id: string) {
 
   request.onsuccess = function () {
     console.log('数据删除成功');
+    busEmit(CRUD.REMOVE, id)
   };
 }
 
