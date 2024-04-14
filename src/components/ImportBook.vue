@@ -10,11 +10,18 @@ function importBook() {
 }
 </script>
 <template>
-    <div>
-        <!-- <label for="book">添加图书</label> -->
-        <button @click="importBook">import book</button>
+    <div class="top-right">
+        <button @click="importBook">Import Book +</button>
         <input ref="fileInput" type="file" v-show="false" accept=".txt,.epub" multiple style="display:none;">
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.top-right {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 1em;
+    text-align: right;
+}
+</style>

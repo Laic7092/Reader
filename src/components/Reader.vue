@@ -39,6 +39,9 @@ const operatePanelVisible = ref(false)
 function changeOperatePanelVisible() {
     operatePanelVisible.value = !operatePanelVisible.value
 }
+
+const patt = /^第?[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,9}[卷篇章回部话集幕册计讲场节](?:\s|$)/;
+
 </script>
 <template>
     <article>
@@ -49,36 +52,34 @@ function changeOperatePanelVisible() {
                 class="svgBtn operate">
             <div v-if="operatePanelVisible" class="operatePanel">
                 <div class="malou flex-r-sbc">
-                    <span>contents - 100%</span>
+                    <span>Contents - 100%</span>
                     <img src="../assets/Bars3.svg" class="svg1">
                 </div>
                 <div class="malou flex-r-sbc">
-                    <span>search book</span>
+                    <span>Search Book</span>
                     <img src="../assets/Search.svg" class="svg1">
                 </div>
                 <div class="malou flex-r-sbc">
-                    <span>theme & setting</span>
+                    <span>Theme & Setting</span>
                     <img src="../assets/Setting.svg" class="svg1">
                 </div>
                 <div class="malou flex-r-sbc hh">
-                    <div class="louma flex-r-cc">
-                        <img src="../assets/Search.svg" class="svg1">
-                    </div>
-                    <div class="louma flex-r-cc">
-                        <img src="../assets/Search.svg" class="svg1">
-                    </div>
-                    <div class="louma flex-r-cc">
-                        <img src="../assets/Search.svg" class="svg1">
-                    </div>
+                    <img src="../assets/Search.svg" class="louma svg1">
+                    <img src="../assets/Search.svg" class="louma svg1">
+                    <img src="../assets/Search.svg" class="louma svg1">
                 </div>
             </div>
         </template>
         <main @click="() => operatePanelVisible ? changeOperatePanelVisible() : changeHeaderVisible()"
             @scroll="() => operatePanelVisible && changeOperatePanelVisible()">
-            <p v-for="(line, idx) in curBook.chapterArr.slice(0,500)" :key="idx">{{ line.content || new
+            <!-- <p v-for="(line, idx) in curBook.chapterArr.slice(0, 500)" :key="idx">{{ false || new
                 Array(10).fill(line.content).toString()
                 }}
-            </p>
+            </p> -->
+            <template v-for="(para, idx) in curBook.paraArr.slice(0, 500)" :key="idx">
+                <h3 v-if="para.search(patt) !== -1">{{ para }}</h3>
+                <p v-else>{{ para }}</p>
+            </template>
         </main>
         <!-- <footer>footer</footer> -->
     </article>
@@ -86,20 +87,17 @@ function changeOperatePanelVisible() {
 
 <style scoped>
 article {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: var(--pc-width);
-    height: 100vh;
-    height: 100dvh;
-    /* height: calc(var(--vh, 1vh) * 100); */
+    min-width: 320px;
+    max-width: 1280px;
+    margin: 0 100px;
+    --bar-width: 250px;
 
     .svgBtn {
         height: 1.5em;
         width: 1.5em;
         cursor: pointer;
         position: fixed;
-        right: calc(20vw + 2em);
+        right: 1em;
         border: 0.25rem solid #CFD3DC;
         border-radius: 50%;
         background-color: #CFD3DC;
@@ -115,32 +113,27 @@ article {
     }
 
     main {
-        flex: content;
-        overflow-y: auto;
-        background-color: black;
-        padding: 1em;
-        font-size: inherit;
-        line-height: normal;
-        line-height: 1.5em;
-        word-spacing: normal;
-        letter-spacing: normal;
+        font-size: 1.2em;
+        line-height: unset;
+        word-spacing: unset;
+        letter-spacing: unset;
         text-align: left;
     }
 }
 
 .operatePanel {
     position: fixed;
-    width: var(--pc-width);
-    bottom: 4em;
-    padding-right: 3em;
-    box-sizing: border-box;
+    right: 0;
+    bottom: 3em;
+    /* padding-right: 3em; */
 
     .malou {
         border-radius: 0.75em;
-        border: 0.5em solid darkgray;
         margin: 0.25em 2em;
+        padding: 0.5em 1em;
         background-color: darkgray;
         cursor: pointer;
+        width: var(--bar-width);
 
         span {
             font-size: 1.2em;
@@ -155,15 +148,16 @@ article {
     }
 
     .hh {
+        width: calc(var(--bar-width) + 2em);
+        padding: 0;
         background-color: unset;
-        border: none;
     }
 
     .louma {
         background-color: darkgray;
+        flex: 1;
         margin: 0 0.25em;
         padding: 0.5em;
-        flex: 1;
         border-radius: 1em;
 
         &:first-child {
@@ -177,39 +171,24 @@ article {
 
 }
 
-/* @media (719px < width <=949px) and (orientation: landscape) {
+@media(max-width: 1280px) {
     article {
-        width: var(--pad-width);
-
-        .svgBtn {
-            right: calc(10vw + 2em);
-        }
-
-        header {
-            width: var(--pad-width);
-        }
+        margin-left: 4em;
+        margin-right: 4em
     }
+}
 
-    .operatePanel {
-        width: var(--pad-width);
-    }
-} */
-
-@media (width <=949px) or (orientation: portrait) {
+@media(max-width: 949px) {
     article {
-        width: var(--full-width);
-
-        .svgBtn {
-            right: 2em;
-        }
-
-        header {
-            width: var(--full-width);
-        }
+        margin-left: 3em;
+        margin-right: 3em
     }
+}
 
-    .operatePanel {
-        width: var(--full-width);
+@media(max-width: 719px) {
+    article {
+        margin-left: 1.5em;
+        margin-right: 1.5em
     }
 }
 </style>
