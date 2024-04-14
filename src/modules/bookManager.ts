@@ -55,7 +55,7 @@ function getCharCode(file: File): Promise<string | undefined> {
 
 function divideTxtContent(txtContent: string) {
   if (typeof txtContent !== "string") return;
-  let paraArr = txtContent.split(/[\r\n]+/);
+  let paraArr = txtContent.split(/[\r\n]+/).map(para => para.trim());
   let chapterArr = []
   if (paraArr.length > 0) {
     chapterArr = divideByChapter(paraArr);

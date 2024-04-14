@@ -69,6 +69,7 @@ p {
   margin: 0;
   word-break: break-all;
   word-wrap: break-word;
+  text-indent: 2em;
 }
 
 #app {
