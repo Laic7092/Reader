@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { Book } from '../modules/indexDb';
+import Drawer from './Drawer.vue';
 
 // 使 v-model 必填
 const model = defineModel({ required: true })
@@ -42,6 +43,10 @@ function changeOperatePanelVisible() {
 
 const patt = /^第?[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,9}[卷篇章回部话集幕册计讲场节](?:\s|$)/;
 
+const drawerVisible = ref(false)
+function showDrawer() {
+    drawerVisible.value = true
+}
 </script>
 <template>
     <article>
@@ -64,12 +69,15 @@ const patt = /^第?[两一二三四五六七八九十零百千万\d壹贰叁肆�
                     <img src="../assets/Setting.svg" class="svg1">
                 </div>
                 <div class="malou flex-r-sbc hh">
-                    <img src="../assets/Search.svg" class="louma svg1">
+                    <img src="../assets/Search.svg" class="louma svg1" @click=showDrawer>
                     <img src="../assets/Search.svg" class="louma svg1">
                     <img src="../assets/Search.svg" class="louma svg1">
                 </div>
             </div>
         </template>
+        <Drawer v-model="drawerVisible">
+            hellow world
+        </Drawer>
         <main @click="() => operatePanelVisible ? changeOperatePanelVisible() : changeHeaderVisible()"
             @scroll="() => operatePanelVisible && changeOperatePanelVisible()">
             <!-- <p v-for="(line, idx) in curBook.chapterArr.slice(0, 500)" :key="idx">{{ false || new
