@@ -22,14 +22,15 @@ function back() {
 const limit = ref(false)
 onMounted(() => {
     console.log('阅读页加载中', props.curBook)
-    // document.addEventListener('scroll', () => {
-    //     const { scrollTop, clientHeight, scrollHeight } = document.documentElement
-    //     if (scrollTop + clientHeight === scrollHeight) {
-    //         aa('next')
-    //     } else if (scrollTop === 0 && start.value !== 0) {
-    //         aa('pre')
-    //     }
-    // })
+    // autoHide()
+    document.addEventListener('scroll', () => {
+        const { scrollTop, clientHeight, scrollHeight } = document.documentElement
+        if (scrollTop + clientHeight === scrollHeight) {
+            aa('next')
+        } else if (scrollTop === 0 && start.value !== 0) {
+            aa('pre')
+        }
+    })
 
     const intersectionObserver = new IntersectionObserver((entries) => {
         // 如果 intersectionRatio 为 0，则目标在视野外，
@@ -71,8 +72,33 @@ function aa(type: string) {
 }
 
 const headerVisible = ref(true)
+
+// const endSecond = ref(4)
+// const curInterval = ref(0)
+// function resetEndSecond() {
+//     endSecond.value = 4
+// }
+// function autoHide() {
+//     if (endSecond.value === 4 && !curInterval.value) {
+//         curInterval.value = setInterval(() => {
+//             if (endSecond.value > 0) {
+//                 endSecond.value -= 1
+//             }
+//             if (headerVisible.value && !operatePanelVisible.value && endSecond.value === 0) {
+//                 clearInterval(curInterval.value)
+//                 curInterval.value = 0
+//                 changeHeaderVisible()
+//             }
+//         }, 1000)
+//     }
+// }
 function changeHeaderVisible() {
     headerVisible.value = !headerVisible.value
+    // if (headerVisible.value && !curInterval.value) {
+    //     autoHide()
+    // } else {
+    //     resetEndSecond()
+    // }
 }
 
 const operatePanelVisible = ref(false)
@@ -86,12 +112,19 @@ function showDrawer() {
 }
 
 // const chapterIdxArr = computed(() => props.curBook.chapterArr.map(chapter => chapter.idx))
+
+function changeFontSize(type: string) {
+    style.value['font-size'] = parseFloat(style.value['font-size']) + (type === 'add' ? 0.1 : -0.1) + 'em'
+}
+const style = ref({
+    'font-size': '1em'
+})
 </script>
 <template>
     <article id="reader">
         <template v-if="headerVisible">
             <!-- <div></div> -->
-            <img src="../assets/Close.svg" @click="back" class="svg-btn-small border close">
+            <img src="../assets/Close.svg" @click="back" v-if="!operatePanelVisible" class="svg-btn-small border close">
             <img src="../assets/Operate.svg" v-if="!operatePanelVisible" @click="changeOperatePanelVisible"
                 class="svg-btn-small border operate">
             <div v-if="operatePanelVisible" class="operatePanel">
@@ -103,21 +136,25 @@ function showDrawer() {
                     <span class="menu-name">Search Book</span>
                     <img src="../assets/Search.svg" class="svg-btn">
                 </div>
-                <div class="menu-item flex-r-sbc">
+                <div class="menu-item flex-r-sbc" @click=showDrawer>
                     <span class="menu-name">Themes & Settings</span>
                     <img src="../assets/Setting.svg" class="svg-btn">
                 </div>
                 <div class="menu-item flex-r-sbc none-decoration">
-                    <img src="../assets/Search.svg" class="louma svg-btn" @click=showDrawer>
+                    <img src="../assets/Search.svg" class="louma svg-btn">
                     <img src="../assets/Search.svg" class="louma svg-btn">
                     <img src="../assets/Search.svg" class="louma svg-btn">
                 </div>
             </div>
         </template>
-        <Drawer v-model="drawerVisible">
-            hellow world
+        <Drawer v-model="drawerVisible" title="Themes & Settings" height="50dvh">
+            <div class="fontsize-adjust-btn flex-r-sbc">
+                <span class="left-letter" @click="changeFontSize('sub')">A</span>
+                <span class="divide"></span>
+                <span class="right-letter" @click="changeFontSize('add')">A</span>
+            </div>
         </Drawer>
-        <main @click="() => operatePanelVisible ? changeOperatePanelVisible() : changeHeaderVisible()"
+        <main :style="style" @click="() => operatePanelVisible ? changeOperatePanelVisible() : changeHeaderVisible()"
             @scroll="() => operatePanelVisible && changeOperatePanelVisible()">
             <template v-for="(para, idx) in vList">
                 <!-- <h3 v-if="chapterIdxArr.indexOf(idx) !== -1">{{ para }}</h3> -->
@@ -166,7 +203,7 @@ article {
 
 
     main {
-        font-size: 1.2em;
+        font-size: 1em;
         line-height: unset;
         word-spacing: unset;
         letter-spacing: unset;
@@ -198,30 +235,53 @@ article {
             height: 2em;
         }
 
-        .none-decoration {
+        &.none-decoration {
             width: calc(var(--bar-width) + 2em);
             padding: 0;
             background-color: unset;
+
+            .louma {
+                background-color: darkgray;
+                flex: 1;
+                margin: 0 0.25em;
+                padding: 0.5em;
+                border-radius: 1em;
+
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
         }
 
-        .louma {
-            background-color: darkgray;
-            flex: 1;
-            margin: 0 0.25em;
-            padding: 0.5em;
-            border-radius: 1em;
-
-            &:first-child {
-                margin-left: 0;
-            }
-
-            &:last-child {
-                margin-right: 0;
-            }
-        }
     }
 
 
+}
+
+.fontsize-adjust-btn {
+    padding: 0.5em;
+    background-color: darkgray;
+    border-radius: 1em;
+
+    .divide {
+        border: 0.5px solid gray;
+        height: 1.5em;
+        margin: auto;
+    }
+
+    .left-letter {
+        font-size: 0.8em;
+        flex: 1;
+    }
+
+    .right-letter {
+        font-size: 1.2em;
+        flex: 1;
+    }
 }
 
 @media(max-width: 1280px) {

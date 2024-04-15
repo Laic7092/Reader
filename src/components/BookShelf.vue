@@ -88,7 +88,7 @@ function removeSelection() {
     <button v-if="curMode === 'normal'" @click="changeMode('manage')">Manage Books</button>
     <template v-else>
       <button class="mr1" @click="changeMode('normal')">cancel</button>
-      <img @click="removeSelection" src="../assets/Delete.svg" class="svg-icon">
+      <img @click="removeSelection" src="../assets/Delete.svg" class="svg-btn">
     </template>
   </div>
   <div v-if="books.length > 0">
