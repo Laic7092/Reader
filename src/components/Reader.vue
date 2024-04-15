@@ -22,7 +22,7 @@ function back() {
 const limit = ref(false)
 onMounted(() => {
     console.log('阅读页加载中', props.curBook)
-    // autoHide()
+    autoHide()
     document.addEventListener('scroll', () => {
         const { scrollTop, clientHeight, scrollHeight } = document.documentElement
         if (scrollTop + clientHeight === scrollHeight) {
@@ -73,37 +73,39 @@ function aa(type: string) {
 
 const headerVisible = ref(true)
 
-// const endSecond = ref(4)
-// const curInterval = ref(0)
-// function resetEndSecond() {
-//     endSecond.value = 4
-// }
-// function autoHide() {
-//     if (endSecond.value === 4 && !curInterval.value) {
-//         curInterval.value = setInterval(() => {
-//             if (endSecond.value > 0) {
-//                 endSecond.value -= 1
-//             }
-//             if (headerVisible.value && !operatePanelVisible.value && endSecond.value === 0) {
-//                 clearInterval(curInterval.value)
-//                 curInterval.value = 0
-//                 changeHeaderVisible()
-//             }
-//         }, 1000)
-//     }
-// }
+const endSecond = ref(4)
+const curInterval = ref(0)
+function resetEndSecond() {
+    clearInterval(curInterval.value)
+    endSecond.value = 4
+}
+function autoHide() {
+    curInterval.value = setInterval(() => {
+        if (endSecond.value > 0) {
+            endSecond.value -= 1
+        }
+        if (endSecond.value === 0) {
+            changeHeaderVisible()
+        }
+    }, 1000)
+}
 function changeHeaderVisible() {
     headerVisible.value = !headerVisible.value
-    // if (headerVisible.value && !curInterval.value) {
-    //     autoHide()
-    // } else {
-    //     resetEndSecond()
-    // }
+    if (headerVisible.value) {
+        autoHide()
+    } else {
+        resetEndSecond()
+    }
 }
 
 const operatePanelVisible = ref(false)
 function changeOperatePanelVisible() {
     operatePanelVisible.value = !operatePanelVisible.value
+    if (operatePanelVisible.value) {
+        resetEndSecond()
+    } else {
+        autoHide()
+    }
 }
 
 const drawerVisible = ref(false)
