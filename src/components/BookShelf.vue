@@ -121,12 +121,11 @@ function removeSelection() {
 
   /* 设置网格间隔 */
   .book {
-    color: #000;
     cursor: pointer;
     overflow: hidden;
 
     .post {
-      background-color: #f0f0f0;
+      background-color: var(--fill-color);
       padding: 1em;
 
       .post-img {
@@ -137,7 +136,6 @@ function removeSelection() {
 
     .name {
       margin: 0.5em 0;
-      color: #f0f0f0;
     }
 
     .checkbox {

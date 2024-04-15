@@ -14,11 +14,6 @@ function back() {
     model.value = false
 }
 
-// const catelog = ref<Array<string>>([])
-// const catelogVisible = ref(false)
-// function showCatelog() {
-//     catelogVisible.value = true
-// }
 const limit = ref(false)
 onMounted(() => {
     console.log('阅读页加载中', props.curBook)
@@ -108,9 +103,16 @@ function changeOperatePanelVisible() {
     }
 }
 
-const drawerVisible = ref(false)
-function showDrawer() {
-    drawerVisible.value = true
+interface DrawerMap {
+    settingsDrawer: boolean
+    contensDrawer: boolean
+}
+const drawerMap = ref<DrawerMap>({
+    settingsDrawer: false,
+    contensDrawer: false,
+})
+function showDrawer(key: keyof DrawerMap) {
+    drawerMap.value[key] = true
 }
 
 // const chapterIdxArr = computed(() => props.curBook.chapterArr.map(chapter => chapter.idx))
@@ -130,7 +132,7 @@ const style = ref({
             <img src="../assets/Operate.svg" v-if="!operatePanelVisible" @click="changeOperatePanelVisible"
                 class="svg-btn-small border operate">
             <div v-if="operatePanelVisible" class="operatePanel">
-                <div class="menu-item flex-r-sbc">
+                <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
                     <span class="menu-name">Contents - 100%</span>
                     <img src="../assets/Bars3.svg" class="svg-btn">
                 </div>
@@ -138,7 +140,7 @@ const style = ref({
                     <span class="menu-name">Search Book</span>
                     <img src="../assets/Search.svg" class="svg-btn">
                 </div>
-                <div class="menu-item flex-r-sbc" @click=showDrawer>
+                <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
                     <span class="menu-name">Themes & Settings</span>
                     <img src="../assets/Setting.svg" class="svg-btn">
                 </div>
@@ -149,13 +151,6 @@ const style = ref({
                 </div>
             </div>
         </template>
-        <Drawer v-model="drawerVisible" title="Themes & Settings" height="50dvh">
-            <div class="fontsize-adjust-btn flex-r-sbc">
-                <span class="left-letter" @click="changeFontSize('sub')">A</span>
-                <span class="divide"></span>
-                <span class="right-letter" @click="changeFontSize('add')">A</span>
-            </div>
-        </Drawer>
         <main :style="style" @click="() => operatePanelVisible ? changeOperatePanelVisible() : changeHeaderVisible()"
             @scroll="() => operatePanelVisible && changeOperatePanelVisible()">
             <template v-for="(para, idx) in vList">
@@ -167,6 +162,20 @@ const style = ref({
             </template>
         </main>
         <!-- <footer>footer</footer> -->
+        <Drawer v-if="drawerMap.settingsDrawer" v-model="drawerMap.settingsDrawer" title="Themes & Settings">
+            <div class="fontsize-adjust-btn flex-r-sbc">
+                <span class="left-letter" @click="changeFontSize('sub')">A</span>
+                <span class="divide"></span>
+                <span class="right-letter" @click="changeFontSize('add')">A</span>
+            </div>
+        </Drawer>
+        <Drawer v-if="drawerMap.contensDrawer" v-model="drawerMap.contensDrawer" title="Contents" height="80vh">
+            <ul class="contents">
+                <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx">
+                    <a style="color: unset;">{{ chapter.content }}</a>
+                </li>
+            </ul>
+        </Drawer>
     </article>
 </template>
 
@@ -182,6 +191,12 @@ article {
         width: 1.5em;
         cursor: pointer;
 
+        &.border {
+            border: 0.25rem solid var(--border-color);
+            border-radius: 50%;
+            background-color: var(--border-color);
+        }
+
         &.close {
             position: fixed;
             right: 1em;
@@ -195,14 +210,7 @@ article {
             border-radius: 25%;
         }
 
-        &.border {
-            border: 0.25rem solid #CFD3DC;
-            border-radius: 50%;
-            background-color: #CFD3DC;
-        }
     }
-
-
 
     main {
         font-size: 1em;
@@ -217,33 +225,32 @@ article {
     position: fixed;
     right: 0;
     bottom: 3em;
+    -webkit-user-select: none;
+    user-select: none;
 
     .menu-item {
         border-radius: 0.75em;
         margin: 0.25em 2em;
         padding: 0.5em 1em;
-        background-color: darkgray;
+        background-color: var(--fill-color);
+        /* box-shadow: var(--box-shadow); */
         cursor: pointer;
         width: var(--bar-width);
 
         .menu-name {
             font-size: 1.2em;
             font-weight: bold;
-            color: #242424;
-        }
-
-        .svg-btn {
-            width: 2em;
-            height: 2em;
         }
 
         &.none-decoration {
             width: calc(var(--bar-width) + 2em);
             padding: 0;
             background-color: unset;
+            box-shadow: none;
 
             .louma {
-                background-color: darkgray;
+                background-color: var(--fill-color);
+                /* box-shadow: var(--box-shadow); */
                 flex: 1;
                 margin: 0 0.25em;
                 padding: 0.5em;
@@ -266,11 +273,11 @@ article {
 
 .fontsize-adjust-btn {
     padding: 0.5em;
-    background-color: darkgray;
+    background-color: var(--border-color);
     border-radius: 1em;
 
     .divide {
-        border: 0.5px solid gray;
+        border: 0.5px solid;
         height: 1.5em;
         margin: auto;
     }
@@ -284,6 +291,11 @@ article {
         font-size: 1.2em;
         flex: 1;
     }
+}
+
+.contents {
+    text-align: left;
+    font-size: 1.3em;
 }
 
 @media(max-width: 1280px) {
