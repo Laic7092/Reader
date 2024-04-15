@@ -10,6 +10,8 @@ let db: IDBDatabase | null = null;
 interface Chapter {
   idx: number
   content: string
+  startLine: number
+  endLine: number
 }
 interface Book {
   id: string

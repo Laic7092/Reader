@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { Book } from '../modules/indexDb';
 import Drawer from './Drawer.vue';
 
@@ -19,17 +19,56 @@ function back() {
 // function showCatelog() {
 //     catelogVisible.value = true
 // }
+const limit = ref(false)
 onMounted(() => {
     console.log('阅读页加载中', props.curBook)
+    // document.addEventListener('scroll', () => {
+    //     const { scrollTop, clientHeight, scrollHeight } = document.documentElement
+    //     if (scrollTop + clientHeight === scrollHeight) {
+    //         aa('next')
+    //     } else if (scrollTop === 0 && start.value !== 0) {
+    //         aa('pre')
+    //     }
+    // })
+
+    const intersectionObserver = new IntersectionObserver((entries) => {
+        // 如果 intersectionRatio 为 0，则目标在视野外，
+        // 我们不需要做任何事情。
+        // what if pre & next exist in a viewport?
+        if (entries[0].intersectionRatio <= 0) {
+            console.log('trigger,out')
+            return
+        };
+        console.log("Loaded new items", entries);
+    });
+    // 开始监听
+    const anchor = document.querySelector('#anchor')
+    anchor && intersectionObserver.observe(anchor);
+    setInterval(() => {
+        // alert(intersectionObserver.root)
+    }, 5000)
 })
 
-// const preLine = ref(5)
-// const viewPortLine = ref(10)
-// const sufLine = ref(5)
+const init = 300
+const gap = 50
 
-// const vList = computed(() => {
+const start = ref(0)
+const vList = computed(() => props.curBook.paraArr.slice(start.value, start.value + init))
 
-// })
+function aa(type: string) {
+    if (limit.value) return
+    limit.value = true
+    if (type === 'next') {
+        start.value += gap
+    } else {
+        start.value = gap > start.value ? 0 : start.value - gap
+    }
+    console.log(vList.value)
+    setTimeout(() => {
+        limit.value = false
+        console.log(vList.value)
+    }, 0)
+}
 
 const headerVisible = ref(true)
 function changeHeaderVisible() {
@@ -41,37 +80,37 @@ function changeOperatePanelVisible() {
     operatePanelVisible.value = !operatePanelVisible.value
 }
 
-const patt = /^第?[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,9}[卷篇章回部话集幕册计讲场节](?:\s|$)/;
-
 const drawerVisible = ref(false)
 function showDrawer() {
     drawerVisible.value = true
 }
+
+// const chapterIdxArr = computed(() => props.curBook.chapterArr.map(chapter => chapter.idx))
 </script>
 <template>
-    <article>
+    <article id="reader">
         <template v-if="headerVisible">
             <!-- <div></div> -->
-            <img src="../assets/Close.svg" @click="back" class="svgBtn close">
+            <img src="../assets/Close.svg" @click="back" class="svg-btn-small border close">
             <img src="../assets/Operate.svg" v-if="!operatePanelVisible" @click="changeOperatePanelVisible"
-                class="svgBtn operate">
+                class="svg-btn-small border operate">
             <div v-if="operatePanelVisible" class="operatePanel">
-                <div class="malou flex-r-sbc">
-                    <span>Contents - 100%</span>
-                    <img src="../assets/Bars3.svg" class="svg1">
+                <div class="menu-item flex-r-sbc">
+                    <span class="menu-name">Contents - 100%</span>
+                    <img src="../assets/Bars3.svg" class="svg-btn">
                 </div>
-                <div class="malou flex-r-sbc">
-                    <span>Search Book</span>
-                    <img src="../assets/Search.svg" class="svg1">
+                <div class="menu-item flex-r-sbc">
+                    <span class="menu-name">Search Book</span>
+                    <img src="../assets/Search.svg" class="svg-btn">
                 </div>
-                <div class="malou flex-r-sbc">
-                    <span>Theme & Setting</span>
-                    <img src="../assets/Setting.svg" class="svg1">
+                <div class="menu-item flex-r-sbc">
+                    <span class="menu-name">Themes & Settings</span>
+                    <img src="../assets/Setting.svg" class="svg-btn">
                 </div>
-                <div class="malou flex-r-sbc hh">
-                    <img src="../assets/Search.svg" class="louma svg1" @click=showDrawer>
-                    <img src="../assets/Search.svg" class="louma svg1">
-                    <img src="../assets/Search.svg" class="louma svg1">
+                <div class="menu-item flex-r-sbc none-decoration">
+                    <img src="../assets/Search.svg" class="louma svg-btn" @click=showDrawer>
+                    <img src="../assets/Search.svg" class="louma svg-btn">
+                    <img src="../assets/Search.svg" class="louma svg-btn">
                 </div>
             </div>
         </template>
@@ -80,13 +119,12 @@ function showDrawer() {
         </Drawer>
         <main @click="() => operatePanelVisible ? changeOperatePanelVisible() : changeHeaderVisible()"
             @scroll="() => operatePanelVisible && changeOperatePanelVisible()">
-            <!-- <p v-for="(line, idx) in curBook.chapterArr.slice(0, 500)" :key="idx">{{ false || new
-                Array(10).fill(line.content).toString()
-                }}
-            </p> -->
-            <template v-for="para in curBook.paraArr.slice(0, 500)">
-                <h3 v-if="para.search(patt) !== -1">{{ para }}</h3>
-                <p v-else>{{ para }}</p>
+            <template v-for="(para, idx) in vList">
+                <!-- <h3 v-if="chapterIdxArr.indexOf(idx) !== -1">{{ para }}</h3> -->
+                <!-- <p v-else>{{ para }}</p> -->
+                <p>{{ para }}</p>
+                <div v-if="idx === vList.length / 2" id="anchor">
+                </div>
             </template>
         </main>
         <!-- <footer>footer</footer> -->
@@ -100,25 +138,32 @@ article {
     margin: 0 100px;
     --bar-width: 250px;
 
-    .svgBtn {
+    .svg-btn-small {
         height: 1.5em;
         width: 1.5em;
         cursor: pointer;
-        position: fixed;
-        right: 1em;
-        border: 0.25rem solid #CFD3DC;
-        border-radius: 50%;
-        background-color: #CFD3DC;
+
+        &.close {
+            position: fixed;
+            right: 1em;
+            top: 2em;
+        }
+
+        &.operate {
+            position: fixed;
+            right: 1em;
+            bottom: 2em;
+            border-radius: 25%;
+        }
+
+        &.border {
+            border: 0.25rem solid #CFD3DC;
+            border-radius: 50%;
+            background-color: #CFD3DC;
+        }
     }
 
-    .close {
-        top: 2em;
-    }
 
-    .operate {
-        bottom: 2em;
-        border-radius: 25%;
-    }
 
     main {
         font-size: 1.2em;
@@ -133,9 +178,8 @@ article {
     position: fixed;
     right: 0;
     bottom: 3em;
-    /* padding-right: 3em; */
 
-    .malou {
+    .menu-item {
         border-radius: 0.75em;
         margin: 0.25em 2em;
         padding: 0.5em 1em;
@@ -143,39 +187,40 @@ article {
         cursor: pointer;
         width: var(--bar-width);
 
-        span {
+        .menu-name {
             font-size: 1.2em;
             font-weight: bold;
             color: #242424;
         }
 
-        .svg1 {
+        .svg-btn {
             width: 2em;
             height: 2em;
         }
-    }
 
-    .hh {
-        width: calc(var(--bar-width) + 2em);
-        padding: 0;
-        background-color: unset;
-    }
-
-    .louma {
-        background-color: darkgray;
-        flex: 1;
-        margin: 0 0.25em;
-        padding: 0.5em;
-        border-radius: 1em;
-
-        &:first-child {
-            margin-left: 0;
+        .none-decoration {
+            width: calc(var(--bar-width) + 2em);
+            padding: 0;
+            background-color: unset;
         }
 
-        &:last-child {
-            margin-right: 0;
+        .louma {
+            background-color: darkgray;
+            flex: 1;
+            margin: 0 0.25em;
+            padding: 0.5em;
+            border-radius: 1em;
+
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
         }
     }
+
 
 }
 

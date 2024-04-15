@@ -65,20 +65,30 @@ function divideTxtContent(txtContent: string) {
 
 function divideByChapter(paraArr: Array<string>) {
   const patt = /^第?[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,9}[卷篇章回部话集幕册计讲场节](?:\s|$)/;
-  let chapterArr: Array<Chapter> = [];
+  const chapterArr: Array<Chapter> = [];
+  if (paraArr[0].search(patt) === -1) {
+    paraArr.unshift("Preface")
+  }
   let cnt = 0
   paraArr.forEach((para, idx) => {
     const content = para.trim()
     if (content.search(patt) !== -1) {
-      chapterArr.push({ content, idx });
+      chapterArr.push({ content, idx, startLine: idx, endLine: -1 });
       cnt += content.length
     }
   });
-  let abc = Math.floor(cnt / chapterArr.length)
-  return chapterArr.filter(chapter => {
-    let a = Math.abs(chapter.content.length - abc)
-    return a <= 7
+  const average = Math.floor(cnt / chapterArr.length)
+  const res = chapterArr.filter(chapter => Math.abs(chapter.content.length - average) <= 7)
+  if (paraArr[0].search(patt) === -1) {
+    res.unshift({ content: 'Preface', idx: 0, startLine: 0, endLine: -1 })
+    // CWJ-TODO JS bigArr unshift performance?
+  }
+  res.forEach((chapter, idx) => {
+    chapter.endLine = res[idx + 1]?.idx - 1
+    // jsu a try ,may be useful?
+    // paraArr[chapter.idx] = "wait for catelog!"
   })
+  return res
 }
 
 export {
