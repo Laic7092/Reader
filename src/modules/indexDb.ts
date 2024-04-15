@@ -36,11 +36,12 @@ interface Book {
       //新建数据库也会触发,因为版本从无到有,而且是先触发升级版本,再触发打开成功
       console.log("升级咯")
       //如果要修改数据库结构（新增或删除表、索引或者主键），只能通过升级数据库版本完成。
-      db = event.target.result;
+      db = (event.target as any)?.result as IDBDatabase;
       //这时通过事件对象的target.result属性，拿到数据库实例。
-      let objectStore;
       if (!db.objectStoreNames.contains('books')) {
+        let objectStore = null;
         objectStore = db.createObjectStore('books', { keyPath: 'id' });
+        console.log(objectStore)
         //主键也可以指定为下一层对象的属性{id:1,foo:{bar:1}} foo.bar
         // let objectStore = db.createObjectStore(
         //   'books',
@@ -57,6 +58,7 @@ interface Book {
 })()
 
 function add(bookData: Book) {
+  if (!db) return
   let id = getRandomBookId()
   bookData.id = id
   let request = db.transaction(['books'], 'readwrite')//新建事务,指定表名,以及操作readonly/readwrite
@@ -74,6 +76,7 @@ function add(bookData: Book) {
 }
 
 function search(id: string) {
+  if (!db) return
   let transaction = db.transaction(['books']);
   let objectStore = transaction.objectStore('books');
   let request = objectStore.get(id);//参数是主键的值
@@ -92,9 +95,13 @@ function search(id: string) {
 }
 
 function readAll(): Promise<Array<Book>> {
-  let objectStore = db.transaction('books').objectStore('books');
-  let allBooks: Array<Book> = [];
   return new Promise((resolve, reject) => {
+    if (!db) {
+      reject()
+      return
+    }
+    let objectStore = db.transaction('books').objectStore('books');
+    let allBooks: Array<Book> = [];
     const openCursor = objectStore.openCursor();
     openCursor.onsuccess = function (event) {//新建指针对象的openCursor()方法是一个异步操作
       const target = event.target as IDBRequest
@@ -110,7 +117,7 @@ function readAll(): Promise<Array<Book>> {
         resolve(allBooks)
       }
     };
-    openCursor.onerror = function (event) {
+    openCursor.onerror = function () {
       console.log('迭代失败');
       reject()
     };
@@ -119,6 +126,7 @@ function readAll(): Promise<Array<Book>> {
 }
 
 function update(id: string, bookData: Book) {
+  if (!db) return
   let request = db.transaction(['books'], 'readwrite')
     .objectStore('books')
     .put({ id, bookData });
@@ -134,6 +142,7 @@ function update(id: string, bookData: Book) {
 }
 
 function remove(id: string) {
+  if (!db) return
   let request = db.transaction(['books'], 'readwrite')
     .objectStore('books')
     .delete(id);//同样是传入主键

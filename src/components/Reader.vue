@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { Book } from '../modules/indexDb';
 import Drawer from './Drawer.vue';
 
@@ -14,22 +14,22 @@ function back() {
     model.value = false
 }
 
-const catelog = ref<Array<string>>([])
-const catelogVisible = ref(false)
-function showCatelog() {
-    catelogVisible.value = true
-}
+// const catelog = ref<Array<string>>([])
+// const catelogVisible = ref(false)
+// function showCatelog() {
+//     catelogVisible.value = true
+// }
 onMounted(() => {
     console.log('阅读页加载中', props.curBook)
 })
 
-const preLine = ref(5)
-const viewPortLine = ref(10)
-const sufLine = ref(5)
+// const preLine = ref(5)
+// const viewPortLine = ref(10)
+// const sufLine = ref(5)
 
-const vList = computed(() => {
+// const vList = computed(() => {
 
-})
+// })
 
 const headerVisible = ref(true)
 function changeHeaderVisible() {
@@ -84,7 +84,7 @@ function showDrawer() {
                 Array(10).fill(line.content).toString()
                 }}
             </p> -->
-            <template v-for="(para, idx) in curBook.paraArr.slice(0, 500)" :key="idx">
+            <template v-for="para in curBook.paraArr.slice(0, 500)">
                 <h3 v-if="para.search(patt) !== -1">{{ para }}</h3>
                 <p v-else>{{ para }}</p>
             </template>

@@ -8,7 +8,7 @@ const emit = defineEmits<{
 }>()
 
 interface SubMap {
-  [key: string]: Function
+  [key: string]: any
 }
 const subMap: SubMap = {
   [CRUD.ADD]: (val: any) => {

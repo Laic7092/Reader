@@ -1,3 +1,4 @@
+// @ts-nocheck
 function renderBookshelf(allBooks) {
     allBooks.forEach(element => {
         books.set(element.id, element.bookData)
