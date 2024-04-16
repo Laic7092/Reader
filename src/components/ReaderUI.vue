@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Book } from '../modules/indexDb';
 import Drawer from './Drawer.vue';
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 interface Utils {
     moveWindow: (param: string) => void
@@ -14,6 +14,7 @@ const props = defineProps<{
 }>()
 
 const { moveWindow, closeReader, changeFontSize, curBook } = props.utils
+console.log(moveWindow)
 
 const curTimeoutID = ref(-1)
 
