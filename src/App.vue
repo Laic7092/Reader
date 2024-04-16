@@ -15,11 +15,11 @@ function pickBook(book: Book) {
 </script>
 
 <template>
-  <Reader v-if="readerVisible && curBook" v-model="readerVisible" :curBook="curBook" />
-  <div v-show="!readerVisible">
+  <template v-if="!readerVisible">
     <ImportBook />
     <BookShelf @pickBook="pickBook" />
-  </div>
+  </template>
+  <Reader v-else-if="readerVisible && curBook" v-model="readerVisible" :curBook="curBook" />
 </template>
 
 <style scoped></style>

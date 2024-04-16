@@ -54,7 +54,7 @@ function close() {
 <template>
     <div role="dialog" class="overlay" aria-modal="true" v-if="model" @click="closeDrawer">
         <div class="drawer" :style="style">
-            <div class="flex-r-sbc drawer-header">
+            <div class="drawer-header flex-r-sbc ">
                 <span class="header-title">{{ title }}</span>
                 <img src="../assets/Close.svg" @click="closeDrawer" class="svg-btn border small">
             </div>

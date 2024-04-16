@@ -84,14 +84,14 @@ function removeSelection() {
 }
 </script>
 <template>
-  <div class="tabs mb1 flex-r-cc top-right">
-    <button v-if="curMode === 'normal'" @click="changeMode('manage')">Manage Books</button>
-    <template v-else>
-      <button class="mr1" @click="changeMode('normal')">cancel</button>
-      <img @click="removeSelection" src="../assets/Delete.svg" class="svg-btn">
-    </template>
-  </div>
-  <div v-if="books.length > 0">
+  <template v-if="books.length > 0">
+    <div class="tabs mb1 flex-r-cc top-right">
+      <button v-if="curMode === 'normal'" @click="changeMode('manage')">Manage Books</button>
+      <template v-else>
+        <button class="mr1" @click="changeMode('normal')">cancel</button>
+        <img @click="removeSelection" src="../assets/Delete.svg" class="svg-btn">
+      </template>
+    </div>
     <div class="container">
       <div class="book" v-for="book in books" :key="book.id"
         @click="() => curMode === 'normal' ? pickBook(book) : changeSelect(book)">
@@ -106,7 +106,7 @@ function removeSelection() {
         </div>
       </div>
     </div>
-  </div>
+  </template>
   <div v-else>
     There doesn't seem to be a single book here, so try importing the basic books!
   </div>
