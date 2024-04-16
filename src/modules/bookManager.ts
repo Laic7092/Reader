@@ -2,35 +2,48 @@ import { add as addToLibrary } from "./indexDb.js";
 import { Chapter } from "./indexDb.js";
 import chardet from 'chardet';
 
-let fileTypes = "text/plain";
-let curBookName = '';
+const fileTypes = "text/plain";
 
+let fileList: FileList | null = null
 function handleBookChange(event: Event) {
   const fileInput = event.target as HTMLInputElement;
-  const fileList = fileInput.files
-  if (!fileList || fileList.length <= 0) return;
-  let curFile = fileList[0];
-  curBookName = curFile.name;
-  if (validBookType(curFile.type)) {
-    getCharCode(curFile).then(encoding => {
-      readFile(curFile, encoding);
-    })
+  fileList = fileInput.files
+  if (!fileList) return;
+  const length = fileList.length
+  let allPromise: Array<Promise<number>> = []
+  for (let index = 0; index < length; index++) {
+    const file = fileList[index]
+    if (validBookType(file.type)) {
+      getCharCode(file).then(encoding => {
+        allPromise.push(readFile(file, encoding))
+      })
+    }
   }
+  // for future
+  Promise.all(allPromise).then(() => {
+    fileInput.value = ''
+  })
 }
+
 
 function validBookType(type: string, rules = fileTypes) {
   if (typeof rules === "string")
     return rules.indexOf(type) !== -1;
 }
 
-function readFile(textFile: File, encode: string | undefined) {
-  let fileReader = new FileReader();
-  fileReader.onload = function (event) {
-    const result = event.target?.result;
-    if (typeof result === 'string')
-      divideTxtContent(result);
-  };
-  fileReader.readAsText(textFile, encode);
+function readFile(textFile: File, encode: string | undefined): Promise<number> {
+  return new Promise((resolve) => {
+    let fileReader = new FileReader();
+    fileReader.readAsText(textFile, encode);
+    fileReader.onload = function (event) {
+      const result = event.target?.result;
+      if (typeof result === 'string') {
+        divideTxtContent(result, textFile.name);
+      }
+      resolve(1)
+    };
+  })
+
 }
 
 function getCharCode(file: File): Promise<string | undefined> {
@@ -53,13 +66,13 @@ function getCharCode(file: File): Promise<string | undefined> {
 
 }
 
-function divideTxtContent(txtContent: string) {
+function divideTxtContent(txtContent: string, name: string) {
   if (typeof txtContent !== "string") return;
   let paraArr = txtContent.split(/[\r\n]+/).map(para => para.trim());
   let chapterArr = []
   if (paraArr.length > 0) {
     chapterArr = divideByChapter(paraArr);
-    addToLibrary({ chapterArr, paraArr, name: curBookName, id: '' })
+    addToLibrary({ chapterArr, paraArr, name, id: '' })
   }
 }
 
