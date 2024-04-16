@@ -99,7 +99,6 @@ onUnmounted(() => {
 </script>
 <template>
     <div class="panel" @click.self="() => curUILayer > UILayer.Blank ? subLayer() : addLayer()">
-        {{ curTimeoutID }}|{{ curUILayer }}
         <template v-if="curUILayer === UILayer.baseBtns">
             <img src="../assets/Close.svg" @click="closeReader" class="svg-btn-small border close">
             <img src="../assets/Operate.svg" @click="addLayer" class="svg-btn-small border operate">
