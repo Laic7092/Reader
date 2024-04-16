@@ -52,17 +52,19 @@ function close() {
 }
 </script>
 <template>
-    <div role="dialog" class="overlay" aria-modal="true" v-if="model" @click="closeDrawer">
-        <div class="drawer" :style="style">
-            <div class="drawer-header flex-r-sbc ">
-                <span class="header-title">{{ title }}</span>
-                <img src="../assets/Close.svg" @click="closeDrawer" class="svg-btn border small">
-            </div>
-            <div class="drawer-body">
-                <slot></slot>
+    <Transition>
+        <div role="dialog" class="overlay" aria-modal="true" v-if="model" @click.self="closeDrawer">
+            <div class="drawer" :style="style">
+                <div class="drawer-header flex-r-sbc ">
+                    <span class="header-title">{{ title }}</span>
+                    <img src="../assets/Close.svg" @click="closeDrawer" class="svg-btn border small">
+                </div>
+                <div class="drawer-body">
+                    <slot></slot>
+                </div>
             </div>
         </div>
-    </div>
+    </Transition>
 </template>
 
 <style scoped>
@@ -114,5 +116,15 @@ function close() {
         padding: 0.5em 1em;
         overflow-y: auto;
     }
+}
+
+.v-enter-active,
+.v-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
 }
 </style>

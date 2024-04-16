@@ -123,26 +123,29 @@ onUnmounted(() => {
                 <img src="../assets/Setting.svg" class="louma svg-btn">
             </div>
         </div>
-        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh">
-            <ul class="contents">
-                <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx">
-                    <a style="color: unset;">{{ chapter.content }}</a>
-                </li>
-            </ul>
-        </Drawer>
-        <Drawer v-model="drawerMap.searchDrawer" title="Search Book" height="80vh">
-            <!-- <input> -->
-            <div>
-                Coming soon...
-            </div>
-        </Drawer>
-        <Drawer v-model="drawerMap.settingsDrawer" title="Themes & Settings">
-            <div class="fontsize-adjust-btn flex-r-sbc">
-                <span class="left-letter" @click="changeFontSize('sub')">A</span>
-                <span class="divide"></span>
-                <span class="right-letter" @click="changeFontSize('add')">A</span>
-            </div>
-        </Drawer>
+        <Teleport to="body">
+            <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh">
+                <ul class="contents">
+                    <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx">
+                        <a style="color: unset;">{{ chapter.content }}</a>
+                    </li>
+                </ul>
+            </Drawer>
+            <Drawer v-model="drawerMap.searchDrawer" title="Search Book" height="80vh">
+                <!-- <input> -->
+                <div>
+                    Coming soon...
+                </div>
+            </Drawer>
+            <Drawer v-model="drawerMap.settingsDrawer" title="Themes & Settings">
+                <div class="fontsize-adjust-btn flex-r-sbc">
+                    <span class="left-letter" @click="changeFontSize('sub')">A</span>
+                    <span class="divide"></span>
+                    <span class="right-letter" @click="changeFontSize('add')">A</span>
+                </div>
+            </Drawer>
+        </Teleport>
+
     </div>
 
 </template>
@@ -240,6 +243,7 @@ onUnmounted(() => {
     background-color: var(--border-color);
     border-radius: 1em;
     cursor: pointer;
+    text-align: center;
 
     .divide {
         border: 0.5px solid;
