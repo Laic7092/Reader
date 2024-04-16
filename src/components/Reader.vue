@@ -136,10 +136,6 @@ function changeFontSize(type: string) {
 const style = ref({
     'font-size': '1em'
 })
-
-function fn() {
-    document.body.style.overflow = document.body.style.overflow ? "" : 'hidden';
-}
 </script>
 <template>
     <template v-if="headerVisible && !operatePanelVisible">
