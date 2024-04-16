@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Book } from '../modules/indexDb';
 import Drawer from './Drawer.vue';
 
@@ -14,18 +14,30 @@ function back() {
     model.value = false
 }
 
+let intervalId = -1
 const limit = ref(false)
 onMounted(() => {
     console.log('阅读页加载中', props.curBook)
     autoHide()
+
+    let scrolling = false;
     document.addEventListener('scroll', () => {
-        const { scrollTop, clientHeight, scrollHeight } = document.documentElement
-        if (scrollTop + clientHeight === scrollHeight) {
-            aa('next')
-        } else if (scrollTop === 0 && start.value !== 0) {
-            aa('pre')
-        }
+        scrolling = true
     })
+    intervalId = setInterval(() => {
+        if (scrolling) {
+            scrolling = false;
+
+            operatePanelVisible.value && changeOperatePanelVisible()
+
+            const { scrollTop, clientHeight, scrollHeight } = document.documentElement
+            if (scrollTop + clientHeight === scrollHeight) {
+                aa('next')
+            } else if (scrollTop === 0 && start.value !== 0) {
+                aa('pre')
+            }
+        }
+    }, 300);
 
     const intersectionObserver = new IntersectionObserver((entries) => {
         // 如果 intersectionRatio 为 0，则目标在视野外，
@@ -44,6 +56,9 @@ onMounted(() => {
         // alert(intersectionObserver.root)
     }, 5000)
 })
+onUnmounted(() => {
+    clearInterval(intervalId)
+})
 
 const init = 300
 const gap = 50
@@ -59,10 +74,8 @@ function aa(type: string) {
     } else {
         start.value = gap > start.value ? 0 : start.value - gap
     }
-    console.log(vList.value)
     setTimeout(() => {
         limit.value = false
-        console.log(vList.value)
     }, 0)
 }
 
@@ -123,36 +136,38 @@ function changeFontSize(type: string) {
 const style = ref({
     'font-size': '1em'
 })
+
+function fn() {
+    document.body.style.overflow = document.body.style.overflow ? "" : 'hidden';
+}
 </script>
 <template>
-    <article id="reader">
-        <template v-if="headerVisible">
-            <!-- <div></div> -->
-            <img src="../assets/Close.svg" @click="back" v-if="!operatePanelVisible" class="svg-btn-small border close">
-            <img src="../assets/Operate.svg" v-if="!operatePanelVisible" @click="changeOperatePanelVisible"
-                class="svg-btn-small border operate">
-            <div v-if="operatePanelVisible" class="operatePanel">
-                <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
-                    <span class="menu-name">Contents - 100%</span>
-                    <img src="../assets/Bars3.svg" class="svg-btn">
-                </div>
-                <div class="menu-item flex-r-sbc">
-                    <span class="menu-name">Search Book</span>
-                    <img src="../assets/Search.svg" class="svg-btn">
-                </div>
-                <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
-                    <span class="menu-name">Themes & Settings</span>
-                    <img src="../assets/Setting.svg" class="svg-btn">
-                </div>
-                <div class="menu-item flex-r-sbc none-decoration">
-                    <img src="../assets/Search.svg" class="louma svg-btn">
-                    <img src="../assets/Search.svg" class="louma svg-btn">
-                    <img src="../assets/Search.svg" class="louma svg-btn">
-                </div>
-            </div>
-        </template>
-        <main :style="style" @click="() => operatePanelVisible ? changeOperatePanelVisible() : changeHeaderVisible()"
-            @scroll="() => operatePanelVisible && changeOperatePanelVisible()">
+    <template v-if="headerVisible && !operatePanelVisible">
+        <img src="../assets/Close.svg" @click="back" class="svg-btn-small border close">
+        <img src="../assets/Operate.svg" @click="changeOperatePanelVisible" class="svg-btn-small border operate">
+    </template>
+    <div v-else-if="operatePanelVisible" class="operatePanel">
+        <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
+            <span class="menu-name">Contents - 100%</span>
+            <img src="../assets/Bars3.svg" class="svg-btn">
+        </div>
+        <div class="menu-item flex-r-sbc">
+            <span class="menu-name">Search Book</span>
+            <img src="../assets/Search.svg" class="svg-btn">
+        </div>
+        <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
+            <span class="menu-name">Themes & Settings</span>
+            <img src="../assets/Setting.svg" class="svg-btn">
+        </div>
+        <div class="menu-item flex-r-sbc none-decoration">
+            <img src="../assets/Search.svg" class="louma svg-btn">
+            <img src="../assets/Search.svg" class="louma svg-btn">
+            <img src="../assets/Search.svg" class="louma svg-btn">
+        </div>
+    </div>
+    <article class="reader">
+        <a href="www.baidu.com">clickme</a>
+        <main :style="style" @click="() => operatePanelVisible ? changeOperatePanelVisible() : changeHeaderVisible()">
             <template v-for="(para, idx) in vList">
                 <!-- <h3 v-if="chapterIdxArr.indexOf(idx) !== -1">{{ para }}</h3> -->
                 <!-- <p v-else>{{ para }}</p> -->
@@ -162,14 +177,14 @@ const style = ref({
             </template>
         </main>
         <!-- <footer>footer</footer> -->
-        <Drawer v-if="drawerMap.settingsDrawer" v-model="drawerMap.settingsDrawer" title="Themes & Settings">
+        <Drawer v-model="drawerMap.settingsDrawer" title="Themes & Settings">
             <div class="fontsize-adjust-btn flex-r-sbc">
                 <span class="left-letter" @click="changeFontSize('sub')">A</span>
                 <span class="divide"></span>
                 <span class="right-letter" @click="changeFontSize('add')">A</span>
             </div>
         </Drawer>
-        <Drawer v-if="drawerMap.contensDrawer" v-model="drawerMap.contensDrawer" title="Contents" height="80vh">
+        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh">
             <ul class="contents">
                 <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx">
                     <a style="color: unset;">{{ chapter.content }}</a>
@@ -180,37 +195,12 @@ const style = ref({
 </template>
 
 <style scoped>
-article {
+.reader {
     min-width: 320px;
     max-width: 1280px;
     margin: 0 100px;
     --bar-width: 250px;
-
-    .svg-btn-small {
-        height: 1.5em;
-        width: 1.5em;
-        cursor: pointer;
-
-        &.border {
-            border: 0.25rem solid var(--border-color);
-            border-radius: 50%;
-            background-color: var(--border-color);
-        }
-
-        &.close {
-            position: fixed;
-            right: 1em;
-            top: 2em;
-        }
-
-        &.operate {
-            position: fixed;
-            right: 1em;
-            bottom: 2em;
-            border-radius: 25%;
-        }
-
-    }
+    -webkit-touch-callout: none;
 
     main {
         font-size: 1em;
@@ -218,7 +208,34 @@ article {
         word-spacing: unset;
         letter-spacing: unset;
         text-align: left;
+        -webkit-touch-callout: none;
     }
+}
+
+.svg-btn-small {
+    height: 1.5em;
+    width: 1.5em;
+    cursor: pointer;
+
+    &.border {
+        border: 0.25rem solid var(--border-color);
+        border-radius: 50%;
+        background-color: var(--border-color);
+    }
+
+    &.close {
+        position: fixed;
+        right: 1em;
+        top: 2em;
+    }
+
+    &.operate {
+        position: fixed;
+        right: 1em;
+        bottom: 2em;
+        border-radius: 25%;
+    }
+
 }
 
 .operatePanel {
@@ -299,21 +316,21 @@ article {
 }
 
 @media(max-width: 1280px) {
-    article {
+    .reader {
         margin-left: 4em;
         margin-right: 4em
     }
 }
 
 @media(max-width: 949px) {
-    article {
+    .reader {
         margin-left: 3em;
         margin-right: 3em
     }
 }
 
 @media(max-width: 719px) {
-    article {
+    .reader {
         margin-left: 1.5em;
         margin-right: 1.5em
     }

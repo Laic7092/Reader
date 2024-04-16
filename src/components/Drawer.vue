@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue';
+import { computed, watch } from 'vue';
 
 const model = defineModel({ required: true })
 
@@ -19,26 +19,40 @@ const style = computed(() => {
     }
 })
 
-onMounted(() => {
+watch(model, (value) => {
+    if (value) {
+        open()
+    } else[
+        close()
+    ]
+}, { immediate: true })
+function open() {
+    const { style, classList } = document.body
     const scrollBarWidth = window.innerWidth - document.body.clientWidth
     if (scrollBarWidth > 0) {
-        document.body.classList.add('keep-width')
-        document.body.style.width = document.body.clientWidth + 'px'
-        document.body.style.paddingRight = scrollBarWidth + 'px'
+        classList.add('keep-width')
+        style.width = document.body.clientWidth + 'px'
+        style.paddingRight = scrollBarWidth + 'px'
     }
+    style.setProperty('touch-action', 'none')
+    style.setProperty('overscroll-behavior', 'none')
     document.body.style.overflow = 'hidden'
-})
-onUnmounted(() => {
+}
+
+function close() {
+    const { style, classList } = document.body
     if (document.body.classList.contains('keep-width')) {
-        document.body.classList.remove('keep-width')
-        document.body.style.paddingRight = ""
-        document.body.style.width = ""
+        classList.remove('keep-width')
+        style.paddingRight = ""
+        style.width = ""
     }
+    style.removeProperty('touch-action')
+    style.removeProperty('overscroll-behaviour')
     document.body.style.overflow = ""
-})
+}
 </script>
 <template>
-    <div role="dialog" class="overlay" v-if="model" aria-modal="true">
+    <div role="dialog" class="overlay" aria-modal="true" v-if="model" @click="closeDrawer">
         <div class="drawer" :style="style">
             <div class="flex-r-sbc drawer-header">
                 <span class="header-title">{{ title }}</span>
@@ -58,6 +72,7 @@ onUnmounted(() => {
     right: 0;
     top: 0;
     bottom: 0;
+    overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
 }

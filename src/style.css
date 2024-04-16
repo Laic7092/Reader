@@ -82,7 +82,7 @@ p {
   padding: 2rem;
   text-align: center;
 
-  &:has(article) {
+  &:has(.reader) {
     padding: 0;
   }
 }

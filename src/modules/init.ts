@@ -3,13 +3,15 @@ window.addEventListener('contextmenu', (e) => {
 })
 
 function disableIosSafariCallout(this: Window) {
-    const s = this.getSelection();
-    if ((s?.rangeCount || 0) > 0) {
-        const r = s?.getRangeAt(0);
-        s?.empty()
-        setTimeout(() => {
-            s?.addRange(r!);
-        }, 50);
-    }
+    const s = this.getSelection()
+    if (!s || s.type === 'None') return
+    let r = s.getRangeAt(0);
+    s.removeAllRanges()
+    this.setTimeout(() => {
+        r && s.addRange(r);
+    }, 30)
 }
-document.ontouchend = disableIosSafariCallout.bind(window);
+
+if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
+    document.ontouchend = disableIosSafariCallout.bind(window);
+}
