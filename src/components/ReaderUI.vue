@@ -97,9 +97,17 @@ onMounted(() => {
 onUnmounted(() => {
     clearInterval(intervalId)
 })
+
+function ChangeUI() {
+    curUILayer.value > UILayer.Blank ? subLayer() : addLayer()
+}
+
+defineExpose({
+    ChangeUI
+})
 </script>
 <template>
-    <div class="panel" @click.self="() => curUILayer > UILayer.Blank ? subLayer() : addLayer()">
+    <div class="panel">
         <template v-if="curUILayer === UILayer.baseBtns">
             <img src="../assets/Close.svg" @click="closeReader" class="svg-btn-small border close">
             <img src="../assets/Operate.svg" @click="addLayer" class="svg-btn-small border operate">
@@ -158,8 +166,6 @@ onUnmounted(() => {
     top: 0;
     bottom: 0;
     overflow: hidden;
-    -webkit-user-select: none;
-    user-select: none;
 }
 
 .svg-btn-small {

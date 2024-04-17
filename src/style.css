@@ -148,4 +148,5 @@ p {
   height: 2em;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
 }

@@ -41,10 +41,12 @@ const utils = {
     changeFontSize,
     closeReader
 }
+
+const UIRef = ref<typeof ReaderUI | null>(null)
 </script>
 <template>
-    <ReaderUI :utils="utils" />
-    <article class="reader">
+    <ReaderUI ref="UIRef" :utils="utils" />
+    <article class="reader" @click="UIRef?.changeUI">
         <main :style="style">
             <template v-for="para in vList">
                 <p>{{ para }}</p>
@@ -59,7 +61,6 @@ const utils = {
     max-width: 1280px;
     margin: 0 100px;
     --bar-width: 250px;
-    -webkit-touch-callout: none;
 
     main {
         font-size: 1em;
@@ -67,7 +68,6 @@ const utils = {
         word-spacing: unset;
         letter-spacing: unset;
         text-align: left;
-        -webkit-touch-callout: none;
     }
 }
 

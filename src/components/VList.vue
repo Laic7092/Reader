@@ -34,9 +34,6 @@ function setHeight() {
     ul.value && ul.value.style.setProperty('height', height)
 }
 
-// function malou () {
-
-// }
 
 function listenScroll(e: Event) {
     const el = e?.target as HTMLElement
