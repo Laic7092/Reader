@@ -49,7 +49,10 @@ function listenScroll(e: Event) {
     const sub = hiddenNum - start.value
     if (sub !== 0) {
         start.value += sub
-        ul.value && ul.value.style.setProperty('margin-top', hiddenNum * 60 + 'px')
+        if (ul.value) {
+            ul.value.style.setProperty('margin-top', hiddenNum * 60 + 'px')
+            ul.value.style.height = total * 60 - hiddenNum * 60 + 'px'
+        }
     }
 }
 
@@ -95,6 +98,7 @@ const hiddenNum = computed(() => Math.floor(_scrollTop.value / 60))
     div {
         font-size: 1.2em;
         text-align: left;
+
         span {
             display: inline-block;
             text-align: left;
@@ -106,11 +110,11 @@ const hiddenNum = computed(() => Math.floor(_scrollTop.value / 60))
 .wrapper {
     height: 90%;
     overflow-y: auto;
-    width: 90vw;
+    contain: layout;
 
     .vList {
         margin: 0;
-
+        padding: 0;
         .item {
             height: 60px;
             background-color: #fff;
