@@ -4,6 +4,8 @@ import BookShelf from './components/BookShelf.vue';
 import ImportBook from './components/ImportBook.vue';
 import Reader from './components/Reader.vue'
 import { Book } from './modules/indexDb';
+import Drawer from './components/Drawer.vue';
+import VList from './components/VList.vue';
 
 const readerVisible = ref(false)
 
@@ -12,6 +14,8 @@ function pickBook(book: Book) {
   curBook.value = book
   readerVisible.value = true
 }
+
+const vListVisible = ref(false)
 </script>
 
 <template>
@@ -19,6 +23,10 @@ function pickBook(book: Book) {
   <div v-show="!readerVisible">
     <ImportBook />
     <BookShelf @pickBook="pickBook" />
+    <button @click="vListVisible = true">Show VList</button>
+    <Drawer v-model="vListVisible" title="vList" height="80vh">
+      <VList />
+    </Drawer>
   </div>
 </template>
 

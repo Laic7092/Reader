@@ -4,7 +4,7 @@ import { computed, watch } from 'vue';
 const model = defineModel({ required: true })
 
 const props = defineProps<{
-    title: string
+    title?: string
     height?: string
 }>()
 
