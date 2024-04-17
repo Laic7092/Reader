@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, nextTick, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Book } from '../modules/indexDb';
 import ReaderUI from './ReaderUI.vue';
 
