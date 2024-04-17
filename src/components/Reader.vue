@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { onMounted, computed, nextTick, ref } from 'vue';
 import { Book } from '../modules/indexDb';
 import ReaderUI from './ReaderUI.vue';
 
@@ -46,10 +46,23 @@ const UIRef = ref<typeof ReaderUI | null>(null)
 function ChangeUI() {
     UIRef.value?.ChangeUI()
 }
+
+const UIVisible = ref(false)
+
+defineExpose({
+    showUI() {
+        UIVisible.value = true
+    },
+    hideUI() {
+        UIVisible.value = false
+    }
+})
 </script>
 <template>
-    <ReaderUI ref="UIRef" :utils="utils" />
     <article class="reader" @click="ChangeUI">
+        <Teleport to="body">
+            <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
+        </Teleport>
         <main :style="style">
             <template v-for="para in vList">
                 <p>{{ para }}</p>
@@ -64,6 +77,7 @@ function ChangeUI() {
     max-width: 1280px;
     margin: 0 100px;
     --bar-width: 250px;
+    background-color: var(--background-color);
 
     main {
         font-size: 1em;

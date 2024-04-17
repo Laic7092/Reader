@@ -52,7 +52,7 @@ function close() {
 }
 </script>
 <template>
-    <Transition>
+    <Transition name="fade">
         <div role="dialog" class="overlay" aria-modal="true" v-if="model" @click.self="closeDrawer">
             <div class="drawer no-touch" :style="style">
                 <div class="drawer-header flex-r-sbc ">
@@ -114,15 +114,5 @@ function close() {
         padding: 0.5em 1em;
         overflow-y: auto;
     }
-}
-
-.v-enter-active,
-.v-leave-active {
-    transition: opacity 0.5s ease;
-}
-
-.v-enter-from,
-.v-leave-to {
-    opacity: 0;
 }
 </style>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
 const total = 500000
 
 const list = new Array(total).fill(0).map((item, idx) => ({ item, idx }))
 
-const catchNum = 5
-const displayNum = 10
+const catchNum = 1
+const displayNum = 6
 
 const start = ref(0)
 const end = computed(() => start.value + displayNum)
@@ -34,23 +34,29 @@ function setHeight() {
     ul.value && ul.value.style.setProperty('height', height)
 }
 
+let ticker = false
+async function listenScroll(e: Event) {
+    if (!ticker) {
+        ticker = true
 
-function listenScroll(e: Event) {
-    const el = e?.target as HTMLElement
-    if (!el) return
-    const { scrollHeight, scrollTop } = el
-    _scrollHeight.value = scrollHeight
-    _scrollTop.value = scrollTop
+        const { scrollHeight, scrollTop } = e.target as HTMLElement
+        _scrollHeight.value = scrollHeight
+        _scrollTop.value = scrollTop
 
-    const hiddenNum = Math.floor(scrollTop / 60)
-    const sub = hiddenNum - start.value
-    if (sub !== 0) {
-        start.value += sub
-        if (ul.value) {
-            ul.value.style.setProperty('margin-top', hiddenNum * 60 + 'px')
-            ul.value.style.height = total * 60 - hiddenNum * 60 + 'px'
+        const hiddenNum = Math.floor(scrollTop / 60)
+        const sub = hiddenNum - start.value
+        if (sub !== 0) {
+            start.value += sub
+            if (ul.value) {
+                ul.value.style.setProperty('margin-top', hiddenNum * 60 + 'px')
+                ul.value.style.height = total * 60 - hiddenNum * 60 + 'px'
+            }
         }
+
+        await nextTick()
+        ticker = false
     }
+
 }
 
 const vList = computed(() => list.slice(Limit(start.value - catchNum), Limit(end.value + catchNum)))
@@ -59,9 +65,12 @@ const hiddenNum = computed(() => Math.floor(_scrollTop.value / 60))
 
 </script>
 <template>
-    <div class="fix">
+    <div class="fix" style="margin-bottom: 10px;">
         <div>
-            <span style="margin-right: 20px;">scrollHeight&scrollTop</span>{{ _scrollHeight }}|{{ _scrollTop }}
+            <span style="margin-right: 20px;">scrollHeight</span>{{ _scrollHeight }}
+        </div>
+        <div>
+            <span style="margin-right: 20px;">scrollTop</span>{{ _scrollTop }}
         </div>
         <div>
             <span style="margin-right: 20px;">start&end</span>{{ start }}|{{ end }}
@@ -86,35 +95,29 @@ const hiddenNum = computed(() => Math.floor(_scrollTop.value / 60))
 
 <style scoped>
 .fix {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    background-color: black;
-
     div {
-        font-size: 1.2em;
         text-align: left;
 
         span {
             display: inline-block;
             text-align: left;
-            width: 200px;
+            width: 160px;
         }
     }
 }
 
 .wrapper {
-    height: 90%;
+    height: 360px;
     overflow-y: auto;
     contain: layout;
 
     .vList {
         margin: 0;
         padding: 0;
+
         .item {
             height: 60px;
-            background-color: #fff;
+            background-color: var(--background-color);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
