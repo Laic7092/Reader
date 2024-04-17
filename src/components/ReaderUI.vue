@@ -107,71 +107,59 @@ defineExpose({
 })
 </script>
 <template>
-    <div class="panel">
-        <template v-if="curUILayer === UILayer.baseBtns">
-            <img src="../assets/Close.svg" @click="closeReader" class="svg-btn-small border close">
-            <img src="../assets/Operate.svg" @click="addLayer" class="svg-btn-small border operate">
-        </template>
-        <div v-else-if="curUILayer === UILayer.operatePanel" class="operatePanel">
-            <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
-                <span class="menu-name">Contents - 100%</span>
-                <img src="../assets/Bars3.svg" class="svg-btn">
-            </div>
-            <div class="menu-item flex-r-sbc" @click="showDrawer('searchDrawer')">
-                <span class=" menu-name">Search Book</span>
-                <img src="../assets/Search.svg" class="svg-btn">
-            </div>
-            <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
-                <span class="menu-name">Themes & Settings</span>
-                <img src="../assets/Setting.svg" class="svg-btn">
-            </div>
-            <div class="menu-item flex-r-sbc none-decoration">
-                <img src="../assets/Bars3.svg" class="louma svg-btn">
-                <img src="../assets/Search.svg" class="louma svg-btn">
-                <img src="../assets/Setting.svg" class="louma svg-btn">
-            </div>
+    <template v-if="curUILayer === UILayer.baseBtns">
+        <img src="../assets/Close.svg" @click="closeReader" class="svg-btn small border close">
+        <img src="../assets/Operate.svg" @click="addLayer" class="svg-btn small border operate">
+    </template>
+    <div v-else-if="curUILayer === UILayer.operatePanel" class="operatePanel no-touch">
+        <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
+            <span class="menu-name">Contents - 100%</span>
+            <img src="../assets/Bars3.svg" class="svg-btn">
         </div>
-        <Teleport to="body">
-            <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh">
-                <ul class="contents">
-                    <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx">
-                        <a style="color: unset;">{{ chapter.content }}</a>
-                    </li>
-                </ul>
-            </Drawer>
-            <Drawer v-model="drawerMap.searchDrawer" title="Search Book" height="80vh">
-                <!-- <input> -->
-                <div>
-                    Coming soon...
-                </div>
-            </Drawer>
-            <Drawer v-model="drawerMap.settingsDrawer" title="Themes & Settings">
-                <div class="fontsize-adjust-btn flex-r-sbc">
-                    <span class="left-letter" @click="changeFontSize('sub')">A</span>
-                    <span class="divide"></span>
-                    <span class="right-letter" @click="changeFontSize('add')">A</span>
-                </div>
-            </Drawer>
-        </Teleport>
-
+        <div class="menu-item flex-r-sbc" @click="showDrawer('searchDrawer')">
+            <span class=" menu-name">Search Book</span>
+            <img src="../assets/Search.svg" class="svg-btn">
+        </div>
+        <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
+            <span class="menu-name">Themes & Settings</span>
+            <img src="../assets/Setting.svg" class="svg-btn">
+        </div>
+        <div class="menu-item flex-r-sbc none-decoration">
+            <img src="../assets/Bars3.svg" class="louma svg-btn">
+            <img src="../assets/Search.svg" class="louma svg-btn">
+            <img src="../assets/Setting.svg" class="louma svg-btn">
+        </div>
     </div>
-
+    <Teleport to="body">
+        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh">
+            <ul class="contents">
+                <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx">
+                    <a style="color: unset;">{{ chapter.content }}</a>
+                </li>
+            </ul>
+        </Drawer>
+        <Drawer v-model="drawerMap.searchDrawer" title="Search Book" height="80vh">
+            <!-- <input> -->
+            <div>
+                Coming soon...
+            </div>
+        </Drawer>
+        <Drawer v-model="drawerMap.settingsDrawer" title="Themes & Settings">
+            <div class="fontsize-adjust-btn flex-r-sbc">
+                <span class="left-letter" @click="changeFontSize('sub')">A</span>
+                <span class="divide"></span>
+                <span class="right-letter" @click="changeFontSize('add')">A</span>
+            </div>
+        </Drawer>
+    </Teleport>
 </template>
 
 <style scoped>
-.panel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    overflow: hidden;
-}
-
-.svg-btn-small {
-    height: 1.5em;
-    width: 1.5em;
-    cursor: pointer;
+.svg-btn {
+    &.small {
+        width: 1.5em;
+        height: 1.5em;
+    }
 
     &.border {
         border: 0.25rem solid var(--border-color);
@@ -198,8 +186,6 @@ defineExpose({
     position: fixed;
     right: 0;
     bottom: 3em;
-    -webkit-user-select: none;
-    user-select: none;
 
     .menu-item {
         border-radius: 0.75em;

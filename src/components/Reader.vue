@@ -43,10 +43,13 @@ const utils = {
 }
 
 const UIRef = ref<typeof ReaderUI | null>(null)
+function ChangeUI() {
+    UIRef.value?.ChangeUI()
+}
 </script>
 <template>
     <ReaderUI ref="UIRef" :utils="utils" />
-    <article class="reader" @click="UIRef?.changeUI">
+    <article class="reader" @click="ChangeUI">
         <main :style="style">
             <template v-for="para in vList">
                 <p>{{ para }}</p>

@@ -54,7 +54,7 @@ function close() {
 <template>
     <Transition>
         <div role="dialog" class="overlay" aria-modal="true" v-if="model" @click.self="closeDrawer">
-            <div class="drawer" :style="style">
+            <div class="drawer no-touch" :style="style">
                 <div class="drawer-header flex-r-sbc ">
                     <span class="header-title">{{ title }}</span>
                     <img src="../assets/Close.svg" @click="closeDrawer" class="svg-btn border small">
@@ -75,8 +75,6 @@ function close() {
     top: 0;
     bottom: 0;
     overflow: hidden;
-    -webkit-user-select: none;
-    user-select: none;
 }
 
 .drawer {

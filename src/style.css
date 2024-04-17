@@ -54,6 +54,9 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 button:hover {
@@ -146,6 +149,13 @@ p {
 .svg-btn {
   width: 2em;
   height: 2em;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.no-touch {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;

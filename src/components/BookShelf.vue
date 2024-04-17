@@ -92,7 +92,7 @@ function removeSelection() {
         <img @click="removeSelection" src="../assets/Delete.svg" class="svg-btn">
       </template>
     </div>
-    <div class="container">
+    <div class="container no-touch">
       <div class="book" v-for="book in books" :key="book.id"
         @click="() => curMode === 'normal' ? pickBook(book) : changeSelect(book)">
         <div class="post">
