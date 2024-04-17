@@ -79,6 +79,12 @@ p {
   text-indent: 2em;
 }
 
+ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
 #app {
   max-width: 1280px;
   margin: 0 auto;

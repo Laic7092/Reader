@@ -112,29 +112,36 @@ defineExpose({
         <img src="../assets/Operate.svg" @click="addLayer" class="svg-btn small border operate">
     </template>
     <div v-else-if="curUILayer === UILayer.operatePanel" class="operatePanel no-touch">
-        <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
-            <span class="menu-name">Contents - 100%</span>
-            <img src="../assets/Bars3.svg" class="svg-btn">
+        <div>
+            <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
+                <span class="menu-name">Contents - 100%</span>
+                <img src="../assets/Bars3.svg" class="svg-btn">
+            </div>
+            <div class="menu-item flex-r-sbc" @click="showDrawer('searchDrawer')">
+                <span class=" menu-name">Search Book</span>
+                <img src="../assets/Search.svg" class="svg-btn">
+            </div>
+            <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
+                <span class="menu-name">Themes & Settings</span>
+                <img src="../assets/Setting.svg" class="svg-btn">
+            </div>
+            <div class="menu-item flex-r-sbc none-decoration">
+                <img src="../assets/Bars3.svg" class="louma svg-btn">
+                <img src="../assets/Search.svg" class="louma svg-btn">
+                <img src="../assets/Setting.svg" class="louma svg-btn">
+            </div>
         </div>
-        <div class="menu-item flex-r-sbc" @click="showDrawer('searchDrawer')">
-            <span class=" menu-name">Search Book</span>
-            <img src="../assets/Search.svg" class="svg-btn">
+        <div class="chapter-bar">
+
         </div>
-        <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
-            <span class="menu-name">Themes & Settings</span>
-            <img src="../assets/Setting.svg" class="svg-btn">
-        </div>
-        <div class="menu-item flex-r-sbc none-decoration">
-            <img src="../assets/Bars3.svg" class="louma svg-btn">
-            <img src="../assets/Search.svg" class="louma svg-btn">
-            <img src="../assets/Setting.svg" class="louma svg-btn">
-        </div>
+
     </div>
     <Teleport to="body">
-        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh">
+        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="malou">
             <ul class="contents">
-                <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx">
-                    <a style="color: unset;">{{ chapter.content }}</a>
+                <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx" class="chapter-item flex-r-sbc">
+                    <a style="color: unset;" :href="'#' + chapter.idx">{{ chapter.content }}</a>
+                    <span>{{ Math.floor(chapter.idx / 15) }}</span>
                 </li>
             </ul>
         </Drawer>
@@ -186,10 +193,13 @@ defineExpose({
     position: fixed;
     right: 0;
     bottom: 3em;
+    --bar-width: 260px;
+
+    display: flex;
 
     .menu-item {
         border-radius: 0.75em;
-        margin: 0.25em 2em;
+        margin: 0.25em 0;
         padding: 0.5em 1em;
         background-color: var(--fill-color);
         /* box-shadow: var(--box-shadow); */
@@ -197,8 +207,8 @@ defineExpose({
         width: var(--bar-width);
 
         .menu-name {
-            font-size: 1.2em;
-            font-weight: bold;
+            /* font-size: 1.2em; */
+            /* font-weight: 600; */
         }
 
         &.none-decoration {
@@ -227,6 +237,12 @@ defineExpose({
 
     }
 
+    .chapter-bar {
+        width: 50px;
+        background-color: var(--fill-color);
+        border-radius: 0.75em;
+        margin: 0 1em;
+    }
 
 }
 
@@ -254,8 +270,18 @@ defineExpose({
     }
 }
 
+.malou> :deep(.drawer)>.drawer-body {
+    padding: 0;
+}
+
 .contents {
     text-align: left;
-    font-size: 1.3em;
+
+    .chapter-item {
+        padding: 1em;
+        /* font-weight: 600; */
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+    }
 }
 </style>
