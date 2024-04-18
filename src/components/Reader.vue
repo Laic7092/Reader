@@ -2,16 +2,16 @@
 import { computed, ref } from 'vue';
 import { Book } from '../modules/indexDb';
 import ReaderUI from './ReaderUI.vue';
+import { routeBack } from '../modules/router';
 
 // 使 v-model 必填
-const model = defineModel({ required: true })
 const props = defineProps<{
     curBook: Book
 }>()
 
 // 提供一个默认值
 function closeReader() {
-    model.value = false
+    routeBack()
 }
 
 const init = 300

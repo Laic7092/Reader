@@ -2,10 +2,8 @@
 import bus, { CRUD, STATUS } from '../modules/pubSub'
 import { readAll, remove, Book } from "../modules/indexDb"
 import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
-
-const emit = defineEmits<{
-  (e: 'pickBook', value: Book): void
-}>()
+import { setCurBook } from '../modules/store';
+import { routeTo } from '../modules/router';
 
 interface SubMap {
   [key: string]: any
@@ -57,8 +55,9 @@ function init() {
   })
 }
 
-function pickBook(val: BookInShelf) {
-  emit('pickBook', val)
+function pickBook(book: BookInShelf) {
+  setCurBook(book)
+  routeTo('/reader')
 }
 
 function removeBook(id: string) {

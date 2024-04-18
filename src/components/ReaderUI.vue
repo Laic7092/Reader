@@ -206,11 +206,6 @@ defineExpose({
         cursor: pointer;
         width: var(--bar-width);
 
-        .menu-name {
-            /* font-size: 1.2em; */
-            /* font-weight: 600; */
-        }
-
         &.none-decoration {
             width: calc(var(--bar-width) + 2em);
             padding: 0;
