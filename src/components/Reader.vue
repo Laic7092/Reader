@@ -14,7 +14,7 @@ function closeReader() {
     routeBack()
 }
 
-const init = 300
+const init = 500
 const gap = 50
 
 const start = ref(0)
@@ -82,31 +82,28 @@ defineExpose({
 
     main {
         font-size: 1em;
-        line-height: unset;
+        line-height: 1.5;
         word-spacing: unset;
         letter-spacing: unset;
-        text-align: left;
+        text-align: justify;
     }
 }
 
 @media(max-width: 1280px) {
     .reader {
-        margin-left: 4em;
-        margin-right: 4em
+        margin: 0 6em;
     }
 }
 
 @media(max-width: 949px) {
     .reader {
-        margin-left: 3em;
-        margin-right: 3em
+        margin: 0 3em;
     }
 }
 
 @media(max-width: 719px) {
     .reader {
-        margin-left: 1.5em;
-        margin-right: 1.5em
+        margin: 0 2em;
     }
 }
 </style>

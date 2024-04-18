@@ -176,13 +176,13 @@ defineExpose({
 
     &.close {
         position: fixed;
-        right: 1em;
+        right: 1.5em;
         top: 2em;
     }
 
     &.operate {
         position: fixed;
-        right: 1em;
+        right: 1.5em;
         bottom: 2em;
         border-radius: 25%;
     }
