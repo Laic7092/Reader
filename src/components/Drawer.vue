@@ -6,6 +6,7 @@ const model = defineModel({ required: true })
 const props = defineProps<{
     title?: string
     height?: string
+    closeIconOffset?: string
 }>()
 
 function closeDrawer() {
@@ -57,7 +58,8 @@ function close() {
             <div class="drawer no-touch" :style="style">
                 <div class="drawer-header flex-r-sbc ">
                     <span class="header-title">{{ title }}</span>
-                    <img src="../assets/Close.svg" @click="closeDrawer" class="svg-btn border small">
+                    <img src="../assets/Close.svg" @click="closeDrawer" class="svg-btn border small"
+                        :style="{ 'margin-right': closeIconOffset }">
                 </div>
                 <div class="drawer-body">
                     <slot></slot>
@@ -102,7 +104,7 @@ function close() {
 
     .drawer-header {
         flex: none;
-        padding: 0.5em 1em;
+        padding: 0.5em 1.25em;
 
         .header-title {
             font-size: 1.5em;
@@ -111,7 +113,7 @@ function close() {
 
     .drawer-body {
         flex: auto;
-        padding: 0.5em 1em;
+        padding: 0.5em 1.25em;
         overflow-y: auto;
     }
 }

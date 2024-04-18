@@ -29,7 +29,7 @@ function moveWindow(type: string) {
 }
 
 function changeFontSize(type: string) {
-    style.value['font-size'] = parseFloat(style.value['font-size']) + (type === 'add' ? 0.1 : -0.1) + 'em'
+    style.value['font-size'] = parseFloat(style.value['font-size'] || '1') + (type === 'add' ? 0.1 : -0.1) + 'em'
 }
 const style = ref({
     'font-size': ''

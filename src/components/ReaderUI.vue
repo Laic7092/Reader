@@ -137,7 +137,7 @@ defineExpose({
 
     </div>
     <Teleport to="body">
-        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="malou">
+        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="malou"  close-icon-offset="-0.5em">
             <ul class="contents">
                 <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx" class="chapter-item flex-r-sbc">
                     <a style="color: unset;" :href="'#' + chapter.idx">{{ chapter.content }}</a>
@@ -244,13 +244,16 @@ defineExpose({
 .fontsize-adjust-btn {
     padding: 0.5em;
     background-color: var(--border-color);
-    border-radius: 1em;
+    border-radius: 0.75em;
     cursor: pointer;
     text-align: center;
+    width: 60%;
+    line-height: 1;
+    font-weight: 500;
 
     .divide {
         border: 0.5px solid;
-        height: 1.5em;
+        height: 1.2em;
         margin: auto;
     }
 
@@ -271,11 +274,13 @@ defineExpose({
 
 .contents {
     text-align: left;
+
     &:last-child {
         margin-bottom: 2em;
     }
+
     .chapter-item {
-        padding: 1em;
+        padding: 1em 1.5em;
         font-size: 14px;
         line-height: 1.5;
         font-weight: 500;
