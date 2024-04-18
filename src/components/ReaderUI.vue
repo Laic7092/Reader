@@ -276,10 +276,14 @@ defineExpose({
 
 .contents {
     text-align: left;
-
+    &:last-child {
+        margin-bottom: 2em;
+    }
     .chapter-item {
         padding: 1em;
-        /* font-weight: 600; */
+        font-size: 14px;
+        line-height: 1.5;
+        font-weight: 500;
         border-bottom: 1px solid var(--border-color);
         cursor: pointer;
     }

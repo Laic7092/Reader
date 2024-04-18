@@ -32,7 +32,7 @@ function changeFontSize(type: string) {
     style.value['font-size'] = parseFloat(style.value['font-size']) + (type === 'add' ? 0.1 : -0.1) + 'em'
 }
 const style = ref({
-    'font-size': '1em'
+    'font-size': ''
 })
 
 const utils = {
@@ -63,7 +63,8 @@ defineExpose({
         <Teleport to="body">
             <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
         </Teleport>
-        <main :style="style">
+        <!-- temp close touch,wait for note & hightlight -->
+        <main :style="style" class="no-touch">
             <template v-for="para in vList">
                 <p>{{ para }}</p>
             </template>

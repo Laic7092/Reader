@@ -52,7 +52,7 @@ function close() {
 }
 </script>
 <template>
-    <Transition name="fade">
+    <Transition name="slide-fade1">
         <div role="dialog" class="overlay" aria-modal="true" v-if="model" @click.self="closeDrawer">
             <div class="drawer no-touch" :style="style">
                 <div class="drawer-header flex-r-sbc ">
