@@ -59,14 +59,14 @@ defineExpose({
 })
 </script>
 <template>
-    <article class="reader testP" @click="ChangeUI">
+    <article class="reader" @click="ChangeUI">
         <Teleport to="body">
             <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
         </Teleport>
         <!-- temp close touch,wait for note & hightlight -->
         <main :style="style" class="no-touch">
             <template v-for="para in vList">
-                <p class="testP">{{ para }}</p>
+                <p>{{ para }}</p>
             </template>
         </main>
     </article>

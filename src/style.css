@@ -201,8 +201,14 @@ ul {
   opacity: 0.95;
 }
 
-.testP {
+
+.testR {
   margin: 0 !important;
+  padding: 0;
+}
+
+.testP {
+  margin: 0;
   text-indent: 0;
   text-align: start;
   line-break: unset;
