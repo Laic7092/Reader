@@ -14,7 +14,7 @@ function closeReader() {
     routeBack()
 }
 
-const init = 500
+const init = 1000
 const gap = 50
 
 const start = ref(0)
@@ -59,14 +59,14 @@ defineExpose({
 })
 </script>
 <template>
-    <article class="reader" @click="ChangeUI">
+    <article class="reader testP" @click="ChangeUI">
         <Teleport to="body">
             <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
         </Teleport>
         <!-- temp close touch,wait for note & hightlight -->
         <main :style="style" class="no-touch">
             <template v-for="para in vList">
-                <p>{{ para }}</p>
+                <p class="testP">{{ para }}</p>
             </template>
         </main>
     </article>
@@ -79,14 +79,6 @@ defineExpose({
     margin: 0 100px;
     --bar-width: 250px;
     background-color: var(--background-color);
-
-    main {
-        font-size: 1em;
-        line-height: 1.5;
-        word-spacing: unset;
-        letter-spacing: unset;
-        text-align: justify;
-    }
 }
 
 @media(max-width: 1280px) {

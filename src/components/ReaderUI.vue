@@ -282,7 +282,6 @@ defineExpose({
     .chapter-item {
         padding: 1em 1.5em;
         font-size: 14px;
-        line-height: 1.5;
         font-weight: 500;
         border-bottom: 1px solid var(--border-color);
         cursor: pointer;
