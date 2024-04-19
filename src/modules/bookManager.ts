@@ -84,7 +84,7 @@ function divideByChapter(paraArr: Array<string>) {
   }
   let cnt = 0
   paraArr.forEach((para, idx) => {
-    const content = para.trim()
+    const content = para
     if (content.search(patt) !== -1) {
       chapterArr.push({ content, idx, startLine: idx, endLine: -1 });
       cnt += content.length
