@@ -14,11 +14,12 @@ function closeReader() {
     routeBack()
 }
 
-const init = 1000
+const init = 10000
 const gap = 50
 
 const start = ref(0)
 const vList = computed(() => props.curBook.paraArr.slice(start.value, start.value + init))
+// const vList = props.curBook.paraArr
 
 function moveWindow(type: string) {
     if (type === 'next') {
@@ -59,14 +60,14 @@ defineExpose({
 })
 </script>
 <template>
-    <article class="reader" @click="ChangeUI">
+    <article class="reader testR" @click="ChangeUI">
         <Teleport to="body">
             <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
         </Teleport>
         <!-- temp close touch,wait for note & hightlight -->
         <main :style="style" class="no-touch">
             <template v-for="para in vList">
-                <p>{{ para }}</p>
+                <p class="testP">{{ para }}</p>
             </template>
         </main>
     </article>
@@ -79,6 +80,7 @@ defineExpose({
     margin: 0 100px;
     --bar-width: 250px;
     background-color: var(--background-color);
+    text-align: justify;
 }
 
 @media(max-width: 1280px) {

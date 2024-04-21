@@ -154,9 +154,9 @@ ul {
 }
 
 .no-touch {
-  -webkit-user-select: none;
+  /* -webkit-user-select: none;
   user-select: none;
-  -webkit-touch-callout: none;
+  -webkit-touch-callout: none; */
 }
 
 .fade-enter-active,
@@ -201,10 +201,21 @@ ul {
   opacity: 0.95;
 }
 
+.testH {
+  padding: 0 !important;
+  display: flex;
+}
+
+.testC {
+  aspect-ratio: auto 450/930;
+  height: 4000px;
+}
 
 .testR {
   margin: 0 !important;
   padding: 0;
+  width: 430px;
+  user-select: text;
 }
 
 .testP {
@@ -212,4 +223,5 @@ ul {
   text-indent: 0;
   text-align: start;
   line-break: unset;
+  line-break: anywhere;
 }
