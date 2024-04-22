@@ -108,6 +108,7 @@ function measureHeight1(ctx: OffscreenCanvasRenderingContext2D, text: string, co
         q += step
         const { width: measureWidth } = ctx.measureText(text.slice(p, q))
         const sub = measureWidth - maxWidth
+        // 可能不对?但我暂时想不出来了...
         q -= Math.floor(sub / fontSize)
 
         if (sub > 0) {
