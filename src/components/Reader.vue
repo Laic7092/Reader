@@ -14,7 +14,7 @@ function closeReader() {
     routeBack()
 }
 
-const init = 10000
+const init = 1000
 const gap = 50
 
 const start = ref(0)

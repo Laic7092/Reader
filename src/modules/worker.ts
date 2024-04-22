@@ -339,7 +339,7 @@ addEventListener('message', (evt) => {
         lineHeight: 1.5,
         maxWidth: 430
     }
-    let paras = allBooks[0].paraArr.slice(0)
+    let paras = allBooks[0].paraArr.slice(0, 1000)
     let cnt: Array<number> = []
     let height = config.fontSize
     console.time()
@@ -350,8 +350,8 @@ addEventListener('message', (evt) => {
         cnt.push(cur)
     });
     console.timeEnd()
-    console.log(mmll)
+    console.log('malou', mmll)
     let sum = 0
     cnt.forEach(i => sum += i)
-    console.log(cnt.reduce((pre, cur) => cur += pre), sum, cnt)
+    console.log('malou', cnt.reduce((pre, cur) => cur += pre), sum, cnt)
 })
