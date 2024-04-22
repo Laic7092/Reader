@@ -189,19 +189,23 @@ interface Config {
     fontFamily: string
 }
 
+
+const mmll = []
 function measureHeight1(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
 
     const { maxWidth, lineHeight, fontSize, fontFamily } = config
     ctx.font = `${fontSize}px ${fontFamily}`;
-    const closeWidth = fontSize * 2 //close to linebreak point
+    // const closeWidth = fontSize * 2 //close to linebreak point
     const length = text.length
-
     const step = Math.ceil(maxWidth / fontSize)
+
     let p = 0
     let q = 0
 
     let lineCount = 0
     // debugger
+    let log = []
+
     while (q < length) {
         q += step
         const { width: measureWidth } = ctx.measureText(text.slice(p, q))
@@ -211,8 +215,8 @@ function measureHeight1(ctx: OffscreenCanvasRenderingContext2D, text: string, co
         if (sub > 0) {
             let initQ = q
             while (q > p) {
-                const malou = ctx.measureText(text.slice(--q, initQ))
-                if (malou.width > sub) {
+                const { actualBoundingBoxLeft, actualBoundingBoxRight, width } = ctx.measureText(text.slice(--q, initQ))
+                if (width > sub) {
                     break
                 }
             }
@@ -220,16 +224,18 @@ function measureHeight1(ctx: OffscreenCanvasRenderingContext2D, text: string, co
         } else {
             let initQ = q
             while (q < length) {
-                const malou = ctx.measureText(text.slice(initQ, ++q))
-                if (malou.width > Math.abs(sub)) {
+                const { actualBoundingBoxLeft, actualBoundingBoxRight, width } = ctx.measureText(text.slice(initQ, ++q))
+                if (width > Math.abs(sub)) {
                     break
                 }
             }
             lineCount++
         }
+        log.push(text.slice(p, q))
         p = q
     }
     // debugger
+    mmll.push(log)
     return lineCount * fontSize * lineHeight
 }
 
@@ -241,6 +247,84 @@ function measureHeight2(ctx: OffscreenCanvasRenderingContext2D, text: string, co
 
     const { width: measureWidth } = measureText(text.slice(p, q))
 }
+
+// from chatgpt
+function measureHeight3(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
+    const { maxWidth, lineHeight, fontSize, fontFamily } = config;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    const length = text.length;
+    let p = 0;
+    let lineCount = 0;
+
+    while (p < length) {
+        let q = p + Math.ceil(maxWidth / fontSize);
+        while (ctx.measureText(text.slice(p, q)).width > maxWidth && q > p) {
+            q--;
+        }
+        lineCount++;
+        p = q;
+    }
+
+    return lineCount * fontSize * lineHeight;
+}
+
+// from chatgpt
+function measureHeight4(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
+    const { maxWidth, lineHeight, fontSize, fontFamily } = config;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    const length = text.length;
+    let p = 0;
+    let lineCount = 0;
+
+    while (p < length) {
+        let low = p;
+        let high = length;
+        while (low < high) {
+            const mid = Math.floor((low + high) / 2);
+            if (ctx.measureText(text.slice(p, mid)).width <= maxWidth) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        p = low - 1;
+        lineCount++;
+    }
+
+    return lineCount * fontSize * lineHeight;
+}
+
+// from: gpt-4
+function measureHeightOptimized(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
+    const { maxWidth, lineHeight, fontSize, fontFamily } = config;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    let lineCount = 0;
+    let p = 0;
+    let q = 0;
+    const length = text.length;
+    while (p < length) {
+        let min = 1;
+        let max = length - p;
+        while (min <= max) {
+            const mid = Math.ceil((min + max) / 2);
+            const subText = text.slice(p, p + mid);
+            const { width: measureWidth } = ctx.measureText(subText);
+            if (measureWidth > maxWidth) {
+                max = mid - 1;
+            } else if (measureWidth < maxWidth) {
+                min = mid + 1;
+            } else {
+                q = p + mid;
+                break;
+            }
+        }
+        q = p + max;
+        lineCount++;
+        p = q;
+    }
+    return lineCount * lineHeight * fontSize;
+}
+
 
 addEventListener('message', (evt) => {
     const canvas: OffscreenCanvas = evt.data.canvas;
@@ -261,10 +345,12 @@ addEventListener('message', (evt) => {
     console.time()
     paras.forEach((para: string) => {
         let cur = measureHeight1(ctx, para, config)
+        // let cur = measureHeightOptimized(ctx, para, config)
         height += cur
         cnt.push(cur)
     });
     console.timeEnd()
+    console.log(mmll)
     let sum = 0
     cnt.forEach(i => sum += i)
     console.log(cnt.reduce((pre, cur) => cur += pre), sum, cnt)
