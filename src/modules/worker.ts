@@ -206,7 +206,7 @@ function measureHeight1(ctx: OffscreenCanvasRenderingContext2D, text: string, co
         q += step
         const { width: measureWidth } = ctx.measureText(text.slice(p, q))
         const sub = measureWidth - maxWidth
-
+        q -= Math.floor(sub / fontSize)
 
         if (sub > 0) {
             let initQ = q
@@ -255,7 +255,7 @@ addEventListener('message', (evt) => {
         lineHeight: 1.5,
         maxWidth: 430
     }
-    let paras = allBooks[0].paraArr.slice(0, 10000)
+    let paras = allBooks[0].paraArr.slice(0)
     let cnt: Array<number> = []
     let height = config.fontSize
     console.time()
