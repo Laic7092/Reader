@@ -72,7 +72,7 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
                 }
             }
         } else {
-            // ok???
+            // ok???, part width not equal part + part,pitty...
             while (q <= length) {
                 if (ctx.measureText(text.slice(initQ, q + 1)).width > Math.abs(sub)) {
                     rules.indexOf(text[q]) !== -1 && (q -= 1)
