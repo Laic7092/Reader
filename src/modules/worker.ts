@@ -19,9 +19,9 @@ addEventListener('message', (e) => {
 });
 
 function mm() {
-    const pp = document.querySelectorAll('p')
+    const p = document.querySelectorAll('p')
     let a = []
-    pp.forEach(ele => a.push(ele.clientHeight))
+    p.forEach(ele => a.push(ele.clientHeight))
     a.reduce((pre, cur) => cur += pre)
 
     for (let i = 0; i < 10000; i++) {
@@ -33,104 +33,57 @@ function mm() {
 interface Config {
     maxWidth: number,
     lineHeight: number,
-    fontSize: number
-}
-
-function measureHeight(canvas: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
-    const { measureText } = canvas
-    const { maxWidth, lineHeight, fontSize } = config
-    const closeWidth = fontSize * 2 //close to linebreak point
-    const length = text.length
-    let resLength = length
-    let res = 0
-
-    // single line
-    if (measureText(text).width < maxWidth) {
-        return lineHeight * fontSize
-    }
-
-    while (resLength > 0) {
-        let left = length - resLength, right = resLength - 1
-        // finf break
-        while (left < right) {
-            const mid = (right - left) / 2 + left
-            const { width: measureWidth } = measureText(text.slice(left, mid))
-
-            const sub = measureWidth - maxWidth
-            if (Math.abs(sub) > closeWidth) {
-                if (sub > 0) right = mid
-                else left = mid
-            } else {
-                // close to break point
-                let offset = 1
-                if (sub > 0) {
-                    for (; mid - offset > left && measureWidth - measureText(text.slice(left, mid - offset)).width <= 0; offset++);
-                } else {
-                    for (; mid + offset < right && measureWidth - measureText(text.slice(left, mid + offset)).width <= 0; offset++);
-                }
-
-                // next 
-                res += lineHeight * fontSize
-                resLength -= mid + sub > 0 ? -offset : offset - left
-            }
-        }
-    }
-
-    return res
-}
-
-
-interface Config {
-    maxWidth: number,
-    lineHeight: number,
     fontSize: number,
     fontFamily: string
 }
 
-
-const mmll = []
-function measureHeight1(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
+const rules = ["，", "。"]
+const mmll: Array<any> = []
+function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
 
     const { maxWidth, lineHeight, fontSize, fontFamily } = config
     ctx.font = `${fontSize}px ${fontFamily}`;
     // const closeWidth = fontSize * 2 //close to linebreak point
     const length = text.length
-    const step = Math.ceil(maxWidth / fontSize)
+    const step = Math.floor(maxWidth / fontSize)
 
+    // start of curline
     let p = 0
+    // start of nextline
     let q = 0
 
     let lineCount = 0
-    // debugger
     let log = []
+    // debugger
 
-    while (q < length) {
+    while (q <= length) {
         q += step
-        const { width: measureWidth } = ctx.measureText(text.slice(p, q))
-        const sub = measureWidth - maxWidth
+        const { width } = ctx.measureText(text.slice(p, q))
+        const sub = width - maxWidth
         // 可能不对?但我暂时想不出来了...
-        q -= Math.floor(sub / fontSize)
-
+        // Math.abs(sub) > fontSize && (q -= Math.floor(sub / fontSize))
+        let initQ = q
         if (sub > 0) {
-            let initQ = q
+            // ok????
             while (q > p) {
-                const { actualBoundingBoxLeft, actualBoundingBoxRight, width } = ctx.measureText(text.slice(--q, initQ))
-                if (width > sub) {
+                if (ctx.measureText(text.slice(--q, initQ)).width > sub) {
+                    rules.indexOf(text[q]) !== -1 && (q -= 1)
                     break
                 }
             }
-            lineCount++
         } else {
-            let initQ = q
-            while (q < length) {
-                const { actualBoundingBoxLeft, actualBoundingBoxRight, width } = ctx.measureText(text.slice(initQ, ++q))
-                if (width > Math.abs(sub)) {
+            // ok???
+            while (q <= length) {
+                if (ctx.measureText(text.slice(initQ, q + 1)).width > Math.abs(sub)) {
+                    rules.indexOf(text[q]) !== -1 && (q -= 1)
                     break
                 }
+                q++
             }
-            lineCount++
+
         }
         log.push(text.slice(p, q))
+        lineCount++
         p = q
     }
     // debugger
@@ -155,14 +108,22 @@ addEventListener('message', (evt) => {
     let cnt: Array<number> = []
     let height = config.fontSize
     console.time()
-    paras.forEach((para: string) => {
-        let cur = measureHeight1(ctx, para, config)
-        // let cur = measureHeightOptimized(ctx, para, config)
+    paras.forEach((para: string, idx) => {
+        // if (idx === 994) debugger
+        let cur = measureHeight(ctx, para, config)
         height += cur
         cnt.push(cur)
     });
     console.timeEnd()
-    console.log('malou', mmll)
+    // console.log('malou', mmll)
+    globalThis.postMessage({
+        key: 'c',
+        val: mmll
+    });
+    globalThis.postMessage({
+        key: 'b',
+        val: cnt
+    });
     let sum = 0
     cnt.forEach(i => sum += i)
     console.log('malou', cnt.reduce((pre, cur) => cur += pre), sum, cnt)

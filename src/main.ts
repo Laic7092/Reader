@@ -8,7 +8,11 @@ import App from './App.vue'
 function useWorker() {
     const myWorker = new Worker("/src/modules/worker");
     myWorker.onmessage = (ev) => {
-        console.log(ev.data)
+        console.log('msg-from-worker', ev.data)
+        const { key, val } = ev.data
+        if (key)
+            window[key] = val
+
     }
 
     const htmlCanvas = document.createElement("canvas");
