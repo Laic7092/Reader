@@ -1,22 +1,19 @@
 globalThis.importScripts('./idb')
 
+addEventListener('message', (e) => {
+    globalThis.postMessage('You said: ' + e.data);
+});
 
-let allBooks: Array<any> = []
+
+const allBooks: Array<any> = []
 setTimeout(async () => {
     allBooks.push(...await readAll())
     console.log(allBooks);
-
 }, 1000)
 
 function count(s: string, c: string) {
     return (s.match(new RegExp(c, 'g')) || []).length;
 }
-
-
-
-addEventListener('message', (e) => {
-    globalThis.postMessage('You said: ' + e.data);
-});
 
 function mm() {
     const p = document.querySelectorAll('p')
@@ -29,6 +26,12 @@ function mm() {
             console.log(i, a[i], b[i], a[i] > b[i])
     }
 }
+function validate(ctx: OffscreenCanvasRenderingContext2D, text: string, hope: number) {
+
+}
+
+
+
 
 interface Config {
     maxWidth: number,
