@@ -77,7 +77,7 @@ function divideTxtContent(txtContent: string, name: string) {
 }
 
 function divideByChapter(paraArr: Array<string>) {
-  const patt = /^第?[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,9}[卷篇章回部话集幕册计讲场节](?:\s|$)/;
+  const patt = /^第?[两一二三四五六七八九十零百千万\d壹贰叁肆伍陆柒捌玖拾佰仟萬①②③④⑤⑥⑦⑧⑨⑩]{1,9}[卷篇章回部话集幕册计讲场节\.、](?:\s|$)/;
   const chapterArr: Array<Chapter> = [];
   if (paraArr[0].search(patt) === -1) {
     paraArr.unshift("Preface")
