@@ -53,7 +53,7 @@ const lineStartProhibition = [
 
 const lineEndProhibition = [
     "“", "‘",
-    "（", "〈","《"
+    "（", "〈", "《"
 ]
 const mmll: Array<any> = []
 function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
@@ -75,24 +75,29 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
 
     while (q <= length) {
         q += step
-        const { width } = ctx.measureText(text.slice(p, q))
-        const sub = width - maxWidth
+        const mt = ctx.measureText(text.slice(p, q))
+        const sub = mt.width - maxWidth
         // 可能不对?但我暂时想不出来了...
         // Math.abs(sub) > fontSize && (q -= Math.floor(sub / fontSize))
         let initQ = q
         if (sub > 0) {
+            // debugger
+            // never in ?
             // ok????
             while (q > p) {
                 if (ctx.measureText(text.slice(--q, initQ)).width > sub) {
-                    rules.indexOf(text[q]) !== -1 && (q -= 1)
+                    lineStartProhibition.indexOf(text[q]) !== -1 && (q -= 1)
                     break
                 }
             }
         } else {
+            // debugger
             // ok???, part width not equal part + part,pitty...
             while (q <= length) {
-                if (ctx.measureText(text.slice(initQ, q + 1)).width > Math.abs(sub)) {
-                    rules.indexOf(text[q]) !== -1 && (q -= 1)
+                const { width } = ctx.measureText(text.slice(initQ, q + 1))
+                const len = text.slice(p, q).match(/[“‘”’]/g)?.length || 0
+                if (width - len * fontSize * 0.5 > Math.abs(sub)) {
+                    lineStartProhibition.indexOf(text[q]) !== -1 && (q -= 1)
                     break
                 }
                 q++
@@ -122,11 +127,13 @@ addEventListener('message', (evt) => {
         maxWidth: 430
     }
     let paras = allBooks[0].paraArr.slice(0, 1000)
+    // let paras = ["“你又帮我解围了。”嗅着身旁少女的淡淡体香，萧炎低笑道。"]
+    // let paras = ["没这资格与心情，落寞的回转过身，对着广场之外缓缓行去…"]
     let cnt: Array<number> = []
     let height = config.fontSize
     console.time()
     paras.forEach((para: string, idx) => {
-        // if (idx === 994) debugger
+        // if (idx === 807) debugger
         let cur = measureHeight(ctx, para, config)
         height += cur
         cnt.push(cur)
