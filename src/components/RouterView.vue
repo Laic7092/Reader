@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import Home from './pages/Home.vue';
-import Reader from './pages/Reader.vue';
-import Config from './pages/Config.vue';
+import type { Component } from 'vue'
+import Home from '../pages/Home.vue';
+import Reader from '../pages/Reader.vue';
+import Config from '../pages/Config.vue';
 
 window.location.hash = '#/'
 
-// interface Routes {
-//     '/': typeof Home,
-//     '/reader': typeof Reader,
-//     '/config': typeof Config
-// }
-const routes = {
+interface Routes {
+    [key: string]: Component
+}
+const routes: Routes = {
     '/': Home,
     '/reader': Reader,
     '/config': Config

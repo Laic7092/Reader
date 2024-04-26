@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import RouterView from './RouterView.vue';
+import RouterView from './components/RouterView.vue';
 </script>
 
 <template>
