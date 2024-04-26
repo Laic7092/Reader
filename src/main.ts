@@ -1,6 +1,6 @@
 import './modules/pubSub'
 import './modules/indexDb'
-import './modules/init'
+// import './modules/init'
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'

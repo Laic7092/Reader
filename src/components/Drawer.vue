@@ -36,7 +36,6 @@ function open() {
         style.paddingRight = scrollBarWidth + 'px'
     }
     style.setProperty('touch-action', 'none')
-    style.setProperty('overscroll-behavior', 'none')
     document.body.style.overflow = 'hidden'
 }
 
@@ -48,7 +47,6 @@ function close() {
         style.width = ""
     }
     style.removeProperty('touch-action')
-    style.removeProperty('overscroll-behaviour')
     document.body.style.overflow = ""
 }
 </script>
@@ -58,7 +56,7 @@ function close() {
             <div class="drawer no-touch" :style="style">
                 <div class="drawer-header flex-r-sbc ">
                     <span class="header-title">{{ title }}</span>
-                    <img src="../assets/Close.svg" @click="closeDrawer" class="svg-btn border small"
+                    <img src="../assets/Close.svg" @click="closeDrawer" class="svg-btn border small no-touch"
                         :style="{ 'margin-right': closeIconOffset }">
                 </div>
                 <div class="drawer-body">

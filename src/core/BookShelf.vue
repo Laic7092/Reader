@@ -84,7 +84,7 @@ function removeSelection() {
 </script>
 <template>
   <template v-if="books.length > 0">
-    <div class="tabs mb1 flex-r-cc top-right">
+    <div class="tabs mb1 flex-r-cc top-right no-touch">
       <button v-if="curMode === 'normal'" @click="changeMode('manage')">Manage Books</button>
       <template v-else>
         <button class="mr1" @click="changeMode('normal')">cancel</button>

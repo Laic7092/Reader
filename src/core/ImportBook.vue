@@ -10,7 +10,7 @@ function importBook() {
 }
 </script>
 <template>
-    <div class="top-right">
+    <div class="top-right no-touch">
         <button @click="importBook">Import Book +</button>
         <input ref="fileInput" type="file" v-show="false" accept=".txt,.epub" multiple style="display:none;">
     </div>
