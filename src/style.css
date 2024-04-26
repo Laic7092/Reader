@@ -63,17 +63,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-.card {
-  padding: 2em;
-}
-
-p {
-  margin: 0.25em 0;
-  word-break: break-all;
-  word-wrap: break-word;
-  text-indent: 2em;
-}
-
 ul {
   padding: 0;
   margin: 0;
@@ -81,20 +70,10 @@ ul {
 }
 
 #app {
-  max-width: 1280px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem;  
   text-align: center;
-
-  &:has(.reader) {
-    padding: 0;
-  }
-}
-
-@media (width <=949px) or (orientation: portrait) {
-  #app {
-    padding: 0.5rem;
-  }
 }
 
 .auto-Elliptical {
@@ -199,17 +178,4 @@ ul {
 .slide-fade1-leave-to {
   transform: translateY(100vh);
   opacity: 0.95;
-}
-
-
-.testR {
-  margin: 0 !important;
-  padding: 0;
-}
-
-.testP {
-  margin: 0;
-  text-indent: 0;
-  text-align: start;
-  line-break: unset;
 }

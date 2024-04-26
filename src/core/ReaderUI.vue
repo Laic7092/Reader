@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Book } from '../modules/indexDb';
-import Drawer from './Drawer.vue';
+import Drawer from '../components/Drawer.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 
 interface Utils {
@@ -137,7 +137,8 @@ defineExpose({
 
     </div>
     <Teleport to="body">
-        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="malou"  close-icon-offset="-0.5em">
+        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="malou"
+            close-icon-offset="-0.5em">
             <ul class="contents">
                 <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx" class="chapter-item flex-r-sbc">
                     <a style="color: unset;" :href="'#' + chapter.idx">{{ chapter.content }}</a>

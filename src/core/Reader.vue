@@ -74,28 +74,15 @@ defineExpose({
 
 <style scoped>
 .reader {
-    min-width: 320px;
-    max-width: 1280px;
-    margin: 0 100px;
     --bar-width: 250px;
     background-color: var(--background-color);
-}
 
-@media(max-width: 1280px) {
-    .reader {
-        margin: 0 6em;
-    }
-}
-
-@media(max-width: 949px) {
-    .reader {
-        margin: 0 3em;
-    }
-}
-
-@media(max-width: 719px) {
-    .reader {
-        margin: 0 2em;
+    main>p {
+        margin: 0.25em 0;
+        word-break: break-all;
+        word-wrap: break-word;
+        text-indent: 2em;
+        text-align: justify;
     }
 }
 </style>

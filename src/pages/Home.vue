@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ImportBook from '../components/ImportBook.vue';
-import BookShelf from '../components/BookShelf.vue';
+import ImportBook from '../core/ImportBook.vue';
+import BookShelf from '../core/BookShelf.vue';
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Reader from '../components/Reader.vue';
+import Reader from '../core/Reader.vue';
 import { getCurBook } from '../modules/store';
 import { onActivated, ref } from 'vue';
 import { Book } from '../modules/indexDb';
