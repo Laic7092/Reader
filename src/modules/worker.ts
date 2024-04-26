@@ -40,7 +40,21 @@ interface Config {
     fontFamily: string
 }
 
-const rules = ["，", "。"]
+// 点号（顿号、逗号、句号、冒号、分号、叹号、问号）、结束引号、结束括号、结束双书名号（书名号乙式）、连接号、间隔号、分隔号不能出现在一行的开头。
+// 开始引号、开始括号、开始单双书名号等符号，不能出现在一行的结尾。这是最推荐的方法。
+const lineStartProhibition = [
+    "、", "，", "。", "：", "；", "！", "？",
+    "」", "』", "”", "’",
+    "）", "》",
+    "～", "-", "–", "—",
+    "·", "・", "‧",
+    "/", "／"
+]
+
+const lineEndProhibition = [
+    "“", "‘",
+    "（", "〈","《"
+]
 const mmll: Array<any> = []
 function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
 
