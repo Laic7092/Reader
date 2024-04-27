@@ -79,10 +79,9 @@ defineExpose({
 
     main>p {
         margin: 0.25em 0;
-        word-break: break-all;
-        word-wrap: break-word;
         text-indent: 2em;
         text-align: justify;
     }
 }
+
 </style>
