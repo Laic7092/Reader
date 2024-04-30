@@ -1,110 +1,111 @@
 <script setup lang="ts">
-import { Book } from '../modules/indexDb';
-import Drawer from '../components/Drawer.vue';
-import { ref, onMounted, onUnmounted } from 'vue';
+    import { Book } from '../modules/indexDb';
+    import Drawer from '../components/Drawer.vue';
+    import { ref, onMounted, onUnmounted } from 'vue';
+    import VList from '../components/VList.vue';
 
-interface Utils {
-    moveWindow: (param: string) => void
-    closeReader: () => void
-    changeFontSize: (param: string) => void
-    curBook: Book
-}
-const props = defineProps<{
-    utils: Utils
-}>()
-
-const { moveWindow, closeReader, changeFontSize, curBook } = props.utils
-console.log(moveWindow)
-
-const curTimeoutID = ref(-1)
-
-function terminate() {
-    curTimeoutID.value > 0 && clearTimeout(curTimeoutID.value)
-    curTimeoutID.value = -1
-}
-function startTimeout() {
-    curTimeoutID.value = setTimeout(() => {
-        curTimeoutID.value = -1
-        subLayer()
-    }, 5000)
-}
-
-enum UILayer {
-    Blank = -1,
-    baseBtns = 0,
-    operatePanel = 1
-}
-const curUILayer = ref<UILayer>(0)
-
-function addLayer() {
-    curUILayer.value += 1
-    judgeLayer(curUILayer.value)
-}
-
-function subLayer() {
-    curUILayer.value -= 1
-    judgeLayer(curUILayer.value)
-}
-
-function judgeLayer(value: UILayer) {
-    // before nextick,so i can terminate timeout if curuilayer !== basebtns
-    // or,start timeout before basebtns been render
-    if (value === UILayer.baseBtns) {
-        startTimeout()
-    } else {
-        terminate()
+    interface Utils {
+        moveWindow: (param: string) => void
+        closeReader: () => void
+        changeFontSize: (param: string) => void
+        curBook: () => Book
     }
-}
+    const props = defineProps<{
+        utils: Utils
+    }>()
 
-interface DrawerMap {
-    settingsDrawer: boolean
-    contensDrawer: boolean
-    searchDrawer: boolean
-}
-const drawerMap = ref<DrawerMap>({
-    settingsDrawer: false,
-    contensDrawer: false,
-    searchDrawer: false
-})
-function showDrawer(key: keyof DrawerMap) {
-    drawerMap.value[key] = true
-}
+    const { moveWindow, closeReader, changeFontSize, curBook } = props.utils
+    console.log(moveWindow)
+
+    const curTimeoutID = ref(-1)
+
+    function terminate() {
+        curTimeoutID.value > 0 && clearTimeout(curTimeoutID.value)
+        curTimeoutID.value = -1
+    }
+    function startTimeout() {
+        curTimeoutID.value = setTimeout(() => {
+            curTimeoutID.value = -1
+            subLayer()
+        }, 5000)
+    }
+
+    enum UILayer {
+        Blank = -1,
+        baseBtns = 0,
+        operatePanel = 1
+    }
+    const curUILayer = ref<UILayer>(0)
+
+    function addLayer() {
+        curUILayer.value += 1
+        judgeLayer(curUILayer.value)
+    }
+
+    function subLayer() {
+        curUILayer.value -= 1
+        judgeLayer(curUILayer.value)
+    }
+
+    function judgeLayer(value: UILayer) {
+        // before nextick,so i can terminate timeout if curuilayer !== basebtns
+        // or,start timeout before basebtns been render
+        if (value === UILayer.baseBtns) {
+            startTimeout()
+        } else {
+            terminate()
+        }
+    }
+
+    interface DrawerMap {
+        settingsDrawer: boolean
+        contensDrawer: boolean
+        searchDrawer: boolean
+    }
+    const drawerMap = ref<DrawerMap>({
+        settingsDrawer: false,
+        contensDrawer: false,
+        searchDrawer: false
+    })
+    function showDrawer(key: keyof DrawerMap) {
+        drawerMap.value[key] = true
+    }
 
 
-let intervalId = -1
-onMounted(() => {
-    const intersectionObserver = new IntersectionObserver((entries) => {
-        // 如果 intersectionRatio 为 0，则目标在视野外，
-        // 我们不需要做任何事情。
-        // what if pre & next exist in a viewport?
-        if (entries[0].intersectionRatio <= 0) {
-            console.log('trigger,out')
-            return
-        };
-        console.log("Loaded new items", entries);
-    });
-    // 开始监听
-    const anchor = document.querySelector('#anchor')
-    anchor && intersectionObserver.observe(anchor);
-})
+    let intervalId = -1
+    onMounted(() => {
+        const intersectionObserver = new IntersectionObserver((entries) => {
+            // 如果 intersectionRatio 为 0，则目标在视野外，
+            // 我们不需要做任何事情。
+            // what if pre & next exist in a viewport?
+            if (entries[0].intersectionRatio <= 0) {
+                console.log('trigger,out')
+                return
+            };
+            console.log("Loaded new items", entries);
+        });
+        // 开始监听
+        const anchor = document.querySelector('#anchor')
+        anchor && intersectionObserver.observe(anchor);
+    })
 
 
 
-onMounted(() => {
-    startTimeout()
-})
+    onMounted(() => {
+        startTimeout()
+    })
 
-onUnmounted(() => {
-    clearInterval(intervalId)
-})
+    onUnmounted(() => {
+        clearInterval(intervalId)
+    })
 
-function ChangeUI() {
-    curUILayer.value > UILayer.Blank ? subLayer() : addLayer()
-}
+    function ChangeUI() {
+        curUILayer.value > UILayer.Blank ? subLayer() : addLayer()
+    }
 
-defineExpose({
-    ChangeUI
-})
+    defineExpose({
+        ChangeUI
+    })
 </script>
 <template>
     <template v-if="curUILayer === UILayer.baseBtns">
@@ -137,14 +138,13 @@ defineExpose({
 
     </div>
     <Teleport to="body">
-        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="malou"
+        <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="content-drawer"
             close-icon-offset="-0.5em">
-            <ul class="contents">
-                <li v-for="(chapter, idx) in curBook.chapterArr" :key="idx" class="chapter-item flex-r-sbc">
-                    <a style="color: unset;" :href="'#' + chapter.idx">{{ chapter.content }}</a>
-                    <span>{{ Math.floor(chapter.idx / 15) }}</span>
-                </li>
-            </ul>
+            <VList :list="curBook().chapterArr" :config="{ catchNum: 8, displayNum: 15, wrapperClass: 'content' }">
+                <template #item="{ content, idx }">
+                    <a style="color: unset;" :href="'#' + idx">{{ content }}</a>
+                </template>
+            </VList>
         </Drawer>
         <Drawer v-model="drawerMap.searchDrawer" title="Search Book" height="80vh">
             <!-- <input> -->
@@ -163,129 +163,123 @@ defineExpose({
 </template>
 
 <style scoped>
-.svg-btn {
-    &.small {
-        width: 1.5em;
-        height: 1.5em;
-    }
+    .svg-btn {
+        &.small {
+            width: 1.5em;
+            height: 1.5em;
+        }
 
-    &.border {
-        border: 0.25rem solid var(--border-color);
-        border-radius: 50%;
-        background-color: var(--border-color);
-    }
+        &.border {
+            border: 0.25rem solid var(--border-color);
+            border-radius: 50%;
+            background-color: var(--border-color);
+        }
 
-    &.close {
-        position: fixed;
-        right: 1.5em;
-        top: 2em;
-    }
+        &.close {
+            position: fixed;
+            right: 1.5em;
+            top: 2em;
+        }
 
-    &.operate {
-        position: fixed;
-        right: 1.5em;
-        bottom: 2em;
-        border-radius: 25%;
-    }
-
-}
-
-.operatePanel {
-    position: fixed;
-    right: 0;
-    bottom: 3em;
-    --bar-width: 260px;
-
-    display: flex;
-
-    .menu-item {
-        border-radius: 0.75em;
-        margin: 0.25em 0;
-        padding: 0.5em 1em;
-        background-color: var(--fill-color);
-        /* box-shadow: var(--box-shadow); */
-        cursor: pointer;
-        width: var(--bar-width);
-
-        &.none-decoration {
-            width: calc(var(--bar-width) + 2em);
-            padding: 0;
-            background-color: unset;
-            box-shadow: none;
-
-            .louma {
-                background-color: var(--fill-color);
-                /* box-shadow: var(--box-shadow); */
-                flex: 1;
-                margin: 0 0.25em;
-                padding: 0.5em;
-                border-radius: 1em;
-
-                &:first-child {
-                    margin-left: 0;
-                }
-
-                &:last-child {
-                    margin-right: 0;
-                }
-            }
+        &.operate {
+            position: fixed;
+            right: 1.5em;
+            bottom: 2em;
+            border-radius: 25%;
         }
 
     }
 
-    .chapter-bar {
-        width: 50px;
-        background-color: var(--fill-color);
+    .operatePanel {
+        position: fixed;
+        right: 0;
+        bottom: 3em;
+        --bar-width: 260px;
+
+        display: flex;
+
+        .menu-item {
+            border-radius: 0.75em;
+            margin: 0.25em 0;
+            padding: 0.5em 1em;
+            background-color: var(--fill-color);
+            /* box-shadow: var(--box-shadow); */
+            cursor: pointer;
+            width: var(--bar-width);
+
+            &.none-decoration {
+                width: calc(var(--bar-width) + 2em);
+                padding: 0;
+                background-color: unset;
+                box-shadow: none;
+
+                .louma {
+                    background-color: var(--fill-color);
+                    /* box-shadow: var(--box-shadow); */
+                    flex: 1;
+                    margin: 0 0.25em;
+                    padding: 0.5em;
+                    border-radius: 1em;
+
+                    &:first-child {
+                        margin-left: 0;
+                    }
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
+            }
+
+        }
+
+        .chapter-bar {
+            width: 50px;
+            background-color: var(--fill-color);
+            border-radius: 0.75em;
+            margin: 0 1em;
+        }
+
+    }
+
+    .fontsize-adjust-btn {
+        padding: 0.5em;
+        background-color: var(--border-color);
         border-radius: 0.75em;
-        margin: 0 1em;
+        cursor: pointer;
+        text-align: center;
+        width: 60%;
+        line-height: 1;
+        font-weight: 500;
+
+        .divide {
+            border: 0.5px solid;
+            height: 1.2em;
+            margin: auto;
+        }
+
+        .left-letter {
+            font-size: 0.8em;
+            flex: 1;
+        }
+
+        .right-letter {
+            font-size: 1.2em;
+            flex: 1;
+        }
     }
 
-}
-
-.fontsize-adjust-btn {
-    padding: 0.5em;
-    background-color: var(--border-color);
-    border-radius: 0.75em;
-    cursor: pointer;
-    text-align: center;
-    width: 60%;
-    line-height: 1;
-    font-weight: 500;
-
-    .divide {
-        border: 0.5px solid;
-        height: 1.2em;
-        margin: auto;
+    .content-drawer> :deep(.drawer)>.drawer-body {
+        padding: 0;
     }
 
-    .left-letter {
-        font-size: 0.8em;
-        flex: 1;
-    }
-
-    .right-letter {
-        font-size: 1.2em;
-        flex: 1;
-    }
-}
-
-.malou> :deep(.drawer)>.drawer-body {
-    padding: 0;
-}
-
-.contents {
-    text-align: left;
-
-    &:last-child {
-        margin-bottom: 2em;
-    }
-
-    .chapter-item {
+    .vList-wrapper :deep(.item) {
+        height: 50px;
+        box-sizing: border-box;
         padding: 1em 1.5em;
         font-size: 14px;
         font-weight: 500;
         border-bottom: 1px solid var(--border-color);
         cursor: pointer;
     }
-}
 </style>

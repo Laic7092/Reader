@@ -1,141 +1,87 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue';
+    import { computed, nextTick, onMounted, ref } from 'vue';
 
-const total = 500000
-
-const list = new Array(total).fill(0).map((item, idx) => ({ item, idx }))
-
-const catchNum = 1
-const displayNum = 6
-
-const start = ref(0)
-const end = computed(() => start.value + displayNum)
-
-const _scrollHeight = ref(0)
-const _scrollTop = ref(0)
-
-function Limit(val: number) {
-    if (val < 0) {
-        return 0
-    } else if (val > total) {
-        return total
+    interface Config {
+        catchNum: number
+        displayNum: number
+        wrapperClass: string
     }
-    return val
-}
+    const props = defineProps<{
+        list: Array<any>
+        config: Config
+    }>()
 
-const ul = ref<HTMLElement | null>(null)
-onMounted(() => {
-    setHeight()
-})
-function setHeight() {
-    // 300|60
-    const height = total * 60 + 'px'
-    _scrollHeight.value = parseInt(height)
-    ul.value && ul.value.style.setProperty('height', height)
-}
+    const ITEM_HEIGHT = 50
+    const { catchNum, displayNum, wrapperClass } = props.config
+    // const catchHeight = catchNum * ITEM_HEIGHT
 
-let ticker = false
-async function listenScroll(e: Event) {
-    if (!ticker) {
-        ticker = true
+    const start = ref(catchNum)
+    const total = props.list.length
 
-        const { scrollHeight, scrollTop } = e.target as HTMLElement
-        _scrollHeight.value = scrollHeight
-        _scrollTop.value = scrollTop
+    const _scrollHeight = ref(0)
 
-        const hiddenNum = Math.floor(scrollTop / 60)
-        const sub = hiddenNum - start.value
-        if (sub !== 0) {
-            start.value += sub
+    function Limit(val: number) {
+        if (val < 0) {
+            return 0
+        } else if (val > total) {
+            return total
+        }
+        return val
+    }
+
+    const ul = ref<HTMLElement | null>(null)
+    onMounted(() => {
+        setHeight()
+    })
+    function setHeight() {
+        const height = total * ITEM_HEIGHT + 'px'
+        _scrollHeight.value = parseInt(height)
+        ul.value && ul.value.style.setProperty('height', height)
+    }
+
+    let ticker = false
+    async function listenScroll(e: Event) {
+        if (!ticker) {
+            ticker = true
+
+            const { scrollTop } = e.target as HTMLElement
+
+            const hiddenNum = Math.floor(Math.max(scrollTop, 0) / ITEM_HEIGHT)
+
+            start.value = hiddenNum + catchNum
             if (ul.value) {
-                ul.value.style.setProperty('margin-top', hiddenNum * 60 + 'px')
-                ul.value.style.height = total * 60 - hiddenNum * 60 + 'px'
+                ul.value.style.setProperty('margin-top', hiddenNum * ITEM_HEIGHT + 'px')
+                ul.value.style.height = total * ITEM_HEIGHT - hiddenNum * ITEM_HEIGHT + 'px'
             }
+            await nextTick()
+            ticker = false
         }
 
-        await nextTick()
-        ticker = false
     }
 
-}
 
-const vList = computed(() => list.slice(Limit(start.value - catchNum), Limit(end.value + catchNum)))
-
-const hiddenNum = computed(() => Math.floor(_scrollTop.value / 60))
+    const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
 
 </script>
 <template>
-    <div class="fix" style="margin-bottom: 10px;">
-        <div>
-            <span style="margin-right: 20px;">scrollHeight</span>{{ _scrollHeight }}
-        </div>
-        <div>
-            <span style="margin-right: 20px;">scrollTop</span>{{ _scrollTop }}
-        </div>
-        <div>
-            <span style="margin-right: 20px;">start&end</span>{{ start }}|{{ end }}
-        </div>
-        <div>
-            <span style="margin-right: 20px;">hiddenNum</span>{{ hiddenNum }}
-        </div>
-    </div>
-    <div class="wrapper" @scroll="listenScroll">
-        <ul ref="ul" class="vList">
+    <div class="vList-wrapper" @scroll="listenScroll">
+        <ul ref="ul" class="vList" :class="wrapperClass">
             <li class="item" v-for="item in vList" :key="item.idx">
-                <span class="a">
-                    {{ item.idx + ' start' }}
-                </span>
-                <span class="b">
-                    {{ item.idx + ' end' }}
-                </span>
+                <slot name="item" v-bind="item"></slot>
             </li>
         </ul>
     </div>
 </template>
 
 <style scoped>
-.fix {
-    div {
-        text-align: left;
+    .vList-wrapper {
+        height: 100%;
+        overflow-y: auto;
+        contain: layout;
 
-        span {
-            display: inline-block;
-            text-align: left;
-            width: 160px;
+        .vList {
+            margin: 0;
+            padding: 0;
         }
     }
-}
-
-.wrapper {
-    height: 360px;
-    overflow-y: auto;
-    contain: layout;
-
-    .vList {
-        margin: 0;
-        padding: 0;
-
-        .item {
-            height: 60px;
-            background-color: var(--background-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-
-            /* margin-bottom: 10px; */
-            .a {
-                background-color: #000;
-                color: orange;
-                width: fit-content;
-            }
-
-            .b {
-                background-color: orange;
-                color: black;
-                width: fit-content;
-            }
-        }
-    }
-}
 </style>
