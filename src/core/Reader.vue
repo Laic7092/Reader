@@ -3,6 +3,7 @@
     import { Book } from '../modules/indexDb';
     import ReaderUI from './ReaderUI.vue';
     import { routeBack } from '../modules/router';
+    import DynamicHeightVList from '../components/DynamicHeightVList.vue';
 
     // 使 v-model 必填
     const props = defineProps<{
@@ -65,9 +66,13 @@
         </Teleport>
         <!-- temp close touch,wait for note & hightlight -->
         <main :style="style" class="no-touch">
-            <template v-for="para in vList">
-                <p>{{ para }}</p>
-            </template>
+            <DynamicHeightVList :list="curBook.paraArr">
+                <template v-slot="slotProps">
+                    <p>
+                        {{ slotProps.text }}
+                    </p>
+                </template>
+            </DynamicHeightVList>
         </main>
     </article>
 </template>
@@ -76,13 +81,14 @@
     .reader {
         --bar-width: 250px;
         background-color: var(--background-color);
+    }
 
-        main>p {
-            margin: 0.25em 0;
-            text-indent: 2em;
-            text-align: justify;
-            word-break: break-all;
-        }
+    :deep(.vList-wrapper) p {
+        margin: 0;
+        text-indent: 2em;
+        text-align: justify;
+        word-break: break-all;
+        word-wrap: anywhere;
     }
 
 </style>
