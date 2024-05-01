@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
+    import { ref } from 'vue';
     import { Book } from '../modules/indexDb';
     import ReaderUI from './ReaderUI.vue';
     import { routeBack } from '../modules/router';
@@ -15,19 +15,6 @@
         routeBack()
     }
 
-    const init = 1000
-    const gap = 50
-
-    const start = ref(0)
-
-    function moveWindow(type: string) {
-        if (type === 'next') {
-            start.value += gap
-        } else {
-            start.value = gap > start.value ? 0 : start.value - gap
-        }
-    }
-
     function changeFontSize(type: string) {
         style.value['font-size'] = parseFloat(style.value['font-size'] || '1') + (type === 'add' ? 0.1 : -0.1) + 'em'
     }
@@ -37,7 +24,6 @@
 
     const utils = {
         curBook: () => props.curBook,
-        moveWindow,
         changeFontSize,
         closeReader
     }

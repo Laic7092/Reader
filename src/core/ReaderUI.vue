@@ -5,7 +5,6 @@
     import VList from '../components/VList.vue';
 
     interface Utils {
-        moveWindow: (param: string) => void
         closeReader: () => void
         changeFontSize: (param: string) => void
         curBook: () => Book
@@ -14,8 +13,7 @@
         utils: Utils
     }>()
 
-    const { moveWindow, closeReader, changeFontSize, curBook } = props.utils
-    console.log(moveWindow)
+    const { closeReader, changeFontSize, curBook } = props.utils
 
     const curTimeoutID = ref(-1)
 
