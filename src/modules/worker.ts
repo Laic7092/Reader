@@ -1,3 +1,4 @@
+// @ts-nocheck
 globalThis.importScripts('./idb')
 
 addEventListener('message', (e) => {

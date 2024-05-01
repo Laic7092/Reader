@@ -19,7 +19,6 @@
     const gap = 50
 
     const start = ref(0)
-    const vList = computed(() => props.curBook.paraArr.slice(start.value, start.value + init))
 
     function moveWindow(type: string) {
         if (type === 'next') {
