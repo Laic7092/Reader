@@ -127,19 +127,15 @@ addEventListener('message', (evt) => {
         maxWidth: 430
     }
     let paras = allBooks[0].paraArr.slice(0, 1000)
-    // let paras = ["“你又帮我解围了。”嗅着身旁少女的淡淡体香，萧炎低笑道。"]
-    // let paras = ["没这资格与心情，落寞的回转过身，对着广场之外缓缓行去…"]
     let cnt: Array<number> = []
     let height = config.fontSize
     console.time()
     paras.forEach((para: string, idx) => {
-        // if (idx === 807) debugger
         let cur = measureHeight(ctx, para, config)
         height += cur
         cnt.push(cur)
     });
     console.timeEnd()
-    // console.log('malou', mmll)
     globalThis.postMessage({
         key: 'c',
         val: mmll
