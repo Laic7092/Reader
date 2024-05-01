@@ -23,7 +23,7 @@ function useWorker() {
         }, [offscreen]);
     }, 2000)
 }
-useWorker()
+// useWorker()
 
 
 createApp(App).mount('#app')
