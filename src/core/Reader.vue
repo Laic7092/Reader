@@ -51,18 +51,23 @@ defineExpose({
         </Teleport>
         <!-- temp close touch,wait for note & hightlight -->
         <main :style="style" class="no-touch">
-            <ul class="vList-wrapper">
+            <!-- <ul class="vList-wrapper">
                 <li v-for="(para, index) in curBook.paraArr.slice(0, 1000)" :key="index">
                     <p>{{ para }}</p>
                 </li>
-            </ul>
-            <!-- <DynamicHeightVList :list="curBook.paraArr">
+            </ul> -->
+            <!-- <div class="vList-wrapper">
+                <p v-for="(para, index) in curBook.paraArr" :key="index">
+                    {{ para }}
+                </p>
+            </div> -->
+            <DynamicHeightVList :list="curBook.paraArr">
                 <template v-slot="slotProps">
                     <p>
                         {{ slotProps.text }}
                     </p>
                 </template>
-</DynamicHeightVList> -->
+            </DynamicHeightVList>
         </main>
     </article>
 </template>
@@ -75,7 +80,7 @@ defineExpose({
 
 :deep(.vList-wrapper) p {
     margin: 0;
-    /* text-indent: 2em; */
+    text-indent: 2em;
     text-align: justify;
     word-break: break-all;
     word-wrap: anywhere;

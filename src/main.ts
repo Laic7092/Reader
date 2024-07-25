@@ -21,7 +21,7 @@ function useWorker() {
         myWorker.postMessage({
             canvas: offscreen
         }, [offscreen]);
-    }, 2000)
+    }, 4000)
 }
 useWorker()
 

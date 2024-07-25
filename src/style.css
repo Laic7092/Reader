@@ -68,8 +68,14 @@ ul {
 #app {
   max-width: 1080px;
   margin: 0 auto;
-  /* padding: 2rem;   */
+  padding: 2rem;
   text-align: center;
+}
+
+@media (width <=949px) or (orientation: portrait) {
+  #app {
+    padding: 0 0.5rem;
+  }
 }
 
 .auto-Elliptical {

@@ -67,12 +67,17 @@ function getCharCode(file: File): Promise<string | undefined> {
 }
 
 function divideTxtContent(txtContent: string, name: string) {
+  const charSet: Set<string> = new Set()
+  const len = txtContent.length
+  for (let index = 0; index < len; index++) {
+    charSet.add(txtContent[index])
+  }
   if (typeof txtContent !== "string") return;
   let paraArr = txtContent.split(/[\r\n]+/).map(para => para.replace("<br />", '').trim()).filter(para => para);
   let chapterArr = []
   if (paraArr.length > 0) {
     chapterArr = divideByChapter(paraArr);
-    addToLibrary({ chapterArr, paraArr, name, id: '' })
+    addToLibrary({ chapterArr, paraArr, charSet, name, id: '' })
   }
 }
 

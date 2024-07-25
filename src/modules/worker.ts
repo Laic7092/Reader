@@ -55,11 +55,21 @@ const lineEndProhibition = [
     "（", "〈", "《"
 ]
 const msContentArr: Array<any> = []
+
+
+function measureWidthByCharMap(text: string, charWidthMap: Map<string, number>) {
+    if (text === '') return 0
+    return Array.from(text).map(char => charWidthMap.get(char)).reduce((pre, cur) => pre + cur)
+}
+
 function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
 
-    const { maxWidth, lineHeight, fontSize, fontFamily, step } = config
+    const { maxWidth, lineHeight, fontSize, fontFamily, step, textIndent } = config
     ctx.font = `${fontSize}px ${fontFamily}`;
     const length = text.length
+
+    let _maxWidth = maxWidth - textIndent * fontSize
+    const charWidthMap = allBooks[0].charWidthMap
 
     // start of curline
     let p = 0
@@ -71,11 +81,14 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
 
     while (q <= length) {
         q += step
-        const sub = ctx.measureText(text.slice(p, q)).width - maxWidth
+        let a = ''
+
+        const _width = measureWidthByCharMap(text.slice(p, q), charWidthMap)
+        const sub = _width - _maxWidth
         const initQ = q
         if (sub > 0) {
             while (q > p) {
-                if (ctx.measureText(text.slice(--q, initQ)).width > sub) {
+                if (measureWidthByCharMap(text.slice(--q, initQ), charWidthMap) > sub) {
                     // while (lineStartProhibition.indexOf(text[q]) !== -1)
                     //     q--
                     break
@@ -83,7 +96,7 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
             }
         } else {
             while (q <= length) {
-                if (ctx.measureText(text.slice(initQ, q + 1)).width > Math.abs(sub)) {
+                if (measureWidthByCharMap(text.slice(initQ, q + 1), charWidthMap) > Math.abs(sub)) {
                     // while (lineStartProhibition.indexOf(text[q]) !== -1)
                     //     q--
                     break
@@ -93,8 +106,9 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
         }
         log.push({
             content: text.slice(p, q),
-            width: ctx.measureText(text.slice(p, q)).width,
+            width: measureWidthByCharMap(text.slice(p, q), charWidthMap),
         })
+        lineCount === 0 && (_maxWidth = maxWidth)
         lineCount++
         p = q
     }
@@ -113,19 +127,34 @@ addEventListener('message', (evt) => {
         fontSize: 16,
         fontFamily: 'Microsoft YaHei',
         lineHeight: 1.5,
-        maxWidth: 430,
+        maxWidth: 430 - 16,
+        textIndent: 2,
         step: 26
     }
-    let paras = allBooks[0].paraArr.slice(0, 1000)
+
+    console.time('charset')
+    ctx.font = `${config.fontSize}px ${config.fontFamily}`;
+    const charSet = allBooks[0].charSet as Set<string>
+    const charWidthMap = new Map()
+    charSet.forEach(char => charWidthMap.set(char, ctx.measureText(char).width))
+    console.log(charWidthMap)
+    allBooks[0].charWidthMap = charWidthMap
+    console.timeEnd('charset')
+
+    console.time('msHeight')
+    // let paras = allBooks[0].paraArr.slice(0, 1000)
+    let paras = allBooks[0].paraArr
     let cnt: Array<number> = []
     let height = config.fontSize
-    console.time()
     paras.forEach((para: string, idx) => {
         let cur = measureHeight(ctx, para, config)
         height += cur
         cnt.push(cur)
     });
-    console.timeEnd()
+    console.timeEnd('msHeight')
+
+    update(allBooks[0].id, { ...allBooks[0], heightArr: cnt })
+
     globalThis.postMessage({
         key: 'msContentArr',
         val: msContentArr
