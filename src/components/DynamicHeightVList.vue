@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 const props = defineProps<{
     list: Array<any>,
     heightList: Array<number>
@@ -63,8 +63,11 @@ function throttled(fn: () => void, delay: number) {
     }
 }
 
-const throttleScroller = throttled(scrollHandler, 50)
+const throttleScroller = throttled(scrollHandler, 80)
+
+let swicth = true
 async function scrollHandler(e: Event) {
+    if (!swicth) return
     const { scrollTop } = (e.target as Document).documentElement
 
     const idx = binarySearch(accumulatedHeightArray, scrollTop)
@@ -89,6 +92,29 @@ function Limit(val: number) {
 }
 
 const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
+
+defineExpose({
+    jump(index: number) {
+
+        start.value = index + catchNum
+
+        const vHeight = index > catchNum ? getSumHeight(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
+        const supplemntHeight = vHeight
+
+        if (ul.value) {
+            ul.value.style.setProperty('margin-top', supplemntHeight + 'px')
+            ul.value.style.height = totalHeight - supplemntHeight + 'px'
+        }
+
+        nextTick(() => {
+            swicth = false
+            document.querySelector('p')?.scrollIntoView()
+            setTimeout(() => {
+                swicth = true
+            });
+        })
+    }
+})
 
 // 稍微分析一下动态高度虚拟该如何计算
 // 1. 假设全部渲染，就是正常滚动，一切都不需要考虑
