@@ -77,7 +77,7 @@ function divideTxtContent(txtContent: string, name: string) {
   let chapterArr = []
   if (paraArr.length > 0) {
     chapterArr = divideByChapter(paraArr);
-    addToLibrary({ chapterArr, paraArr, charSet, name, id: '' })
+    useWorker({ chapterArr, paraArr, charSet, name, id: '' })
   }
 }
 
@@ -107,6 +107,32 @@ function divideByChapter(paraArr: Array<string>) {
     // paraArr[chapter.idx] = "wait for catelog!"
   })
   return res
+}
+
+
+function useWorker(book: any) {
+  const myWorker = new Worker("/src/modules/worker");
+  myWorker.onmessage = (ev) => {
+    console.log('msg-from-worker', ev.data)
+    const { key, val } = ev.data
+    if (key === 'heightArr') {
+      addToLibrary({ ...book, heightArr: val })
+    }
+    if (key)
+      window[key] = val
+  }
+
+  const width = window.innerWidth
+  const height = window.innerHeight
+  const htmlCanvas = document.createElement("canvas");
+  const offscreen = htmlCanvas?.transferControlToOffscreen();
+
+  myWorker.postMessage({
+    width,
+    height,
+    canvas: offscreen,
+    book
+  }, [offscreen]);
 }
 
 export {

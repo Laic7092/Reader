@@ -19,7 +19,7 @@ function changeFontSize(type: string) {
     style.value['font-size'] = parseFloat(style.value['font-size'] || '1') + (type === 'add' ? 0.1 : -0.1) + 'em'
 }
 const style = ref({
-    'font-size': ''
+    'font-size': '',
 })
 
 const utils = {
@@ -61,7 +61,7 @@ defineExpose({
                     {{ para }}
                 </p>
             </div> -->
-            <DynamicHeightVList :list="curBook.paraArr">
+            <DynamicHeightVList :list="curBook.paraArr" :height-list="curBook.heightArr">
                 <template v-slot="slotProps">
                     <p>
                         {{ slotProps.text }}
