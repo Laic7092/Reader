@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Reader from '../core/Reader.vue';
 import { getCurBook } from '../modules/store';
-import { onActivated, ref } from 'vue';
+import { onActivated, onDeactivated, ref } from 'vue';
 import { Book } from '../modules/indexDb';
 
 const curBook = ref<Book>()
@@ -15,6 +15,13 @@ function onAfterEnter() {
 function onBeforeLeave() {
     readerRef.value?.hideUI()
 }
+
+onActivated(() => {
+    document.body.style.overflow = 'hidden'
+})
+onDeactivated(() => {
+    document.body.style.overflow = ''
+})
 </script>
 <template>
     <Transition name="slide-fade" @after-enter="onAfterEnter" @before-leave="onBeforeLeave">

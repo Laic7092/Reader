@@ -31,7 +31,7 @@ watch(model, (value) => {
     } else[
         close()
     ]
-}, { immediate: true })
+})
 function open() {
     const { style, classList } = document.body
     const scrollBarWidth = window.innerWidth - document.body.clientWidth
@@ -52,7 +52,11 @@ function close() {
         style.width = ""
     }
     style.removeProperty('touch-action')
-    document.body.style.overflow = ""
+    !checkIsInReader() && (document.body.style.overflow = "")
+}
+
+function checkIsInReader() {
+    return !!document.querySelector('.reader')
 }
 </script>
 <template>

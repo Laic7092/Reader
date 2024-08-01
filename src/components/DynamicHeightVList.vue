@@ -43,10 +43,10 @@ const start = ref(0)
 const ul = ref<HTMLElement | null>(null)
 onMounted(() => {
     ul.value && ul.value.style.setProperty('height', totalHeight + 'px')
-    document.addEventListener('scroll', throttleScroller)
+    document.querySelector('#reader-overlay').addEventListener('scroll', throttleScroller)
 })
 onUnmounted(() => {
-    document.removeEventListener('scroll', throttleScroller)
+    document.querySelector('#reader-overlay').removeEventListener('scroll', throttleScroller)
 })
 
 function throttled(fn: () => void, delay: number) {
@@ -65,12 +65,12 @@ function throttled(fn: () => void, delay: number) {
     }
 }
 
-const throttleScroller = throttled(scrollHandler, 80)
+const throttleScroller = throttled(scrollHandler, 40)
 
 let swicth = true
 async function scrollHandler(e: Event) {
     if (!swicth) return
-    const { scrollTop } = (e.target as Document).documentElement
+    const { scrollTop } = e.target as HTMLElement
 
     const idx = binarySearch(accumulatedHeightArray, scrollTop)
     start.value = idx
@@ -110,7 +110,7 @@ defineExpose({
         }
 
         nextTick(() => {
-            document.querySelector('p')?.scrollIntoView()
+            document.querySelector('p')?.scrollIntoView({ behavior: 'smooth' })
             setTimeout(() => {
                 swicth = true
             });

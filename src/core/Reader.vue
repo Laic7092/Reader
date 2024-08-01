@@ -52,25 +52,37 @@ defineExpose({
 })
 </script>
 <template>
-    <article class="reader" @click="ChangeUI">
-        <Teleport to="body">
-            <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
-        </Teleport>
-        <!-- temp close touch,wait for note & hightlight -->
-        <main :style="style" class="no-touch">
-            <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, key) => ({ text, key }))"
-                :height-list="curBook.heightArr">
-                <template v-slot="slotProps">
-                    <p>
-                        {{ slotProps.text }}
-                    </p>
-                </template>
-            </DynamicHeightVList>
-        </main>
-    </article>
+    <div class="overlay" id="reader-overlay">
+        <article class="reader" @click="ChangeUI">
+            <Teleport to="body">
+                <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
+            </Teleport>
+            <!-- temp close touch,wait for note & hightlight -->
+            <main :style="style" class="no-touch">
+                <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, key) => ({ text, key }))"
+                    :height-list="curBook.heightArr">
+                    <template v-slot="slotProps">
+                        <p>
+                            {{ slotProps.text }}
+                        </p>
+                    </template>
+                </DynamicHeightVList>
+            </main>
+        </article>
+    </div>
 </template>
 
 <style scoped>
+.overlay {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 0 0.5rem;
+}
+
 .reader {
     --bar-width: 250px;
     background-color: var(--background-color);
