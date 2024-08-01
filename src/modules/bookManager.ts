@@ -1,6 +1,7 @@
 import { add as addToLibrary } from "./indexDb.js";
 import { Chapter } from "./indexDb.js";
 import chardet from 'chardet';
+import worker from './worker.js?worker'
 
 const fileTypes = "text/plain";
 
@@ -67,12 +68,17 @@ function getCharCode(file: File): Promise<string | undefined> {
 }
 
 function divideTxtContent(txtContent: string, name: string) {
+  const charSet: Set<string> = new Set()
+  const len = txtContent.length
+  for (let index = 0; index < len; index++) {
+    charSet.add(txtContent[index])
+  }
   if (typeof txtContent !== "string") return;
   let paraArr = txtContent.split(/[\r\n]+/).map(para => para.replace("<br />", '').trim()).filter(para => para);
   let chapterArr = []
   if (paraArr.length > 0) {
     chapterArr = divideByChapter(paraArr);
-    addToLibrary({ chapterArr, paraArr, name, id: '' })
+    useWorker({ chapterArr, paraArr, charSet, name, id: '' })
   }
 }
 
@@ -102,6 +108,32 @@ function divideByChapter(paraArr: Array<string>) {
     // paraArr[chapter.idx] = "wait for catelog!"
   })
   return res
+}
+
+
+function useWorker(book: any) {
+  const myWorker = new worker();
+  myWorker.onmessage = (ev) => {
+    console.log('msg-from-worker', ev.data)
+    const { key, val } = ev.data
+    if (key === 'heightArr') {
+      addToLibrary({ ...book, heightArr: val })
+    }
+    if (key)
+      window[key] = val
+  }
+
+  const width = window.innerWidth
+  const height = window.innerHeight
+  const htmlCanvas = document.createElement("canvas");
+  const offscreen = htmlCanvas?.transferControlToOffscreen();
+
+  myWorker.postMessage({
+    width,
+    height,
+    canvas: offscreen,
+    book
+  }, [offscreen]);
 }
 
 export {

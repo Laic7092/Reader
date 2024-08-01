@@ -1,45 +1,21 @@
 // @ts-nocheck
-globalThis.importScripts('./idb')
-
 addEventListener('message', (e) => {
     globalThis.postMessage('You said: ' + e.data);
 });
-
-
-const allBooks: Array<any> = []
-setTimeout(async () => {
-    allBooks.push(...await readAll())
-    console.log(allBooks);
-}, 1000)
 
 function count(s: string, c: string) {
     return (s.match(new RegExp(c, 'g')) || []).length;
 }
 
-function mm() {
-    const p = document.querySelectorAll('p')
-    let a = []
-    p.forEach(ele => a.push(ele.clientHeight))
-    a.reduce((pre, cur) => cur += pre)
-
-    for (let i = 0; i < 10000; i++) {
-        if (a[i] !== b[i])
-            console.log(i, a[i], b[i], a[i] > b[i])
-    }
-}
-function validate(ctx: OffscreenCanvasRenderingContext2D, text: string, hope: number) {
-
-}
-
-
-
-
 interface Config {
     maxWidth: number,
     lineHeight: number,
     fontSize: number,
-    fontFamily: string
+    fontFamily: string,
+    step: number
 }
+
+let curBook;
 
 // 点号（顿号、逗号、句号、冒号、分号、叹号、问号）、结束引号、结束括号、结束双书名号（书名号乙式）、连接号、间隔号、分隔号不能出现在一行的开头。
 // 开始引号、开始括号、开始单双书名号等符号，不能出现在一行的结尾。这是最推荐的方法。
@@ -56,14 +32,19 @@ const lineEndProhibition = [
     "“", "‘",
     "（", "〈", "《"
 ]
-const mmll: Array<any> = []
+const msContentArr: Array<any> = []
+function measureWidthByCharMap(text: string, charWidthMap: Map<string, number>) {
+    if (text === '') return 0
+    return Array.from(text).map(char => charWidthMap.get(char)).reduce((pre, cur) => pre + cur)
+}
 function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
 
-    const { maxWidth, lineHeight, fontSize, fontFamily } = config
+    const { maxWidth, lineHeight, fontSize, fontFamily, step, textIndent } = config
     ctx.font = `${fontSize}px ${fontFamily}`;
-    // const closeWidth = fontSize * 2 //close to linebreak point
     const length = text.length
-    const step = Math.floor(maxWidth / fontSize)
+
+    let _maxWidth = maxWidth - textIndent * fontSize
+    const charWidthMap = curBook.charWidthMap
 
     // start of curline
     let p = 0
@@ -72,80 +53,103 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
 
     let lineCount = 0
     let log = []
-    // debugger
 
     while (q <= length) {
         q += step
-        const mt = ctx.measureText(text.slice(p, q))
-        const sub = mt.width - maxWidth
-        // 可能不对?但我暂时想不出来了...
-        // Math.abs(sub) > fontSize && (q -= Math.floor(sub / fontSize))
-        let initQ = q
+        let a = ''
+
+        const _width = measureWidthByCharMap(text.slice(p, q), charWidthMap)
+        const sub = _width - _maxWidth
+        const initQ = q
         if (sub > 0) {
-            // debugger
-            // never in ?
-            // ok????
             while (q > p) {
-                if (ctx.measureText(text.slice(--q, initQ)).width > sub) {
-                    lineStartProhibition.indexOf(text[q]) !== -1 && (q -= 1)
+                if (measureWidthByCharMap(text.slice(--q, initQ), charWidthMap) > sub) {
+                    // while (lineStartProhibition.indexOf(text[q]) !== -1)
+                    //     q--
                     break
                 }
             }
         } else {
-            // debugger
-            // ok???, part width not equal part + part,pitty...
             while (q <= length) {
-                const { width } = ctx.measureText(text.slice(initQ, q + 1))
-                const len = text.slice(p, q).match(/[“‘”’]/g)?.length || 0
-                if (width - len * fontSize * 0.5 > Math.abs(sub)) {
-                    lineStartProhibition.indexOf(text[q]) !== -1 && (q -= 1)
+                if (measureWidthByCharMap(text.slice(initQ, q + 1), charWidthMap) > Math.abs(sub)) {
+                    // while (lineStartProhibition.indexOf(text[q]) !== -1)
+                    //     q--
                     break
                 }
                 q++
             }
-
         }
-        log.push(text.slice(p, q))
+        log.push({
+            content: text.slice(p, q),
+            width: measureWidthByCharMap(text.slice(p, q), charWidthMap),
+        })
+        lineCount === 0 && (_maxWidth = maxWidth)
         lineCount++
         p = q
     }
-    // debugger
-    mmll.push(log)
+    msContentArr.push(log)
     return lineCount * fontSize * lineHeight
 }
 
 addEventListener('message', (evt) => {
-    const canvas: OffscreenCanvas = evt.data.canvas;
-    canvas.height = 4000
-    canvas.width = 430
+    const { canvas, width, height, book } = evt.data as { height: number, width: number, canvas: OffscreenCanvas };
+    curBook = book
+    canvas.height = height
+    canvas.width = width
     const ctx: OffscreenCanvasRenderingContext2D | null = canvas.getContext("2d");
     if (!ctx) return
 
     const config: Config = {
         fontSize: 16,
-        fontFamily: 'inter',
+        fontFamily: 'system-ui',
         lineHeight: 1.5,
-        maxWidth: 430
+        maxWidth: width - 16,
+        textIndent: 2,
+        step: 26
     }
-    let paras = allBooks[0].paraArr.slice(0, 1000)
+
+    console.time('charset')
+    ctx.font = `${config.fontSize}px ${config.fontFamily}`;
+    const charSet = curBook.charSet as Set<string>
+    const charWidthMap = new Map()
+    charSet.forEach(char => charWidthMap.set(char, ctx.measureText(char).width))
+    console.log(charWidthMap)
+    curBook.charWidthMap = charWidthMap
+    console.timeEnd('charset')
+
+    console.time('msHeight')
+    let paras = curBook.paraArr
     let cnt: Array<number> = []
-    let height = config.fontSize
-    console.time()
+    let _height = config.fontSize
     paras.forEach((para: string, idx) => {
         let cur = measureHeight(ctx, para, config)
-        height += cur
+        _height += cur
         cnt.push(cur)
     });
-    console.timeEnd()
+    console.timeEnd('msHeight')
+
     globalThis.postMessage({
-        key: 'c',
-        val: mmll
+        key: 'msContentArr',
+        val: msContentArr
     });
     globalThis.postMessage({
-        key: 'b',
+        key: 'msHeightArr',
         val: cnt
     });
-    let sum = 0
-    cnt.forEach(i => sum += i)
-    console.log('malou', cnt.reduce((pre, cur) => cur += pre), sum, cnt)
+    globalThis.postMessage({
+        key: 'heightArr',
+        val: cnt
+    });
 })
+
+function compare() {
+    const p = document.querySelectorAll('p')
+    const realHeightArr = []
+    p.forEach(ele => realHeightArr.push(ele.clientHeight))
+    for (let i = 0; i < 1000; i++) {
+        if (realHeightArr[i] !== msHeightArr[i]) {
+            console.log(i, realHeightArr[i], msHeightArr[i], realHeightArr[i] > msHeightArr[i])
+            console.log(p[i], msContentArr[i])
+        }
+    }
+}

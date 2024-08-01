@@ -1,8 +1,7 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
@@ -68,8 +67,14 @@ ul {
 #app {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 2rem;  
+  padding: 2rem;
   text-align: center;
+}
+
+@media (width <=949px) or (orientation: portrait) {
+  #app {
+    padding: 0 0.5rem;
+  }
 }
 
 .auto-Elliptical {

@@ -18,6 +18,8 @@ interface Book {
   name: string
   chapterArr: Array<Chapter>
   paraArr: Array<string>
+  charSet: Set<string>
+  heightArr: Array<number>
 }
 
 (function openOrCreatIDB() {

@@ -1,3 +1,4 @@
+// 在worker里好像貌似不能用模块。。。所以复制粘贴
 const databaseName = 'library';
 let db: IDBDatabase | null = null;
 
@@ -12,6 +13,8 @@ interface Book {
     name: string
     chapterArr: Array<Chapter>
     paraArr: Array<string>
+    charSet: Set<string>
+    heightArr: Array<number>
 }
 
 (function openOrCreatIDB() {
@@ -82,4 +85,20 @@ function readAll(): Promise<Array<Book>> {
         };
     })
 
+}
+
+function update(id: string, bookData: Book) {
+    if (!db) return
+    let request = db.transaction(['books'], 'readwrite')
+        .objectStore('books')
+        .put({ id, bookData });
+    //put()方法自动更新了主键为1的记录
+
+    request.onsuccess = function () {
+        console.log('数据更新成功');
+    };
+
+    request.onerror = function () {
+        console.log('数据更新失败');
+    }
 }

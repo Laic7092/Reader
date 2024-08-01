@@ -1,83 +1,135 @@
 <script setup lang="ts">
-    import { computed, nextTick, onMounted, ref } from 'vue';
-    import DynamicItem from './DynamicItem.vue';
+// @ts-nocheck
 
-    interface Para {
-        content: string
-        measureHeight: number
-        realHeight: number
-    }
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
+const props = defineProps<{
+    list: Array<any>,
+    heightList: Array<number>
+}>()
 
-    const props = defineProps<{
-        list: Array<any>
-        // 保留的样式配置
-        config?: any
-    }>()
+const accumulatedHeightArray = props.heightList.reduce((acc: Array<number>, curr, index) => {
+    acc.push(index === 0 ? curr : acc[index - 1] + curr);
+    return acc;
+}, []);
+function getSumHeight(arr: Array<number>) {
+    return arr.reduce((pre, cur) => pre + cur)
+}
 
-    const { fontSize, lineHeight } = props.config || { fontSize: 16, lineHeight: 1.5 }
-    const _lineHeight = lineHeight * fontSize
-    const viewPortWidth = window.innerWidth - 2 * fontSize
-    let measureScollHeight = 0
-    const _list = props.list.map(item => {
-        const measureHeight = _lineHeight * Math.ceil(item.length * fontSize / viewPortWidth)
-        measureScollHeight += measureHeight
-        return {
-            content: item,
-            measureHeight,
-            realHeight: 0
-        }
-    })
+function binarySearch(arr: Array<number>, aimHeight: number): number {
+    let left = 0, right = arr.length - 1;
+    let mid = 0;
 
-    const MEASURE_HEIGHT = 64
-    const { catchNum, displayNum } = { catchNum: 10, displayNum: 20 }
-
-    const start = ref(catchNum)
-    const total = props.list.length
-
-    const scrollHeight = ref(0)
-    const preScrollTop = ref(0)
-
-    const realStart = computed(() => Math.max(start.value - catchNum, 0))
-    const realEnd = computed(() => Math.min(start.value + displayNum + catchNum, total))
-
-    const ul = ref<HTMLElement | null>(null)
-    const vList = computed(() => _list.slice(realStart.value, realEnd.value))
-
-    let ticker = false
-    async function listenScroll(e: Event) {
-        if (!ticker) {
-            ticker = true
-
-            const { scrollTop } = (e.target as Document).documentElement
-
-            const hiddenNum = Math.floor(Math.max(scrollTop, 0) / MEASURE_HEIGHT)
-
-            start.value = hiddenNum + catchNum
-            if (ul.value) {
-                ul.value.style.setProperty('margin-top', hiddenNum * MEASURE_HEIGHT + 'px')
-                ul.value.style.height = total * MEASURE_HEIGHT - hiddenNum * MEASURE_HEIGHT + 'px'
-            }
-            await nextTick()
-            ticker = false
+    while (left <= right) {
+        mid = Math.floor((left + right) / 2);
+        if (arr[mid] === aimHeight) {
+            return mid; // 直接返回匹配的索引
+        } else if (arr[mid] < aimHeight) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
         }
     }
 
-    function setHeight() {
-        scrollHeight.value = measureScollHeight
-        ul.value && ul.value.style.setProperty('height', measureScollHeight + 'px')
-    }
+    // 循环结束后，left > right，此时left是最接近aimHeight的索引
+    return left;
+}
 
-    onMounted(() => {
-        document.addEventListener('scroll', listenScroll)
-        setHeight()
-    })
+const { catchNum, displayNum } = { catchNum: 8, displayNum: 15 }
+const totalLen = props.list.length
+const totalHeight = getSumHeight(props.heightList)
+
+const start = ref(0)
+
+const ul = ref<HTMLElement | null>(null)
+onMounted(() => {
+    ul.value && ul.value.style.setProperty('height', totalHeight + 'px')
+    document.addEventListener('scroll', throttleScroller)
+})
+onUnmounted(() => {
+    document.removeEventListener('scroll', throttleScroller)
+})
+
+function throttled(fn: () => void, delay: number) {
+    let timer: any;
+    let startTime = Date.now()
+    return function () {
+        const remain = delay - (Date.now() - startTime)
+        clearTimeout(timer)
+        if (remain <= 0) {
+            fn.apply(this, arguments)
+            startTime = Date.now()
+        } else {
+            timer = setTimeout(() => fn.apply(this, arguments), remain)
+        }
+
+    }
+}
+
+const throttleScroller = throttled(scrollHandler, 80)
+
+let swicth = true
+async function scrollHandler(e: Event) {
+    if (!swicth) return
+    const { scrollTop } = (e.target as Document).documentElement
+
+    const idx = binarySearch(accumulatedHeightArray, scrollTop)
+    start.value = idx
+    // const topCacheHeight = getSumHeight(props.heightList.slice(Limit(start.value - catchNum), start.value))
+    const vHeight = idx > catchNum ? getSumHeight(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
+    const supplemntHeight = vHeight
+
+    if (ul.value) {
+        ul.value.style.setProperty('margin-top', supplemntHeight + 'px')
+        ul.value.style.height = totalHeight - supplemntHeight + 'px'
+    }
+}
+
+function Limit(val: number) {
+    if (val < 0) {
+        return 0
+    } else if (val > totalLen) {
+        return totalLen
+    }
+    return val
+}
+
+const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
+
+defineExpose({
+    jump(index: number) {
+
+        start.value = index + catchNum
+
+        const vHeight = index > catchNum ? getSumHeight(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
+        const supplemntHeight = vHeight
+
+        if (ul.value) {
+            ul.value.style.setProperty('margin-top', supplemntHeight + 'px')
+            ul.value.style.height = totalHeight - supplemntHeight + 'px'
+        }
+
+        nextTick(() => {
+            swicth = false
+            document.querySelector('p')?.scrollIntoView()
+            setTimeout(() => {
+                swicth = true
+            });
+        })
+    }
+})
+
+// 稍微分析一下动态高度虚拟该如何计算
+// 1. 假设全部渲染，就是正常滚动，一切都不需要考虑
+// 2. 虚拟列表 + 真实渲染（缓冲区 + 视口）
+// 3. 为了方便，我已经得到了每项高度
+// 4. 那现在的滚动，需要用margin去填充虚拟部分（上部分，下部分不需要，为空就行）
+// 5. 真实区域，则需要考虑缓冲区每次的高度变化，以及视口部分的高度变化
+// 6. 最后就是保证好滚动条位置。。。
 </script>
 <template>
     <div ref="ul" class="vList-wrapper">
-        <template v-for="item in vList">
-            <DynamicItem :item="item">
-                <slot v-bind="item"></slot>
-            </DynamicItem>
+        <template v-for="item in vList" :key="item.key">
+            <slot :text="item.text"></slot>
         </template>
     </div>
 </template>
