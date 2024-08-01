@@ -3,7 +3,7 @@
     import { Book } from '../modules/indexDb';
     import ReaderUI from './ReaderUI.vue';
     import { routeBack } from '../modules/router';
-    import DynamicHeightVList from '../components/VList/DynamicHeightVList.vue';
+    import DynamicHeightVList from '../components/DynamicHeightVList.vue';
 
     // 使 v-model 必填
     const props = defineProps<{

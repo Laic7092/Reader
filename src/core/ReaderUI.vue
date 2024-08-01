@@ -2,7 +2,7 @@
     import { Book } from '../modules/indexDb';
     import Drawer from '../components/Drawer.vue';
     import { ref, onMounted, onUnmounted } from 'vue';
-    import VList from '../components/VList/VList.vue';
+    import VList from '../components/VList.vue';
 
     interface Utils {
         closeReader: () => void
