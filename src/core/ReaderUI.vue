@@ -138,10 +138,10 @@ defineExpose({
     </div>
     <Teleport to="body">
         <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="content-drawer"
-            close-icon-offset="-0.5em">
+            close-icon-offset="-0.5em" @close="curUILayer = UILayer.Blank">
             <VList :list="curBook().chapterArr" :config="{ catchNum: 8, displayNum: 15, wrapperClass: 'content' }">
                 <template #item="{ content, idx }">
-                    <div @click="utils.jumpChapter(idx)">
+                    <div @click="drawerMap.contensDrawer = false; curUILayer = UILayer.Blank; utils.jumpChapter(idx)">
                         <a style="color: unset;">{{ content }}</a>
                     </div>
                 </template>

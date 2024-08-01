@@ -97,6 +97,7 @@ const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Lim
 
 defineExpose({
     jump(index: number) {
+        swicth = false
 
         start.value = index + catchNum
 
@@ -109,7 +110,6 @@ defineExpose({
         }
 
         nextTick(() => {
-            swicth = false
             document.querySelector('p')?.scrollIntoView()
             setTimeout(() => {
                 swicth = true

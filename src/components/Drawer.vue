@@ -9,8 +9,13 @@ const props = defineProps<{
     closeIconOffset?: string
 }>()
 
+const emit = defineEmits<{
+    (e: 'close'): void
+}>()
+
 function closeDrawer() {
     model.value = false
+    emit('close')
 }
 
 const style = computed(() => {
