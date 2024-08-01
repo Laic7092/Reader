@@ -5,9 +5,11 @@ export function throttled(fn: () => void, delay: number) {
         const remain = delay - (Date.now() - startTime)
         clearTimeout(timer)
         if (remain <= 0) {
+            // @ts-ignore
             fn.apply(this, arguments)
             startTime = Date.now()
         } else {
+            // @ts-ignore
             timer = setTimeout(() => fn.apply(this, arguments), remain)
         }
 

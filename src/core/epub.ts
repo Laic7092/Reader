@@ -1,3 +1,4 @@
+// @ts-nocheck
 // 利用zip.js，读取并解析epub文件
 // 然依次解析`container.xml`,`opf`,`导航文件`
 import { BlobReader, ZipReader, TextWriter, BlobWriter } from '@zip.js/zip.js';
