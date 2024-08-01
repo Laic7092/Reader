@@ -1,6 +1,6 @@
 {
   "name": "My app",
-  "start_url": "/",
+  "start_url": "/Reader/",
   "description": "Progressive Web App that can provode e-book reader feature",
   "icons": [
     {
