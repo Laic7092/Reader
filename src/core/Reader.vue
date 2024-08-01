@@ -58,7 +58,8 @@ defineExpose({
         </Teleport>
         <!-- temp close touch,wait for note & hightlight -->
         <main :style="style" class="no-touch">
-            <DynamicHeightVList ref="DVList" :list="curBook.paraArr" :height-list="curBook.heightArr">
+            <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, key) => ({ text, key }))"
+                :height-list="curBook.heightArr">
                 <template v-slot="slotProps">
                     <p>
                         {{ slotProps.text }}

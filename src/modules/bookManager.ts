@@ -1,6 +1,7 @@
 import { add as addToLibrary } from "./indexDb.js";
 import { Chapter } from "./indexDb.js";
 import chardet from 'chardet';
+import worker from './worker.js?worker'
 
 const fileTypes = "text/plain";
 
@@ -111,7 +112,7 @@ function divideByChapter(paraArr: Array<string>) {
 
 
 function useWorker(book: any) {
-  const myWorker = new Worker("/src/modules/worker");
+  const myWorker = new worker();
   myWorker.onmessage = (ev) => {
     console.log('msg-from-worker', ev.data)
     const { key, val } = ev.data

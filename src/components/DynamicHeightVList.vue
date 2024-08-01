@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// @ts-nocheck
+
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 const props = defineProps<{
     list: Array<any>,
@@ -32,7 +34,7 @@ function binarySearch(arr: Array<number>, aimHeight: number): number {
     return left;
 }
 
-const { catchNum, displayNum } = { catchNum: 8, displayNum: 16 }
+const { catchNum, displayNum } = { catchNum: 8, displayNum: 15 }
 const totalLen = props.list.length
 const totalHeight = getSumHeight(props.heightList)
 
@@ -126,8 +128,8 @@ defineExpose({
 </script>
 <template>
     <div ref="ul" class="vList-wrapper">
-        <template v-for="item in vList">
-            <slot :text="item"></slot>
+        <template v-for="item in vList" :key="item.key">
+            <slot :text="item.text"></slot>
         </template>
     </div>
 </template>
