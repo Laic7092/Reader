@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
+import { lockBody, unLockBody, isInReader } from '../modules/utils';
 
 const model = defineModel({ required: true })
 
@@ -25,38 +26,14 @@ const style = computed(() => {
     }
 })
 
-watch(model, (value) => {
-    if (value) {
-        open()
-    } else[
-        close()
-    ]
-})
+watch(model, value => value ? open() : close())
 function open() {
-    const { style, classList } = document.body
-    const scrollBarWidth = window.innerWidth - document.body.clientWidth
-    if (scrollBarWidth > 0) {
-        classList.add('keep-width')
-        style.width = document.body.clientWidth + 'px'
-        style.paddingRight = scrollBarWidth + 'px'
-    }
-    style.setProperty('touch-action', 'none')
-    document.body.style.overflow = 'hidden'
+    lockBody()
 }
 
 function close() {
-    const { style, classList } = document.body
-    if (document.body.classList.contains('keep-width')) {
-        classList.remove('keep-width')
-        style.paddingRight = ""
-        style.width = ""
-    }
-    style.removeProperty('touch-action')
-    !checkIsInReader() && (document.body.style.overflow = "")
-}
-
-function checkIsInReader() {
-    return !!document.querySelector('.reader')
+    unLockBody()
+    isInReader() && document.body.style.setProperty('overflow', 'hidden')
 }
 </script>
 <template>
@@ -77,15 +54,6 @@ function checkIsInReader() {
 </template>
 
 <style scoped>
-.overlay {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    overflow: hidden;
-}
-
 .drawer {
     position: fixed;
     left: 0;

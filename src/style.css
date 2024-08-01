@@ -177,3 +177,12 @@ ul {
   transform: translateY(100vh);
   opacity: 0.95;
 }
+
+.overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+}

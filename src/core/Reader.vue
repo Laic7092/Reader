@@ -52,7 +52,7 @@ defineExpose({
 })
 </script>
 <template>
-    <div class="overlay" id="reader-overlay">
+    <div class="overlay" id="reader-overlay" style="overflow-y: auto;padding: 0 0.5rem;">
         <article class="reader" @click="ChangeUI">
             <Teleport to="body">
                 <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
@@ -73,16 +73,6 @@ defineExpose({
 </template>
 
 <style scoped>
-.overlay {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    overflow-y: auto;
-    padding: 0 0.5rem;
-}
-
 .reader {
     --bar-width: 250px;
     background-color: var(--background-color);

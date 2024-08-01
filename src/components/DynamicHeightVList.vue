@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // @ts-nocheck
-
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { throttled, binarySearch, arraySumming } from '../modules/utils';
 const props = defineProps<{
     list: Array<any>,
     heightList: Array<number>
@@ -11,32 +11,11 @@ const accumulatedHeightArray = props.heightList.reduce((acc: Array<number>, curr
     acc.push(index === 0 ? curr : acc[index - 1] + curr);
     return acc;
 }, []);
-function getSumHeight(arr: Array<number>) {
-    return arr.reduce((pre, cur) => pre + cur)
-}
 
-function binarySearch(arr: Array<number>, aimHeight: number): number {
-    let left = 0, right = arr.length - 1;
-    let mid = 0;
-
-    while (left <= right) {
-        mid = Math.floor((left + right) / 2);
-        if (arr[mid] === aimHeight) {
-            return mid; // 直接返回匹配的索引
-        } else if (arr[mid] < aimHeight) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
-        }
-    }
-
-    // 循环结束后，left > right，此时left是最接近aimHeight的索引
-    return left;
-}
 
 const { catchNum, displayNum } = { catchNum: 8, displayNum: 15 }
 const totalLen = props.list.length
-const totalHeight = getSumHeight(props.heightList)
+const totalHeight = arraySumming(props.heightList)
 
 const start = ref(0)
 
@@ -49,21 +28,6 @@ onUnmounted(() => {
     document.querySelector('#reader-overlay').removeEventListener('scroll', throttleScroller)
 })
 
-function throttled(fn: () => void, delay: number) {
-    let timer: any;
-    let startTime = Date.now()
-    return function () {
-        const remain = delay - (Date.now() - startTime)
-        clearTimeout(timer)
-        if (remain <= 0) {
-            fn.apply(this, arguments)
-            startTime = Date.now()
-        } else {
-            timer = setTimeout(() => fn.apply(this, arguments), remain)
-        }
-
-    }
-}
 
 const throttleScroller = throttled(scrollHandler, 40)
 
@@ -74,8 +38,7 @@ async function scrollHandler(e: Event) {
 
     const idx = binarySearch(accumulatedHeightArray, scrollTop)
     start.value = idx
-    // const topCacheHeight = getSumHeight(props.heightList.slice(Limit(start.value - catchNum), start.value))
-    const vHeight = idx > catchNum ? getSumHeight(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
+    const vHeight = idx > catchNum ? arraySumming(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
     const supplemntHeight = vHeight
 
     if (ul.value) {
@@ -101,7 +64,7 @@ defineExpose({
 
         start.value = index + catchNum
 
-        const vHeight = index > catchNum ? getSumHeight(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
+        const vHeight = index > catchNum ? arraySumming(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
         const supplemntHeight = vHeight
 
         if (ul.value) {
