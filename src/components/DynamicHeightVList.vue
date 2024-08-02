@@ -32,11 +32,10 @@ onUnmounted(() => {
 
 const throttleScroller = throttled(scrollHandler, 40)
 
-let swicth = true
+let _scrollTop = 0
 async function scrollHandler(e: Event) {
-    if (!swicth) return
     const { scrollTop } = e.target as HTMLElement
-
+    _scrollTop = scrollTop
     const idx = binarySearch(accumulatedHeightArray, scrollTop)
     start.value = idx
     const vHeight = idx > catchNum ? arraySumming(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
@@ -60,14 +59,15 @@ function Limit(val: number) {
 const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
 
 defineExpose({
-    jump(index: number) {
+    jump(index: number, scrollTop?: number) {
         const vHeight = index > catchNum ? arraySumming(props.heightList.slice(0, Limit(index))) : 0
         document.querySelector('#reader-overlay').scrollTo({
-            top: vHeight,
+            top: scrollTop || vHeight,
             behavior: 'auto'
         })
     },
-    getStart: () => start.value
+    getStart: () => start.value,
+    getScrollTop: () => _scrollTop
 })
 </script>
 <template>

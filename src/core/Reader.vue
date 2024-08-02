@@ -63,14 +63,18 @@ defineExpose({
 // bookMark
 onMounted(() => {
     if (DVList.value) {
-        const start = localStorage.getItem(props.curBook.id)
-        start && DVList.value.jump(Number(start))
+        const { idx = 0, scrollTop = 0 } = JSON.parse(localStorage.getItem(props.curBook.id) || '{}')
+        DVList.value.jump(idx, scrollTop)
     }
 })
 onBeforeUnmount(() => {
-    if (DVList.value) {
+    const _DVList = DVList.value
+    if (_DVList) {
         // 存在1的误差，可以看看算法是不是还有点问题。。。
-        localStorage.setItem(props.curBook.id, String(DVList.value.getStart()))
+        localStorage.setItem(props.curBook.id, JSON.stringify({
+            idx: String(_DVList.getStart()),
+            scrollTop: String(_DVList.getScrollTop())
+        }))
     }
 })
 </script>
