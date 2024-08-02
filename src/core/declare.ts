@@ -17,6 +17,12 @@ export interface Chapter {
     endLine: number
 }
 
+export interface BookMark {
+    bookId: string
+    chapterId: string
+    paraId: string
+}
+
 export interface Book {
     id: string
     name: string
@@ -24,20 +30,21 @@ export interface Book {
     paraArr: Array<string>
     charSet: Set<string>
     heightArr: Array<number>
+    bookMarks?: Array<BookMark>
 }
 
-interface MetaData {
-    title: string
-    author: string
-    id: any
-    [key: string]: any
-}
+// interface MetaData {
+//     title: string
+//     author: string
+//     id: any
+//     [key: string]: any
+// }
 
-interface Section {
-    load: () => string
-    unload: () => void
-    size: number
-    linear: string
-    cfi: string
-    id: any
-}
+// interface Section {
+//     load: () => string
+//     unload: () => void
+//     size: number
+//     linear: string
+//     cfi: string
+//     id: any
+// }

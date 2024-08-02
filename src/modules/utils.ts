@@ -75,10 +75,10 @@ export function isInReader() {
     return !!document.querySelector('.reader')
 }
 
-export function $on(handler: (e: Event) => void, target: EventTarget = document) {
-    // target.addEventListener()
-}
+// export function $on(handler: (e: Event) => void, target: EventTarget = document) {
+//     // target.addEventListener()
+// }
 
-export function $off(handler: (e: Event) => void, target: EventTarget = document) {
-    // target.removeEventListener()
-}
+// export function $off(handler: (e: Event) => void, target: EventTarget = document) {
+//     // target.removeEventListener()
+// }

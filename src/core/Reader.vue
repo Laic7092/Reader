@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { Book } from '../core/declare';
 import ReaderUI from './ReaderUI.vue';
 import { routeBack } from '../modules/router';
 import DynamicHeightVList from '../components/DynamicHeightVList.vue';
-import { useViewPortSize } from '../modules/composables';
-import { debounced } from '../modules/utils';
+// import { useViewPortSize } from '../modules/composables';
+// import { debounced } from '../modules/utils';
 
 // 使 v-model 必填
 const props = defineProps<{
@@ -36,7 +36,6 @@ const jumpChapter = (index: number) => {
     DVList.value && DVList.value.jump(index)
 }
 
-
 const utils = {
     curBook: () => props.curBook,
     changeFontSize,
@@ -54,14 +53,26 @@ defineExpose({
 })
 
 // watch reader container size to recalc height
-const resizeHandler = (DOMRect: DOMRectReadOnly) => {
-    const { width, height } = DOMRect
-    console.log(width, height)
-}
+// const resizeHandler = (DOMRect: DOMRectReadOnly) => {
+//     const { width, height } = DOMRect
+//     console.log(width, height)
+// }
 
-const DOMRect = useViewPortSize('#reader-overlay', debounced(resizeHandler, 200))
+// const DOMRect = useViewPortSize('#reader-overlay', debounced(resizeHandler, 200))
 
-// 
+// bookMark
+onMounted(() => {
+    if (DVList.value) {
+        const start = localStorage.getItem(props.curBook.id)
+        start && DVList.value.jump(Number(start))
+    }
+})
+onBeforeUnmount(() => {
+    if (DVList.value) {
+        // 存在1的误差，可以看看算法是不是还有点问题。。。
+        localStorage.setItem(props.curBook.id, String(DVList.value.getStart()))
+    }
+})
 </script>
 <template>
     <div class="overlay" id="reader-overlay" style="overflow-y: auto;padding: 0 0.5rem;">

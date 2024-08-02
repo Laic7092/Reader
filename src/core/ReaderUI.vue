@@ -148,7 +148,10 @@ defineExpose({
             </div>
         </Drawer>
         <Drawer v-model="drawerMap.settingsDrawer" title="Themes & Settings">
-            <div class="fontsize-adjust-btn flex-r-sbc">
+            <div>
+                Coming soon...
+            </div>
+            <div class="fontsize-adjust-btn flex-r-sbc" v-if="false">
                 <span class="left-letter" @click="changeFontSize('sub')">A</span>
                 <span class="divide"></span>
                 <span class="right-letter" @click="changeFontSize('add')">A</span>
