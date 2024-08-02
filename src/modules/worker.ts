@@ -3,6 +3,8 @@ addEventListener('message', (e) => {
     globalThis.postMessage('You said: ' + e.data);
 });
 
+const REM_PX = 16
+
 function count(s: string, c: string) {
     return (s.match(new RegExp(c, 'g')) || []).length;
 }
@@ -103,7 +105,7 @@ addEventListener('message', (evt) => {
         fontSize: 18,
         fontFamily: 'system-ui',
         lineHeight: 1.5,
-        maxWidth: width - 16,
+        maxWidth: width - 4 * REM_PX,
         textIndent: 2,
         step: 26
     }

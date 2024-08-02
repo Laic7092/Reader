@@ -88,7 +88,7 @@ const saveBookMark = () => {
 onBeforeUnmount(() => saveBookMark())
 </script>
 <template>
-    <div class="overlay" id="reader-overlay" style="overflow-y: auto;padding: 0 0.5rem;">
+    <div class="overlay" id="reader-overlay" style="overflow-y: auto;padding: 0 2rem;">
         <article class="reader" @click="ChangeUI">
             <Teleport to="body">
                 <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
