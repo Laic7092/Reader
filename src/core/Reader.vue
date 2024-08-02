@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue';
 import { Book } from '../core/declare';
 import ReaderUI from './ReaderUI.vue';
 import { routeBack } from '../modules/router';
@@ -66,8 +66,16 @@ onMounted(() => {
         const { idx = 0, scrollTop = 0 } = JSON.parse(localStorage.getItem(props.curBook.id) || '{}')
         DVList.value.jump(idx, scrollTop)
     }
+    addEventListener('visibilitychange', saveBookMark)
+    addEventListener('pagehide', saveBookMark)
 })
-onBeforeUnmount(() => {
+
+onUnmounted(() => {
+    removeEventListener('visibilitychange', saveBookMark)
+    removeEventListener('pagehide', saveBookMark)
+})
+
+const saveBookMark = () => {
     const _DVList = DVList.value
     if (_DVList) {
         // 存在1的误差，可以看看算法是不是还有点问题。。。
@@ -76,7 +84,8 @@ onBeforeUnmount(() => {
             scrollTop: String(_DVList.getScrollTop())
         }))
     }
-})
+}
+onBeforeUnmount(() => saveBookMark())
 </script>
 <template>
     <div class="overlay" id="reader-overlay" style="overflow-y: auto;padding: 0 0.5rem;">
