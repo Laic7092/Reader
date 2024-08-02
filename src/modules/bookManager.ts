@@ -1,5 +1,5 @@
-import { add as addToLibrary } from "./indexDb.js";
-import { Chapter } from "./indexDb.js";
+import { add as addToLibrary } from "./indexDb";
+import { Chapter } from "../core/declare";
 import chardet from 'chardet';
 import worker from './worker.js?worker'
 

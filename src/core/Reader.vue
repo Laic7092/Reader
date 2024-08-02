@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Book } from '../modules/indexDb';
+import { Book } from '../core/declare';
 import ReaderUI from './ReaderUI.vue';
 import { routeBack } from '../modules/router';
 import DynamicHeightVList from '../components/DynamicHeightVList.vue';
+import { useViewPortSize } from '../modules/composables';
+import { debounced } from '../modules/utils';
 
 // 使 v-model 必填
 const props = defineProps<{
@@ -16,7 +18,7 @@ function closeReader() {
 }
 
 function changeFontSize(type: string) {
-    style.value['font-size'] = parseInt(style.value['font-size'] || '16') + (type === 'add' ? 2 : -2) + 'px'
+    style.value['font-size'] = parseInt(style.value['font-size'] || '18') + (type === 'add' ? 2 : -2) + 'px'
 }
 const style = ref({
     'font-size': '',
@@ -50,6 +52,16 @@ defineExpose({
         UIVisible.value = false
     },
 })
+
+// watch reader container size to recalc height
+const resizeHandler = (DOMRect: DOMRectReadOnly) => {
+    const { width, height } = DOMRect
+    console.log(width, height)
+}
+
+const DOMRect = useViewPortSize('#reader-overlay', debounced(resizeHandler, 200))
+
+// 
 </script>
 <template>
     <div class="overlay" id="reader-overlay" style="overflow-y: auto;padding: 0 0.5rem;">
@@ -58,7 +70,7 @@ defineExpose({
                 <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
             </Teleport>
             <!-- temp close touch,wait for note & hightlight -->
-            <main :style="style" class="no-touch">
+            <main :style="style">
                 <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, key) => ({ text, key }))"
                     :height-list="curBook.heightArr">
                     <template v-slot="slotProps">
@@ -79,6 +91,7 @@ defineExpose({
 }
 
 :deep(.vList-wrapper) p {
+    font-size: 18px;
     margin: 0;
     text-indent: 2em;
     text-align: justify;

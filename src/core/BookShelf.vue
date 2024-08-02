@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import bus, { CRUD, STATUS } from '../modules/pubSub'
-import { readAll, remove, Book } from "../modules/indexDb"
+import { readAll, remove } from "../modules/indexDb"
+import { Book } from './declare';
 import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
 import { setCurBook } from '../modules/store';
 import { routeTo } from '../modules/router';

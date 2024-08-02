@@ -1,7 +1,7 @@
 import { ref } from 'vue'
-import { Book } from './indexDb'
+import { Book } from '../core/declare'
 
-const curBook = ref<Book>()
+const curBook = ref<Book | null>(null)
 
 export function getCurBook() {
     return curBook.value

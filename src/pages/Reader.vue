@@ -2,11 +2,14 @@
 import Reader from '../core/Reader.vue';
 import { getCurBook } from '../modules/store';
 import { onActivated, onDeactivated, ref } from 'vue';
-import { Book } from '../modules/indexDb';
+import { Book } from '../core/declare';
 
-const curBook = ref<Book>()
+const curBook = ref<Book | null>(null)
 onActivated(() => {
     curBook.value = getCurBook()
+})
+onDeactivated(() => {
+    curBook.value = null
 })
 const readerRef = ref<typeof Reader | null>(null)
 function onAfterEnter() {

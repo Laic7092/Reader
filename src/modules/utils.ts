@@ -16,6 +16,15 @@ export function throttled(fn: () => void, delay: number) {
     }
 }
 
+export function debounced(fn: (param?: any) => void, delay: number) {
+    let timer: any
+    return function () {
+        clearTimeout(timer)
+        // @ts-ignore
+        timer = setTimeout(() => fn.apply(this, arguments), delay)
+    }
+}
+
 export function arraySumming(arr: Array<number>) {
     return arr.reduce((pre, cur) => pre + cur)
 }
@@ -64,4 +73,12 @@ export function unLockBody() {
 
 export function isInReader() {
     return !!document.querySelector('.reader')
+}
+
+export function $on(handler: (e: Event) => void, target: EventTarget = document) {
+    // target.addEventListener()
+}
+
+export function $off(handler: (e: Event) => void, target: EventTarget = document) {
+    // target.removeEventListener()
 }

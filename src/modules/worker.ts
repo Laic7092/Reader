@@ -100,7 +100,7 @@ addEventListener('message', (evt) => {
     if (!ctx) return
 
     const config: Config = {
-        fontSize: 16,
+        fontSize: 18,
         fontFamily: 'system-ui',
         lineHeight: 1.5,
         maxWidth: width - 16,

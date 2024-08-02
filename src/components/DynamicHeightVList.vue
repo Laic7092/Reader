@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // @ts-nocheck
+// 这并不算是一个公用组件了，算有关于阅读器的逻辑也写进来了，后面考虑抽离出来把。
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { throttled, binarySearch, arraySumming } from '../modules/utils';
 const props = defineProps<{
@@ -60,23 +61,10 @@ const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Lim
 
 defineExpose({
     jump(index: number) {
-        swicth = false
-
-        start.value = index + catchNum
-
-        const vHeight = index > catchNum ? arraySumming(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
-        const supplemntHeight = vHeight
-
-        if (ul.value) {
-            ul.value.style.setProperty('margin-top', supplemntHeight + 'px')
-            ul.value.style.height = totalHeight - supplemntHeight + 'px'
-        }
-
-        nextTick(() => {
-            document.querySelector('p')?.scrollIntoView({ behavior: 'smooth' })
-            setTimeout(() => {
-                swicth = true
-            });
+        const vHeight = index > catchNum ? arraySumming(props.heightList.slice(0, Limit(index))) : 0
+        document.querySelector('#reader-overlay').scrollTo({
+            top: vHeight,
+            behavior: 'auto'
         })
     }
 })

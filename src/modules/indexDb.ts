@@ -1,4 +1,5 @@
 import bus, { CRUD, STATUS } from "./pubSub";
+import { Book, Chapter } from "../core/declare";
 
 function busEmit(eventType: string, val?: any) {
   bus.emit(eventType, val)
@@ -6,21 +7,6 @@ function busEmit(eventType: string, val?: any) {
 
 const databaseName = 'library';
 let db: IDBDatabase | null = null;
-
-interface Chapter {
-  idx: number
-  content: string
-  startLine: number
-  endLine: number
-}
-interface Book {
-  id: string
-  name: string
-  chapterArr: Array<Chapter>
-  paraArr: Array<string>
-  charSet: Set<string>
-  heightArr: Array<number>
-}
 
 (function openOrCreatIDB() {
   return new Promise((resolve, reject) => {

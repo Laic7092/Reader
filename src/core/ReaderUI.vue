@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import { Book } from '../modules/indexDb';
 import Drawer from '../components/Drawer.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 import VList from '../components/VList.vue';
+import { BookUtils } from './declare';
 
-interface Utils {
-    closeReader: () => void
-    changeFontSize: (param: string) => void
-    curBook: () => Book
-    jumpChapter: (index: number) => void
-}
 const props = defineProps<{
-    utils: Utils
+    utils: BookUtils
 }>()
 
 const { closeReader, changeFontSize, curBook } = props.utils
