@@ -90,7 +90,7 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
         p = q
     }
     msContentArr.push(log)
-    return lineCount * fontSize * lineHeight
+    return lineCount * fontSize * lineHeight + 0.5 * fontSize
 }
 
 addEventListener('message', (evt) => {
@@ -102,12 +102,12 @@ addEventListener('message', (evt) => {
     if (!ctx) return
 
     const config: Config = {
-        fontSize: 18,
+        fontSize: 20,
         fontFamily: 'system-ui',
         lineHeight: 1.5,
         maxWidth: width - 4 * REM_PX,
         textIndent: 2,
-        step: 26
+        step: Math.ceil(width / 20)
     }
 
     console.time('charset')

@@ -71,11 +71,6 @@ ul {
   text-align: center;
 }
 
-@media (width <=949px) or (orientation: portrait) {
-  #app {
-    padding: 0 0.5rem;
-  }
-}
 
 .auto-Elliptical {
   overflow: hidden;
