@@ -33,7 +33,7 @@ const ul = ref<HTMLElement | null>(null)
 onMounted(() => {
     setHeight()
     ul.value?.parentElement?.scrollTo({
-        top: (props.initIdx - 8) * ITEM_HEIGHT,
+        top: (props.initIdx - 6) * ITEM_HEIGHT,
         behavior: 'auto'
     })
 })
