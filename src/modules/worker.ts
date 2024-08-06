@@ -66,16 +66,16 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
         if (sub > 0) {
             while (q > p) {
                 if (measureWidthByCharMap(text.slice(--q, initQ), charWidthMap) > sub) {
-                    // while (lineStartProhibition.indexOf(text[q]) !== -1)
-                    //     q--
+                    while (lineStartProhibition.indexOf(text[q]) !== -1)
+                        q--
                     break
                 }
             }
         } else {
             while (q <= length) {
                 if (measureWidthByCharMap(text.slice(initQ, q + 1), charWidthMap) > Math.abs(sub)) {
-                    // while (lineStartProhibition.indexOf(text[q]) !== -1)
-                    //     q--
+                    while (lineStartProhibition.indexOf(text[q]) !== -1)
+                        q--
                     break
                 }
                 q++

@@ -81,6 +81,6 @@ setCurBookUtils({
     text-align: justify;
     word-break: break-all;
     word-wrap: anywhere;
-    line-break: anywhere;
+    /* line-break: anywhere; */
 }
 </style>
