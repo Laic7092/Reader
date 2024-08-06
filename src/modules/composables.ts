@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, onActivated, onDeactivated } from 'vue'
 
 export function useViewPortSize(el: HTMLElement | string, handler: (DOMRect: DOMRectReadOnly) => void) {
     // const rect = el.getBoundingClientRect()
@@ -21,4 +21,14 @@ export function useViewPortSize(el: HTMLElement | string, handler: (DOMRect: DOM
     })
 
     return _DOMRect
+}
+
+export function useLockBody() {
+    // control body
+    onActivated(() => {
+        document.body.style.overflow = 'hidden'
+    })
+    onDeactivated(() => {
+        document.body.style.overflow = ''
+    })
 }

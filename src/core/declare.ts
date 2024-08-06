@@ -6,7 +6,7 @@
 export interface BookUtils {
     closeReader: () => void
     changeFontSize: (param: string) => void
-    curBook: () => Book
+    getCurBook: () => Book
     jumpChapter: (index: number) => void
 }
 

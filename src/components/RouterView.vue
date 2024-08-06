@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import type { Component } from 'vue'
 import Home from '../pages/Home.vue';
-import Reader from '../pages/Reader.vue';
+import Read from '../pages/Read.vue';
 import Config from '../pages/Config.vue';
 
 window.location.hash = '#/'
@@ -12,7 +12,7 @@ interface Routes {
 }
 const routes: Routes = {
     '/': Home,
-    '/reader': Reader,
+    '/read': Read,
     '/config': Config
 }
 const currentPath = ref(window.location.hash)

@@ -2,13 +2,10 @@
 import Drawer from '../components/Drawer.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 import VList from '../components/VList.vue';
-import { BookUtils } from './declare';
+import { getCurBookUtils } from '../modules/store';
 
-const props = defineProps<{
-    utils: BookUtils
-}>()
 
-const { closeReader, changeFontSize, curBook } = props.utils
+const { closeReader, changeFontSize, getCurBook } = getCurBookUtils() || {}
 
 const curTimeoutID = ref(-1)
 
@@ -133,7 +130,7 @@ defineExpose({
     <Teleport to="body">
         <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="content-drawer"
             close-icon-offset="-0.5em" @close="curUILayer = UILayer.Blank">
-            <VList :list="curBook().chapterArr" :config="{ catchNum: 8, displayNum: 15, wrapperClass: 'content' }">
+            <VList :list="getCurBook().chapterArr" :config="{ catchNum: 8, displayNum: 15, wrapperClass: 'content' }">
                 <template #item="{ content, idx }">
                     <div @click="drawerMap.contensDrawer = false; curUILayer = UILayer.Blank; utils.jumpChapter(idx)">
                         <a style="color: unset;">{{ content }}</a>

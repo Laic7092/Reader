@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue';
+import { ref } from 'vue';
 import { Book } from '../core/declare';
-import ReaderUI from './ReaderUI.vue';
 import { routeBack } from '../modules/router';
-import DynamicHeightVList from '../components/DynamicHeightVList.vue';
+import DynamicHeightVList from './ScrollMode.vue';
+import { useTxtBook } from './book';
+import { setCurBookUtils } from '../modules/store';
 // import { useViewPortSize } from '../modules/composables';
 // import { debounced } from '../modules/utils';
 
@@ -24,33 +25,13 @@ const style = ref({
     'font-size': '',
 })
 
-const UIRef = ref<typeof ReaderUI | null>(null)
-function ChangeUI() {
-    UIRef.value?.ChangeUI()
-}
-
-const UIVisible = ref(false)
-
 const DVList = ref<InstanceType<typeof DynamicHeightVList> | null>(null)
 const jumpChapter = (index: number) => {
     DVList.value && DVList.value.jump(index)
 }
 
-const utils = {
-    curBook: () => props.curBook,
-    changeFontSize,
-    closeReader,
-    jumpChapter
-}
-
-defineExpose({
-    showUI() {
-        UIVisible.value = true
-    },
-    hideUI() {
-        UIVisible.value = false
-    },
-})
+// txt implement
+useTxtBook(DVList, props.curBook.id)
 
 // watch reader container size to recalc height
 // const resizeHandler = (DOMRect: DOMRectReadOnly) => {
@@ -60,52 +41,28 @@ defineExpose({
 
 // const DOMRect = useViewPortSize('#reader-overlay', debounced(resizeHandler, 200))
 
-// bookMark
-onMounted(() => {
-    if (DVList.value) {
-        const { idx = 0, scrollTop = 0 } = JSON.parse(localStorage.getItem(props.curBook.id) || '{}')
-        DVList.value.jump(idx, scrollTop)
-    }
-    addEventListener('visibilitychange', saveBookMark)
-    addEventListener('pagehide', saveBookMark)
+// expose to ui
+setCurBookUtils({
+    getCurBook: () => props.curBook,
+    changeFontSize,
+    closeReader,
+    jumpChapter
 })
-
-onUnmounted(() => {
-    removeEventListener('visibilitychange', saveBookMark)
-    removeEventListener('pagehide', saveBookMark)
-})
-
-const saveBookMark = () => {
-    const _DVList = DVList.value
-    if (_DVList) {
-        // 存在1的误差，可以看看算法是不是还有点问题。。。
-        localStorage.setItem(props.curBook.id, JSON.stringify({
-            idx: String(_DVList.getStart()),
-            scrollTop: String(_DVList.getScrollTop())
-        }))
-    }
-}
-onBeforeUnmount(() => saveBookMark())
 </script>
 <template>
-    <div class="overlay" id="reader-overlay" style="overflow-y: auto;">
-        <article class="reader" @click="ChangeUI">
-            <Teleport to="body">
-                <ReaderUI ref="UIRef" v-if="UIVisible" :utils="utils" />
-            </Teleport>
-            <!-- temp close touch,wait for note & hightlight -->
-            <main :style="style">
-                <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, key) => ({ text, key }))"
-                    :height-list="curBook.heightArr">
-                    <template v-slot="slotProps">
-                        <p>
-                            {{ slotProps.text }}
-                        </p>
-                    </template>
-                </DynamicHeightVList>
-            </main>
-        </article>
-    </div>
+    <article class="reader">
+        <!-- temp close touch,wait for note & hightlight -->
+        <main :style="style">
+            <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, key) => ({ text, key }))"
+                :height-list="curBook.heightArr">
+                <template v-slot="slotProps">
+                    <p>
+                        {{ slotProps.text }}
+                    </p>
+                </template>
+            </DynamicHeightVList>
+        </main>
+    </article>
 </template>
 
 <style scoped>

@@ -58,7 +58,7 @@ function init() {
 
 function pickBook(book: BookInShelf) {
   setCurBook(book)
-  routeTo('/reader')
+  routeTo('/read')
 }
 
 function removeBook(id: string) {
