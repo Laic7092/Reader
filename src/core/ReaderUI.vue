@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Drawer from '../components/Drawer.vue';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import VList from '../components/VList.vue';
-import { getCurBookUtils } from '../modules/store';
+import { getCurBookUtils, curChapterIdx } from '../modules/store';
 import { BookUtils } from './declare';
 
 const { closeReader, changeFontSize, getCurBook, jumpChapter } = getCurBookUtils() as BookUtils
@@ -62,23 +62,6 @@ function showDrawer(key: keyof DrawerMap) {
 }
 
 let intervalId = -1
-onMounted(() => {
-    const intersectionObserver = new IntersectionObserver((entries) => {
-        // 如果 intersectionRatio 为 0，则目标在视野外，
-        // 我们不需要做任何事情。
-        // what if pre & next exist in a viewport?
-        if (entries[0].intersectionRatio <= 0) {
-            console.log('trigger,out')
-            return
-        };
-        console.log("Loaded new items", entries);
-    });
-    // 开始监听
-    const anchor = document.querySelector('#anchor')
-    anchor && intersectionObserver.observe(anchor);
-})
-
-
 
 onMounted(() => {
     startTimeout()
@@ -101,6 +84,16 @@ function jump(idx: number) {
     curUILayer.value = UILayer.Blank
     jumpChapter(idx)
 }
+
+const realChapterIdx = computed(() => {
+    let res = 0
+    const _curChapterIdx = curChapterIdx.value
+    getCurBook().chapterArr.forEach((item, idx) => {
+        item.idx === _curChapterIdx && (res = idx)
+    })
+    return res
+})
+
 </script>
 <template>
     <template v-if="curUILayer === UILayer.baseBtns">
@@ -135,9 +128,10 @@ function jump(idx: number) {
     <Teleport to="body">
         <Drawer v-model="drawerMap.contensDrawer" title="Contents" height="80vh" class="content-drawer"
             close-icon-offset="-0.5em" @close="curUILayer = UILayer.Blank">
-            <VList :list="getCurBook().chapterArr" :config="{ catchNum: 8, displayNum: 15, wrapperClass: 'content' }">
+            <VList :list="getCurBook().chapterArr" :config="{ catchNum: 8, displayNum: 15, wrapperClass: 'content' }"
+                :init-idx="realChapterIdx">
                 <template #item="{ content, idx }">
-                    <div @click="jump(idx)">
+                    <div @click="jump(idx)" :class="{ 'active-chapter': curChapterIdx === idx }">
                         <a style="color: unset;">{{ content }}</a>
                     </div>
                 </template>
@@ -281,5 +275,11 @@ function jump(idx: number) {
     font-weight: 500;
     border-bottom: 1px solid var(--border-color);
     cursor: pointer;
+
+    .active-chapter {
+        margin: -1em -1.5em;
+        padding: 1em 1.5em;
+        background-color: var(--border-color);
+    }
 }
 </style>

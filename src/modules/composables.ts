@@ -1,4 +1,5 @@
-import { onMounted, onUnmounted, ref, onActivated, onDeactivated } from 'vue'
+import { onMounted, onUnmounted, ref, onActivated, onDeactivated, onUpdated } from 'vue'
+import { curChapterIdx } from './store';
 
 export function useViewPortSize(el: HTMLElement | string, handler: (DOMRect: DOMRectReadOnly) => void) {
     // const rect = el.getBoundingClientRect()
@@ -30,5 +31,32 @@ export function useLockBody() {
     })
     onDeactivated(() => {
         document.body.style.overflow = ''
+    })
+}
+
+export function useChapterObserver() {
+    const chapterSet: Set<HTMLParagraphElement> = new Set()
+    const intersectionObserver = new IntersectionObserver((entries) => {
+        if (entries[0].intersectionRatio > 0) {
+            curChapterIdx.value = Number(entries[0].target.id)
+        }
+    }, {
+        root: document.querySelector('#reader-overlay'),
+        threshold: 1.0
+    });
+    onMounted(() => {
+        document.querySelectorAll('p').forEach(pELe => {
+            pELe.classList.contains('chapter') && chapterSet.add(pELe)
+        })
+        chapterSet.forEach(pELe => intersectionObserver.observe(pELe))
+    })
+    onUnmounted(() => intersectionObserver.disconnect())
+    onUpdated(() => {
+        chapterSet.forEach(pELe => intersectionObserver.unobserve(pELe))
+        chapterSet.clear()
+        document.querySelectorAll('p').forEach(pELe => {
+            pELe.classList.contains('chapter') && chapterSet.add(pELe)
+        })
+        chapterSet.forEach(pELe => intersectionObserver.observe(pELe))
     })
 }

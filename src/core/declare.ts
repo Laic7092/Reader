@@ -8,6 +8,7 @@ export interface BookUtils {
     changeFontSize: (param: string) => void
     getCurBook: () => Book
     jumpChapter: (index: number) => void
+    getChapterIdx: () => number
 }
 
 export interface Chapter {

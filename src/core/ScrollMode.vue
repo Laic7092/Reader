@@ -1,8 +1,9 @@
 <script setup lang="ts">
 // @ts-nocheck
-// 这并不算是一个公用组件了，算有关于阅读器的逻辑也写进来了，后面考虑抽离出来把。
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, onUpdated, ref } from 'vue';
 import { throttled, binarySearch, arraySumming } from '../modules/utils';
+import { useChapterObserver } from '../modules/composables';
+
 const props = defineProps<{
     list: Array<any>,
     heightList: Array<number>
@@ -58,6 +59,8 @@ function Limit(val: number) {
 
 const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
 
+useChapterObserver()
+
 defineExpose({
     jump(index: number, scrollTop?: number) {
         const vHeight = index > catchNum ? arraySumming(props.heightList.slice(0, Limit(index))) : 0
@@ -72,8 +75,8 @@ defineExpose({
 </script>
 <template>
     <div ref="ul" class="vList-wrapper">
-        <template v-for="item in vList" :key="item.key">
-            <slot :text="item.text"></slot>
+        <template v-for="item in vList" :id="item.id">
+            <slot v-bind="item"></slot>
         </template>
     </div>
 </template>

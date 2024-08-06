@@ -9,13 +9,13 @@ interface Config {
 const props = defineProps<{
     list: Array<any>
     config: Config
+    initIdx: number
 }>()
 
 const ITEM_HEIGHT = 50
 const { catchNum, displayNum, wrapperClass } = props.config
-// const catchHeight = catchNum * ITEM_HEIGHT
 
-const start = ref(catchNum)
+const start = ref(catchNum + props.initIdx)
 const total = props.list.length
 
 const _scrollHeight = ref(0)
@@ -32,6 +32,10 @@ function Limit(val: number) {
 const ul = ref<HTMLElement | null>(null)
 onMounted(() => {
     setHeight()
+    ul.value?.parentElement?.scrollTo({
+        top: (props.initIdx - 8) * ITEM_HEIGHT,
+        behavior: 'auto'
+    })
 })
 function setHeight() {
     const height = total * ITEM_HEIGHT + 'px'

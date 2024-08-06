@@ -11,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+    (e: 'open'): void
     (e: 'close'): void
 }>()
 
@@ -28,6 +29,7 @@ const style = computed(() => {
 
 watch(model, value => value ? open() : close())
 function open() {
+    emit('open')
     lockBody()
 }
 

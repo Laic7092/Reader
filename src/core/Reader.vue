@@ -41,23 +41,27 @@ useTxtBook(DVList, props.curBook.id)
 
 // const DOMRect = useViewPortSize('#reader-overlay', debounced(resizeHandler, 200))
 
+// calc cur chapter
+const chapterIdxArr = props.curBook.chapterArr.map(chapter => chapter.idx)
+
 // expose to ui
 setCurBookUtils({
     getCurBook: () => props.curBook,
     changeFontSize,
     closeReader,
-    jumpChapter
+    jumpChapter,
+    getChapterIdx: () => 0
 })
 </script>
 <template>
     <article class="reader">
         <!-- temp close touch,wait for note & hightlight -->
         <main :style="style">
-            <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, key) => ({ text, key }))"
+            <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, id) => ({ text, id }))"
                 :height-list="curBook.heightArr">
-                <template v-slot="slotProps">
-                    <p>
-                        {{ slotProps.text }}
+                <template v-slot="{ text, id }">
+                    <p :class="{ chapter: chapterIdxArr.includes(id) }" :id="id">
+                        {{ text }}
                     </p>
                 </template>
             </DynamicHeightVList>
@@ -72,6 +76,12 @@ setCurBookUtils({
     padding: 0 2rem;
     max-width: 720px;
     margin: auto;
+
+    .chapter {
+        font-weight: 600;
+        text-indent: 0;
+        font-size: 1.5em;
+    }
 }
 
 :deep(.vList-wrapper) p {
@@ -81,6 +91,5 @@ setCurBookUtils({
     text-align: justify;
     word-break: break-all;
     word-wrap: anywhere;
-    /* line-break: anywhere; */
 }
 </style>

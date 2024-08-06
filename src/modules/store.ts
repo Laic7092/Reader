@@ -21,3 +21,5 @@ export function setCurBookUtils(bookUtils: BookUtils) {
     curBookUtils.value = bookUtils
 }
 
+export const curChapterIdx = ref(0)
+

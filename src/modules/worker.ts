@@ -41,11 +41,11 @@ function measureWidthByCharMap(text: string, charWidthMap: Map<string, number>) 
 }
 function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
 
-    const { maxWidth, lineHeight, fontSize, fontFamily, step, textIndent } = config
+    const { maxWidth, lineHeight, fontSize, fontFamily, step, textIndent, isChapter, lineGap } = config
     ctx.font = `${fontSize}px ${fontFamily}`;
     const length = text.length
 
-    let _maxWidth = maxWidth - textIndent * fontSize
+    let _maxWidth = isChapter ? config.maxWidth : config.maxWidth - textIndent * fontSize
     const charWidthMap = curBook.charWidthMap
 
     // start of curline
@@ -90,7 +90,7 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
         p = q
     }
     msContentArr.push(log)
-    return lineCount * fontSize * lineHeight + 0.5 * fontSize
+    return lineCount * fontSize * lineHeight + lineGap
 }
 
 addEventListener('message', (evt) => {
@@ -107,7 +107,9 @@ addEventListener('message', (evt) => {
         lineHeight: 1.5,
         maxWidth: width - 4 * REM_PX,
         textIndent: 2,
-        step: Math.ceil(width / 20)
+        step: Math.ceil(width / 20),
+        lineGap: 10,
+        isChapter: false
     }
 
     console.time('charset')
@@ -121,9 +123,13 @@ addEventListener('message', (evt) => {
 
     console.time('msHeight')
     let paras = curBook.paraArr
+    let chapterIdxArr = curBook.chapterArr.map(chapter => chapter.idx)
     let cnt: Array<number> = []
     let _height = config.fontSize
     paras.forEach((para: string, idx) => {
+        const isChapter = chapterIdxArr.includes(idx)
+        config.isChapter = isChapter
+        config.fontSize = isChapter ? 30 : 20
         let cur = measureHeight(ctx, para, config)
         _height += cur
         cnt.push(cur)
