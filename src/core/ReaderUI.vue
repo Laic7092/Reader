@@ -3,9 +3,9 @@ import Drawer from '../components/Drawer.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 import VList from '../components/VList.vue';
 import { getCurBookUtils } from '../modules/store';
+import { BookUtils } from './declare';
 
-
-const { closeReader, changeFontSize, getCurBook } = getCurBookUtils() || {}
+const { closeReader, changeFontSize, getCurBook, jumpChapter } = getCurBookUtils() as BookUtils
 
 const curTimeoutID = ref(-1)
 
@@ -61,7 +61,6 @@ function showDrawer(key: keyof DrawerMap) {
     drawerMap.value[key] = true
 }
 
-
 let intervalId = -1
 onMounted(() => {
     const intersectionObserver = new IntersectionObserver((entries) => {
@@ -96,6 +95,12 @@ function ChangeUI() {
 defineExpose({
     ChangeUI
 })
+
+function jump(idx: number) {
+    drawerMap.value.contensDrawer = false
+    curUILayer.value = UILayer.Blank
+    jumpChapter(idx)
+}
 </script>
 <template>
     <template v-if="curUILayer === UILayer.baseBtns">
@@ -132,7 +137,7 @@ defineExpose({
             close-icon-offset="-0.5em" @close="curUILayer = UILayer.Blank">
             <VList :list="getCurBook().chapterArr" :config="{ catchNum: 8, displayNum: 15, wrapperClass: 'content' }">
                 <template #item="{ content, idx }">
-                    <div @click="drawerMap.contensDrawer = false; curUILayer = UILayer.Blank; utils.jumpChapter(idx)">
+                    <div @click="jump(idx)">
                         <a style="color: unset;">{{ content }}</a>
                     </div>
                 </template>
