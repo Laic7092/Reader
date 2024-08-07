@@ -97,7 +97,7 @@ function divideByChapter(paraArr: Array<string>) {
     }
   });
   const average = Math.floor(cnt / chapterArr.length)
-  const res = chapterArr.filter(chapter => Math.abs(chapter.content.length - average) <= 7)
+  const res = chapterArr.filter(chapter => Math.abs(chapter.content.length - average) <= 10)
   if (paraArr[0].search(patt) === -1) {
     res.unshift({ content: 'Preface', idx: 0, startLine: 0, endLine: -1 })
     // CWJ-TODO JS bigArr unshift performance?

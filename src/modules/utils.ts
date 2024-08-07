@@ -1,4 +1,4 @@
-export function throttled(fn: () => void, delay: number) {
+export function throttled(fn: (arg?: any) => void, delay: number) {
     let timer: any;
     let startTime = Date.now()
     return function () {

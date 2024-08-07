@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { throttled } from '../modules/utils';
 
 interface Config {
     catchNum: number
@@ -15,10 +16,8 @@ const props = defineProps<{
 const ITEM_HEIGHT = 50
 const { catchNum, displayNum, wrapperClass } = props.config
 
-const start = ref(catchNum + props.initIdx)
+const start = ref(0)
 const total = props.list.length
-
-const _scrollHeight = ref(0)
 
 function Limit(val: number) {
     if (val < 0) {
@@ -39,36 +38,30 @@ onMounted(() => {
 })
 function setHeight() {
     const height = total * ITEM_HEIGHT + 'px'
-    _scrollHeight.value = parseInt(height)
     ul.value && ul.value.style.setProperty('height', height)
 }
 
-let ticker = false
-async function listenScroll(e: Event) {
-    if (!ticker) {
-        ticker = true
+const TOTAL_HEIGHT = total * ITEM_HEIGHT
+function scrollHandler(e: Event) {
+    const { scrollTop } = e.target as HTMLElement
+    const idx = Math.floor(Math.max(scrollTop, 0) / ITEM_HEIGHT)
 
-        const { scrollTop } = e.target as HTMLElement
+    if (start.value === idx) return
 
-        const hiddenNum = Math.floor(Math.max(scrollTop, 0) / ITEM_HEIGHT)
+    start.value = idx
+    const vHeight = idx > catchNum ? (idx - catchNum) * ITEM_HEIGHT : 0
 
-        start.value = hiddenNum + catchNum
-        if (ul.value) {
-            ul.value.style.setProperty('margin-top', hiddenNum * ITEM_HEIGHT + 'px')
-            ul.value.style.height = total * ITEM_HEIGHT - hiddenNum * ITEM_HEIGHT + 'px'
-        }
-        await nextTick()
-        ticker = false
+    if (ul.value) {
+        ul.value.style.setProperty('margin-top', vHeight + 'px')
+        ul.value.style.height = TOTAL_HEIGHT - vHeight + 'px'
     }
-
 }
-
+const throttleScroller = throttled(scrollHandler, 40)
 
 const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
-
 </script>
 <template>
-    <div class="vList-wrapper" @scroll="listenScroll">
+    <div class="vList-wrapper" @scroll="throttleScroller">
         <ul ref="ul" class="vList" :class="wrapperClass">
             <li class="item" v-for="item in vList" :key="item">
                 <slot name="item" v-bind="item"></slot>
