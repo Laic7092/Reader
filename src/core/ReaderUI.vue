@@ -142,7 +142,7 @@ const { curPage, total } = usePagination('#reader-overlay', getCurBook().heightA
             <VList :list="getCurBook().chapterArr" :config="{ catchNum: 8, displayNum: 15, wrapperClass: 'content' }"
                 :init-idx="realChapterIdx">
                 <template #item="{ content, idx }">
-                    <div @click="jump(idx)" :class="{ 'active-chapter': curChapterIdx === idx }">
+                    <div @click="jump(Number(idx))" :class="{ 'active-chapter': curChapterIdx === idx }">
                         <a style="color: unset;">{{ content }}</a>
                     </div>
                 </template>

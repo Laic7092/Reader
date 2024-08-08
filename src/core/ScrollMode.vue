@@ -39,9 +39,9 @@ async function scrollHandler(e: Event) {
     _scrollTop = scrollTop
     const idx = binarySearch(accumulatedHeightArray, scrollTop)
 
-    if (start.value === idx) return
+    if (start.value === idx + 1) return
 
-    start.value = idx
+    start.value = idx + 1
     const vHeight = idx > catchNum ? arraySumming(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
     const supplemntHeight = vHeight
 
@@ -73,10 +73,8 @@ watch(start, (newValue) => {
 
 defineExpose({
     jump(index: number, scrollTop?: number) {
-        const vHeight = index > catchNum ? arraySumming(props.heightList.slice(0, Limit(index))) : 0
         document.querySelector('#reader-overlay').scrollTo({
-            top: scrollTop || vHeight,
-            behavior: 'auto'
+            top: scrollTop ?? (index === 0 ? 0 : accumulatedHeightArray[index - 1]),
         })
     },
     getStart: () => start.value,
