@@ -21,24 +21,27 @@ let curBook;
 
 // 点号（顿号、逗号、句号、冒号、分号、叹号、问号）、结束引号、结束括号、结束双书名号（书名号乙式）、连接号、间隔号、分隔号不能出现在一行的开头。
 // 开始引号、开始括号、开始单双书名号等符号，不能出现在一行的结尾。这是最推荐的方法。
-const lineStartProhibition = [
+const lineStartProhibition = new Set([
     "、", "，", "。", "：", "；", "！", "？",
     "」", "』", "”", "’",
     "）", "》",
     "～", "-", "–", "—",
     "·", "・", "‧",
     "/", "／"
-]
+])
 
-const lineEndProhibition = [
+const lineEndProhibition = new Set([
     "“", "‘",
     "（", "〈", "《"
-]
+])
+
 const msContentArr: Array<any> = []
 function measureWidthByCharMap(text: string, charWidthMap: Map<string, number>) {
     if (text === '') return 0
     return Array.from(text).map(char => charWidthMap.get(char)).reduce((pre, cur) => pre + cur)
 }
+let ml = 0
+let lm = 0
 function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
 
     const { maxWidth, lineHeight, fontSize, fontFamily, step, textIndent, isChapter, lineGap } = config
@@ -58,27 +61,26 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
 
     while (q <= length) {
         q += step
-        let a = ''
 
         const _width = measureWidthByCharMap(text.slice(p, q), charWidthMap)
         const sub = _width - _maxWidth
         const initQ = q
         if (sub > 0) {
+            lm++
             while (q > p) {
                 if (measureWidthByCharMap(text.slice(--q, initQ), charWidthMap) > sub) {
-                    while (lineStartProhibition.indexOf(text[q]) !== -1)
-                        q--
+                    while (lineStartProhibition.has(text[q]))
+                        q-- 
                     break
                 }
             }
         } else {
+            ml++
             while (q <= length) {
-                if (measureWidthByCharMap(text.slice(initQ, q + 1), charWidthMap) > Math.abs(sub)) {
-                    while (lineStartProhibition.indexOf(text[q]) !== -1)
-                        q--
+                if (measureWidthByCharMap(text.slice(initQ, ++q), charWidthMap) > Math.abs(sub)) {
+                    while (q > initQ && lineStartProhibition.has(text[q--]));
                     break
                 }
-                q++
             }
         }
         log.push({
@@ -107,7 +109,7 @@ addEventListener('message', (evt) => {
         lineHeight: 1.5,
         maxWidth: width - 4 * REM_PX,
         textIndent: 2,
-        step: Math.ceil(width / 20),
+        step: Math.ceil((width - 4 * REM_PX) / 20),
         lineGap: 10,
         isChapter: false
     }
@@ -120,30 +122,28 @@ addEventListener('message', (evt) => {
     console.log(charWidthMap)
     curBook.charWidthMap = charWidthMap
     console.timeEnd('charset')
-
     console.time('msHeight')
     let paras = curBook.paraArr
-    let chapterIdxArr = curBook.chapterArr.map(chapter => chapter.idx)
+    let chapterIdxSet = new Set()
+    curBook.chapterArr.forEach(chapter => chapterIdxSet.add(chapter.idx))
     let cnt: Array<number> = []
     let _height = config.fontSize
     paras.forEach((para: string, idx) => {
-        const isChapter = chapterIdxArr.includes(idx)
+        const isChapter = chapterIdxSet.has(idx)
         config.isChapter = isChapter
         config.fontSize = isChapter ? 24 : 20
-        config.lineGap = config.fontSize * 0.5
+        config.lineGap = isChapter ? 12 : 10
         let cur = measureHeight(ctx, para, config)
         _height += cur
         cnt.push(cur)
     });
+    console.log(lm, ml);
+
     console.timeEnd('msHeight')
 
     globalThis.postMessage({
         key: 'msContentArr',
         val: msContentArr
-    });
-    globalThis.postMessage({
-        key: 'msHeightArr',
-        val: cnt
     });
     globalThis.postMessage({
         key: 'heightArr',
