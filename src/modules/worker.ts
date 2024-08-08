@@ -129,7 +129,8 @@ addEventListener('message', (evt) => {
     paras.forEach((para: string, idx) => {
         const isChapter = chapterIdxArr.includes(idx)
         config.isChapter = isChapter
-        config.fontSize = isChapter ? 30 : 20
+        config.fontSize = isChapter ? 24 : 20
+        config.lineGap = config.fontSize * 0.5
         let cur = measureHeight(ctx, para, config)
         _height += cur
         cnt.push(cur)

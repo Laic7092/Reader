@@ -86,7 +86,8 @@ setCurBookUtils({
 
 :deep(.vList-wrapper) p {
     font-size: 20px;
-    margin: 0.5em 0;
+    margin: 0;
+    margin-bottom: 0.5em;
     text-indent: 2em;
     text-align: justify;
     word-break: break-all;
