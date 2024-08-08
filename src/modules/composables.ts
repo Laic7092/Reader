@@ -37,8 +37,12 @@ export function useLockBody() {
 export function useChapterObserver() {
     const chapterSet: Set<HTMLParagraphElement> = new Set()
     const intersectionObserver = new IntersectionObserver((entries) => {
-        if (entries[0].intersectionRatio > 0) {
-            curChapterIdx.value = Number(entries[0].target.id)
+        if (entries.every(entry => entry.intersectionRatio <= 0)) {
+            curChapterIdx.value = Number(entries.shift()?.target.id)
+        } else {
+            entries.forEach(entry => {
+                entry.intersectionRatio > 0 && (curChapterIdx.value = Number(entry.target.id))
+            })
         }
     }, {
         root: document.querySelector('#reader-overlay'),

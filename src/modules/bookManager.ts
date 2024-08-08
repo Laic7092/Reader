@@ -96,18 +96,16 @@ function divideByChapter(paraArr: Array<string>) {
       cnt += content.length
     }
   });
-  const average = Math.floor(cnt / chapterArr.length)
-  const res = chapterArr.filter(chapter => Math.abs(chapter.content.length - average) <= 10)
   if (paraArr[0].search(patt) === -1) {
-    res.unshift({ content: 'Preface', idx: 0, startLine: 0, endLine: -1 })
+    chapterArr.unshift({ content: 'Preface', idx: 0, startLine: 0, endLine: -1 })
     // CWJ-TODO JS bigArr unshift performance?
   }
-  res.forEach((chapter, idx) => {
-    chapter.endLine = res[idx + 1]?.idx - 1
+  chapterArr.forEach((chapter, idx) => {
+    chapter.endLine = chapterArr[idx + 1]?.idx - 1
     // jsu a try ,may be useful?
     // paraArr[chapter.idx] = "wait for catelog!"
   })
-  return res
+  return chapterArr
 }
 
 
