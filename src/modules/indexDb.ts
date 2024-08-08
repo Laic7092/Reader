@@ -51,9 +51,10 @@ function add(bookData: Book) {
   if (!db) return
   let id = getRandomBookId()
   bookData.id = id
+  const { name, heightArr, chapterArr, charSet, paraArr } = bookData
   let request = db.transaction(['books'], 'readwrite')//新建事务,指定表名,以及操作readonly/readwrite
     .objectStore('books')//上面的操作会创建一个IDBtransaction对象,通过这个对象的objectstore方法拿到IDBObjectstore对象
-    .add({ id, bookData });//最后通过表格对象的(add)方法,写入记录
+    .add({ id, name, heightArr, chapterArr, charSet, paraArr });//最后通过表格对象的(add)方法,写入记录
 
   request.onsuccess = () => {
     console.log('数据写入成功');
@@ -65,23 +66,27 @@ function add(bookData: Book) {
   }
 }
 
-function search(id: string) {
-  if (!db) return
-  let transaction = db.transaction(['books']);
-  let objectStore = transaction.objectStore('books');
-  let request = objectStore.get(id);//参数是主键的值
+function search(id: string): Promise<Book> {
+  return new Promise((resolve, reject) => {
+    if (!db) return
+    let transaction = db.transaction(['books']);
+    let objectStore = transaction.objectStore('books');
+    let request = objectStore.get(id);//参数是主键的值
 
-  request.onerror = function () {
-    console.log('事务失败');
-  };
+    request.onerror = function () {
+      reject(new Error())
+      console.log('事务失败');
+    };
 
-  request.onsuccess = function () {
-    if (request.result) {
-      console.log('bookData' + request.result.bookData)
-    } else {
-      console.log('未获得数据记录');
-    }
-  };
+    request.onsuccess = function () {
+      if (request.result) {
+        resolve(request.result)
+      } else {
+        console.log('未获得数据记录');
+      }
+    };
+  })
+
 }
 
 function readAll(): Promise<Array<Book>> {
@@ -91,16 +96,16 @@ function readAll(): Promise<Array<Book>> {
       return
     }
     let objectStore = db.transaction('books').objectStore('books');
-    let allBooks: Array<Book> = [];
+    let allBooks: Array<any> = [];
     const openCursor = objectStore.openCursor();
     openCursor.onsuccess = function (event) {//新建指针对象的openCursor()方法是一个异步操作
       const target = event.target as IDBRequest
       let cursor = target.result;
       if (cursor) {
-        //console.log(cursor);
-        //  console.log('Id: ' + cursor.key);
-        //  console.log('bookData',cursor.value.bookData)
-        allBooks.push(cursor.value.bookData)
+        allBooks.push({
+          name: cursor.value.name,
+          id: cursor.value.id,
+        })
         cursor.continue();
       } else {
         // console.log('没有更多数据了！');

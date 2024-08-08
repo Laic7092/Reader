@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import bus, { CRUD, STATUS } from '../modules/pubSub'
-import { readAll, remove } from "../modules/indexDb"
+import { readAll, remove, search } from "../modules/indexDb"
 import { Book } from './declare';
 import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
 import { setCurBook } from '../modules/store';
@@ -56,8 +56,8 @@ function init() {
   })
 }
 
-function pickBook(book: BookInShelf) {
-  setCurBook(book)
+async function pickBook(book: BookInShelf) {
+  setCurBook(await search(book.id))
   routeTo('/read')
 }
 
