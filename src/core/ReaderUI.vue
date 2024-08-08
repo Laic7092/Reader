@@ -18,7 +18,7 @@ function startTimeout() {
     curTimeoutID.value = setTimeout(() => {
         curTimeoutID.value = -1
         subLayer()
-    }, 50000)
+    }, 5000)
 }
 
 enum UILayer {
@@ -102,9 +102,9 @@ const { curPage, total } = usePagination('#reader-overlay', getCurBook().heightA
         <img src="../assets/Close.svg" @click="closeReader" class="svg-btn small border close">
         <img src="../assets/Operate.svg" @click="addLayer" class="svg-btn small border operate">
         <div style="position: fixed;bottom: 1rem;width: 100%;display: flex;justify-content: center;">
-            <div style="padding: 5px;border-radius: 25px;background-color: #909399;display: flex;align-items: center;">
+            <div style="padding: 5px;border-radius: 25px;background-color: var(--fill-color);display: flex;align-items: center;line-height: 1;">
                 <span>{{ curPage }}/{{ total }}</span>
-                <span style="margin-left: 5px;">页</span>
+                <span style="margin-left: 5px;font-size: 14px;">页</span>
             </div>
         </div>
     </template>
@@ -196,7 +196,7 @@ const { curPage, total } = usePagination('#reader-overlay', getCurBook().heightA
     position: fixed;
     right: 0;
     bottom: 3em;
-    --bar-width: 320px;
+    --bar-width: 260px;
     padding: 1rem;
 
     display: flex;
