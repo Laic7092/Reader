@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // @ts-nocheck
-import { computed, nextTick, onMounted, onUnmounted, onUpdated, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 import { throttled, binarySearch, arraySumming } from '../modules/utils';
-import { useChapterObserver } from '../modules/composables';
+import { curChapterIdx, getCurBook } from '../modules/store';
 
 const props = defineProps<{
     list: Array<any>,
@@ -62,7 +62,14 @@ function Limit(val: number) {
 
 const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
 
-useChapterObserver()
+const chapterArray = getCurBook()?.chapterArr
+watch(start, (newValue) => {
+    const idx = chapterArray?.find((chapter, idx) => {
+        const { startLine, endLine } = chapter
+        return newValue >= startLine && newValue <= endLine
+    })?.idx
+    curChapterIdx.value = idx
+})
 
 defineExpose({
     jump(index: number, scrollTop?: number) {

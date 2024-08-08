@@ -102,34 +102,37 @@ const { curPage, total } = usePagination('#reader-overlay', getCurBook().heightA
         <img src="../assets/Close.svg" @click="closeReader" class="svg-btn small border close">
         <img src="../assets/Operate.svg" @click="addLayer" class="svg-btn small border operate">
         <div style="position: fixed;bottom: 1rem;width: 100%;display: flex;justify-content: center;">
-            <div style="padding: 5px;border-radius: 25px;background-color: var(--fill-color);display: flex;align-items: center;line-height: 1;">
+            <div
+                style="padding: 5px;border-radius: 25px;background-color: var(--fill-color);display: flex;align-items: center;line-height: 1;">
                 <span>{{ curPage }}/{{ total }}</span>
                 <span style="margin-left: 5px;font-size: 14px;">页</span>
             </div>
         </div>
     </template>
     <div v-else-if="curUILayer === UILayer.operatePanel" class="operatePanel no-touch">
-        <div>
-            <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
-                <span class="menu-name">Contents - 100%</span>
-                <img src="../assets/Bars3.svg" class="svg-btn">
+        <div class="body">
+            <div class="menu-items">
+                <div class="menu-item flex-r-sbc" @click="showDrawer('contensDrawer')">
+                    <span class="menu-name">Contents - 100%</span>
+                    <img src="../assets/Bars3.svg" class="svg-btn">
+                </div>
+                <div class="menu-item flex-r-sbc" @click="showDrawer('searchDrawer')">
+                    <span class=" menu-name">Search Book</span>
+                    <img src="../assets/Search.svg" class="svg-btn">
+                </div>
+                <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
+                    <span class="menu-name">Themes & Settings</span>
+                    <img src="../assets/Setting.svg" class="svg-btn">
+                </div>
+                <div class="menu-item flex-r-sbc none-decoration" v-if="false">
+                    <img src="../assets/Bars3.svg" class="louma svg-btn">
+                    <img src="../assets/Search.svg" class="louma svg-btn">
+                    <img src="../assets/Setting.svg" class="louma svg-btn">
+                </div>
             </div>
-            <div class="menu-item flex-r-sbc" @click="showDrawer('searchDrawer')">
-                <span class=" menu-name">Search Book</span>
-                <img src="../assets/Search.svg" class="svg-btn">
-            </div>
-            <div class="menu-item flex-r-sbc" @click="showDrawer('settingsDrawer')">
-                <span class="menu-name">Themes & Settings</span>
-                <img src="../assets/Setting.svg" class="svg-btn">
-            </div>
-            <div class="menu-item flex-r-sbc none-decoration">
-                <img src="../assets/Bars3.svg" class="louma svg-btn">
-                <img src="../assets/Search.svg" class="louma svg-btn">
-                <img src="../assets/Setting.svg" class="louma svg-btn">
-            </div>
-        </div>
-        <div class="chapter-bar">
+            <div class="chapter-bar">
 
+            </div>
         </div>
 
     </div>
@@ -194,53 +197,66 @@ const { curPage, total } = usePagination('#reader-overlay', getCurBook().heightA
 
 .operatePanel {
     position: fixed;
-    right: 0;
+    left: 1rem;
+    right: 1rem;
     bottom: 3em;
-    --bar-width: 260px;
-    padding: 1rem;
 
     display: flex;
+    justify-content: flex-end;
+    align-items: end;
 
-    .menu-item {
-        border-radius: 0.75em;
-        margin: 0.25em 0;
-        padding: 0.5em 1em;
-        background-color: var(--fill-color);
-        /* box-shadow: var(--box-shadow); */
-        cursor: pointer;
-        max-width: var(--bar-width);
+    .body {
+        display: flex;
+        width: 100%;
+        max-width: 430px;
+        --bar-width: 300px;
 
-        &.none-decoration {
-            width: calc(var(--bar-width) + 2em);
-            padding: 0;
-            background-color: unset;
-            box-shadow: none;
+        column-gap: 1em;
 
-            .louma {
-                background-color: var(--fill-color);
-                /* box-shadow: var(--box-shadow); */
-                flex: 1;
-                margin: 0 0.25em;
-                padding: 0.5em;
-                border-radius: 1em;
-
-                &:first-child {
-                    margin-left: 0;
-                }
-
-                &:last-child {
-                    margin-right: 0;
-                }
-            }
+        .menu-items {
+            flex: auto;
         }
 
-    }
+        .menu-item {
+            border-radius: 0.75em;
+            margin: 0.25em 0;
+            padding: 0.5em 1em;
+            background-color: var(--fill-color);
+            /* box-shadow: var(--box-shadow); */
+            cursor: pointer;
 
-    .chapter-bar {
-        width: 50px;
-        background-color: var(--fill-color);
-        border-radius: 0.75em;
-        margin-left: 1em;
+            &.none-decoration {
+                width: calc(var(--bar-width) + 2em);
+                padding: 0;
+                background-color: unset;
+                box-shadow: none;
+
+                .louma {
+                    background-color: var(--fill-color);
+                    /* box-shadow: var(--box-shadow); */
+                    flex: 1;
+                    margin: 0 0.25em;
+                    padding: 0.5em;
+                    border-radius: 1em;
+
+                    &:first-child {
+                        margin-left: 0;
+                    }
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
+            }
+
+        }
+
+        .chapter-bar {
+            width: 50px;
+            flex: none;
+            background-color: var(--fill-color);
+            border-radius: 0.75em;
+        }
     }
 
 }
