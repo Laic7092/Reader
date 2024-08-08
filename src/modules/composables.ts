@@ -64,3 +64,28 @@ export function useChapterObserver() {
         chapterSet.forEach(pELe => intersectionObserver.observe(pELe))
     })
 }
+
+export function usePagination(root: HTMLElement | string, heightArray: Array<number>) {
+    // width？
+    const _root = (typeof root === 'string' ? document.querySelector(root) : root) as HTMLElement
+    const { clientHeight } = _root
+    const curPage = ref(0)
+    const total = ref(Math.ceil(heightArray.reduce((pre, cur) => pre + cur) / clientHeight))
+
+    const handler = (e: Event) => {
+        const { scrollTop } = e.target as HTMLElement
+        curPage.value = Math.floor(scrollTop / clientHeight) + 1
+    }
+
+    onMounted(() => {
+        _root.addEventListener('scroll', handler)
+        const { scrollTop } = _root
+        curPage.value = Math.floor(scrollTop / clientHeight) + 1
+    })
+    onUnmounted(() => _root.removeEventListener('scroll', handler))
+    
+    return {
+        total,
+        curPage
+    }
+}

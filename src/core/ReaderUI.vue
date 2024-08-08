@@ -4,6 +4,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import VList from '../components/VList.vue';
 import { getCurBookUtils, curChapterIdx } from '../modules/store';
 import { BookUtils } from './declare';
+import { usePagination } from '../modules/composables';
 
 const { closeReader, changeFontSize, getCurBook, jumpChapter } = getCurBookUtils() as BookUtils
 
@@ -17,7 +18,7 @@ function startTimeout() {
     curTimeoutID.value = setTimeout(() => {
         curTimeoutID.value = -1
         subLayer()
-    }, 5000)
+    }, 50000)
 }
 
 enum UILayer {
@@ -94,11 +95,18 @@ const realChapterIdx = computed(() => {
     return res
 })
 
+const { curPage, total } = usePagination('#reader-overlay', getCurBook().heightArr)
 </script>
 <template>
     <template v-if="curUILayer === UILayer.baseBtns">
         <img src="../assets/Close.svg" @click="closeReader" class="svg-btn small border close">
         <img src="../assets/Operate.svg" @click="addLayer" class="svg-btn small border operate">
+        <div style="position: fixed;bottom: 1rem;width: 100%;display: flex;justify-content: center;">
+            <div style="padding: 5px;border-radius: 25px;background-color: #909399;display: flex;align-items: center;">
+                <span>{{ curPage }}/{{ total }}</span>
+                <span style="margin-left: 5px;">页</span>
+            </div>
+        </div>
     </template>
     <div v-else-if="curUILayer === UILayer.operatePanel" class="operatePanel no-touch">
         <div>
@@ -188,7 +196,8 @@ const realChapterIdx = computed(() => {
     position: fixed;
     right: 0;
     bottom: 3em;
-    --bar-width: 260px;
+    --bar-width: 320px;
+    padding: 1rem;
 
     display: flex;
 
@@ -199,7 +208,7 @@ const realChapterIdx = computed(() => {
         background-color: var(--fill-color);
         /* box-shadow: var(--box-shadow); */
         cursor: pointer;
-        width: var(--bar-width);
+        max-width: var(--bar-width);
 
         &.none-decoration {
             width: calc(var(--bar-width) + 2em);
@@ -231,7 +240,7 @@ const realChapterIdx = computed(() => {
         width: 50px;
         background-color: var(--fill-color);
         border-radius: 0.75em;
-        margin: 0 1em;
+        margin-left: 1em;
     }
 
 }
