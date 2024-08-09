@@ -102,9 +102,8 @@ function divideByChapter(paraArr: Array<string>) {
   }
   chapterArr.forEach((chapter, idx) => {
     chapter.endLine = chapterArr[idx + 1]?.idx - 1
-    // jsu a try ,may be useful?
-    // paraArr[chapter.idx] = "wait for catelog!"
   })
+  chapterArr[chapterArr.length - 1].endLine = paraArr.length - 1
   return chapterArr
 }
 
