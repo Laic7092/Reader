@@ -9,15 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@zip.js/zip.js": "^2.7.48",
+    "@zip.js/zip.js": "^2.7.52",
     "chardet": "^2.0.0",
-    "vue": "^3.4.21"
+    "vue": "^3.5.12"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.0",
-    "vue-tsc": "^2.0.6"
+    "@vitejs/plugin-vue": "^5.1.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vue-tsc": "^2.1.6"
   },
   "packageManager": "pnpm@8.15.4"
 }
