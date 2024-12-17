@@ -70,7 +70,7 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
             while (q > p) {
                 if (measureWidthByCharMap(text.slice(--q, initQ), charWidthMap) > sub) {
                     while (lineStartProhibition.has(text[q]))
-                        q-- 
+                        q--
                     break
                 }
             }
@@ -82,6 +82,12 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
                     break
                 }
             }
+        }
+        if (lineEndProhibition.has(text[q - 1])) {
+            q--
+        }
+        if (lineStartProhibition.has(text[q])) {
+            q--
         }
         log.push({
             content: text.slice(p, q),
@@ -131,8 +137,8 @@ addEventListener('message', (evt) => {
     paras.forEach((para: string, idx) => {
         const isChapter = chapterIdxSet.has(idx)
         config.isChapter = isChapter
-        config.fontSize = isChapter ? 24 : 20
-        config.lineGap = isChapter ? 12 : 10
+        // config.fontSize = isChapter ? 24 : 20
+        // config.lineGap = isChapter ? 12 : 10
         let cur = measureHeight(ctx, para, config)
         _height += cur
         cnt.push(cur)
@@ -146,7 +152,7 @@ addEventListener('message', (evt) => {
         val: msContentArr
     });
     globalThis.postMessage({
-        key: 'heightArr',
+        key: 'msHeightArr',
         val: cnt
     });
 })

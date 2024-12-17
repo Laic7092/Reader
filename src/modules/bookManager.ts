@@ -113,7 +113,7 @@ function useWorker(book: any) {
   myWorker.onmessage = (ev) => {
     console.log('msg-from-worker', ev.data)
     const { key, val } = ev.data
-    if (key === 'heightArr') {
+    if (key === 'msHeightArr') {
       addToLibrary({ ...book, heightArr: val })
     }
     if (key)
