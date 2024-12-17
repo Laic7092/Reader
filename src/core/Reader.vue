@@ -80,7 +80,7 @@ setCurBookUtils({
     .chapter {
         font-weight: 600;
         text-indent: 0;
-        font-size: 1.5em;
+        /* font-size: 1.5em; */
     }
 }
 
