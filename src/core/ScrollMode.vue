@@ -37,11 +37,11 @@ let _scrollTop = 0
 async function scrollHandler(e: Event) {
     const { scrollTop } = e.target as HTMLElement
     _scrollTop = scrollTop
-    const idx = binarySearch(accumulatedHeightArray, scrollTop)
+    const idx = binarySearch(accumulatedHeightArray, scrollTop) + 1
 
-    if (start.value === idx + 1) return
+    if (start.value === idx) return
 
-    start.value = idx + 1
+    start.value = idx
     const vHeight = idx > catchNum ? arraySumming(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
     const supplemntHeight = vHeight
 
