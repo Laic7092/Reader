@@ -90,7 +90,7 @@ const getTransform = (idx: number) => `translateY(${idx > 0 ? accumulatedHeightA
     </div>
 </template>
 
-<style>
+<style scoped>
 .vList-wrapper {
     overflow-y: auto;
     height: 100%;
