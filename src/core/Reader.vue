@@ -54,19 +54,14 @@ setCurBookUtils({
 })
 </script>
 <template>
-    <article class="reader">
-        <!-- temp close touch,wait for note & hightlight -->
-        <main :style="style">
-            <DynamicHeightVList ref="DVList" :list="curBook.paraArr.map((text, id) => ({ text, id }))"
-                :height-list="curBook.heightArr">
-                <template v-slot="{ text, id }">
-                    <p :class="{ 'chapter': chapterIdxArr.includes(id) }" :id="id">
-                        {{ text }}
-                    </p>
-                </template>
-            </DynamicHeightVList>
-        </main>
-    </article>
+    <DynamicHeightVList class="reader" :style="style" ref="DVList"
+        :list="curBook.paraArr.map((text, id) => ({ text, id }))" :height-list="curBook.heightArr">
+        <template v-slot="{ text, id }">
+            <p :class="{ 'chapter': chapterIdxArr.includes(id) }" :id="id">
+                {{ text }}
+            </p>
+        </template>
+    </DynamicHeightVList>
 </template>
 
 <style scoped>
@@ -82,16 +77,16 @@ setCurBookUtils({
         text-indent: 0;
         /* font-size: 1.5em; */
     }
-}
 
-:deep(.vList-wrapper) p {
-    font-size: 20px;
-    margin: 0;
-    margin-bottom: 0.5em;
-    text-indent: 2em;
-    text-align: justify;
-    word-break: break-all;
-    word-wrap: anywhere;
-		line-break: loose;
+    p {
+        font-size: 20px;
+        margin: 0;
+        margin-bottom: 0.5em;
+        text-indent: 2em;
+        text-align: justify;
+        word-break: break-all;
+        word-wrap: anywhere;
+        line-break: loose;
+    }
 }
 </style>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// @ts-nocheck
-import { computed, nextTick, onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { throttled, binarySearch, arraySumming } from '../modules/utils';
 import { curChapterIdx, getCurBook } from '../modules/store';
 
@@ -21,34 +20,28 @@ const totalHeight = arraySumming(props.heightList)
 
 const start = ref(0)
 
-const ul = ref<HTMLElement | null>(null)
+const constHeight = ref<HTMLElement>()
+const vListWrapper = ref<HTMLElement>()
 onMounted(() => {
-    ul.value && ul.value.style.setProperty('height', totalHeight + 'px')
-    document.querySelector('#reader-overlay').addEventListener('scroll', throttleScroller)
+    constHeight.value && constHeight.value.style.setProperty('height', totalHeight + 'px')
+    vListWrapper.value?.addEventListener('scroll', throttleScroller)
 })
 onUnmounted(() => {
-    document.querySelector('#reader-overlay').removeEventListener('scroll', throttleScroller)
+    vListWrapper.value?.removeEventListener('scroll', throttleScroller)
 })
 
 
 const throttleScroller = throttled(scrollHandler, 40)
 
 let _scrollTop = 0
+
 async function scrollHandler(e: Event) {
     const { scrollTop } = e.target as HTMLElement
     _scrollTop = scrollTop
+
     const idx = binarySearch(accumulatedHeightArray, scrollTop) + 1
-
     if (start.value === idx) return
-
-    start.value = idx
-    const vHeight = idx > catchNum ? arraySumming(props.heightList.slice(0, Limit(start.value - catchNum))) : 0
-    const supplemntHeight = vHeight
-
-    if (ul.value) {
-        ul.value.style.setProperty('margin-top', supplemntHeight + 'px')
-        ul.value.style.height = totalHeight - supplemntHeight + 'px'
-    }
+    setStart(idx)
 }
 
 function Limit(val: number) {
@@ -63,28 +56,51 @@ function Limit(val: number) {
 const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
 
 const chapterArray = getCurBook()?.chapterArr
-watch(start, (newValue) => {
-    const idx = chapterArray?.find((chapter, idx) => {
+
+const setStart = (idx: number) => {
+    start.value = idx
+    const chapterIdx = chapterArray?.find((chapter) => {
         const { startLine, endLine } = chapter
-        return newValue >= startLine && newValue <= endLine
+        return idx >= startLine && idx <= endLine
     })?.idx
-    curChapterIdx.value = idx
-})
+    curChapterIdx.value = chapterIdx || 0
+}
 
 defineExpose({
     jump(index: number, scrollTop?: number) {
-        document.querySelector('#reader-overlay').scrollTo({
+        vListWrapper.value?.scrollTo({
             top: scrollTop ?? (index === 0 ? 0 : accumulatedHeightArray[index - 1]),
         })
     },
     getStart: () => start.value,
     getScrollTop: () => _scrollTop
 })
+
+const getTransform = (idx: number) => `translateY(${idx > 0 ? accumulatedHeightArray[idx - 1] : 0}px)`
 </script>
+
 <template>
-    <div ref="ul" class="vList-wrapper">
-        <template v-for="item in vList" :id="item.id">
-            <slot v-bind="item"></slot>
-        </template>
+    <div ref="vListWrapper" class="vList-wrapper" id="reader-overlay">
+        <div ref="constHeight" style="position: relative;">
+            <div class="item" v-for="item in vList" :style="{ transform: getTransform(item.id) }">
+                <slot v-bind="item"></slot>
+            </div>
+        </div>
+
     </div>
 </template>
+
+<style>
+.vList-wrapper {
+    overflow-y: auto;
+    height: 100%;
+}
+
+.item {
+    position: absolute;
+    will-change: transform;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+</style>

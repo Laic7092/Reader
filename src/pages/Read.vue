@@ -32,7 +32,7 @@ function ChangeUI() {
 </script>
 <template>
     <Transition name="slide-fade" @after-enter="onAfterEnter" @before-leave="onBeforeLeave">
-        <div v-if="curBook" class="overlay" id="reader-overlay" style="overflow-y: auto;" @click="ChangeUI">
+        <div v-if="curBook" class="overlay" id="reader-overlay" @click="ChangeUI">
             <Teleport to="body">
                 <ReaderUI ref="UIRef" v-if="UIVisible" />
             </Teleport>
