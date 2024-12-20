@@ -14,7 +14,7 @@ const accumulatedHeightArray = props.heightList.reduce((acc: Array<number>, curr
 }, []);
 
 
-const { catchNum, displayNum } = { catchNum: 8, displayNum: 15 }
+const { catchNum, displayNum } = { catchNum: 15, displayNum: 30 }
 const totalLen = props.list.length
 const totalHeight = arraySumming(props.heightList)
 
@@ -82,11 +82,10 @@ const getTransform = (idx: number) => `translateY(${idx > 0 ? accumulatedHeightA
 <template>
     <div ref="vListWrapper" class="vList-wrapper" id="reader-overlay">
         <div ref="constHeight" style="position: relative;">
-            <div class="item" v-for="item in vList" :style="{ transform: getTransform(item.id) }">
+            <div class="item" v-for="item in vList" :key="item.id" :style="{ transform: getTransform(item.id) }">
                 <slot v-bind="item"></slot>
             </div>
         </div>
-
     </div>
 </template>
 
