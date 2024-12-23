@@ -127,6 +127,9 @@ function removeSelection() {
     .post {
       background-color: var(--fill-color);
       padding: 1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       .post-img {
         width: 5em;

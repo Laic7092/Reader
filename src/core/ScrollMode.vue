@@ -31,18 +31,23 @@ onUnmounted(() => {
 })
 
 
-const throttleScroller = throttled(scrollHandler, 40)
 
 let _scrollTop = 0
-
+const CHUNK = (20 + 10) * 1.5 * catchNum
+let preScrollTop = 0
 async function scrollHandler(e: Event) {
     const { scrollTop } = e.target as HTMLElement
     _scrollTop = scrollTop
-
+    if (Math.abs(preScrollTop - _scrollTop) < CHUNK) {
+        return
+    }
+    preScrollTop = scrollTop
     const idx = binarySearch(accumulatedHeightArray, scrollTop) + 1
     if (start.value === idx) return
     setStart(idx)
 }
+
+const throttleScroller = scrollHandler
 
 function Limit(val: number) {
     if (val < 0) {
@@ -68,7 +73,7 @@ const setStart = (idx: number) => {
 
 defineExpose({
     jump(index: number, scrollTop?: number) {
-        vListWrapper.value?.scrollTo({
+        vListWrapper.value?.parentElement?.scrollTo({
             top: scrollTop ?? (index === 0 ? 0 : accumulatedHeightArray[index - 1]),
         })
     },
