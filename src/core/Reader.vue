@@ -54,14 +54,16 @@ setCurBookUtils({
 })
 </script>
 <template>
-    <DynamicHeightVList class="reader" :style="style" ref="DVList"
-        :list="curBook.paraArr.map((text, id) => ({ text, id }))" :height-list="curBook.heightArr">
-        <template v-slot="{ text, id }">
-            <p :class="{ 'chapter': chapterIdxArr.includes(id) }" :key="id">
-                {{ text }}
-            </p>
-        </template>
-    </DynamicHeightVList>
+    <div class="wrapper" :style="style">
+        <DynamicHeightVList class="reader" ref="DVList" :list="curBook.paraArr.map((text, id) => ({ text, id }))"
+            :height-list="curBook.heightArr">
+            <template v-slot="{ text, id }">
+                <p :class="{ 'chapter': chapterIdxArr.includes(id) }" :key="id">
+                    {{ text }}
+                </p>
+            </template>
+        </DynamicHeightVList>
+    </div>
 </template>
 
 <style scoped>
@@ -88,5 +90,10 @@ setCurBookUtils({
         word-wrap: anywhere;
         line-break: loose;
     }
+}
+
+.wrapper {
+    overflow-y: auto;
+    height: 100%;
 }
 </style>

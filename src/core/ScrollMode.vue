@@ -24,10 +24,10 @@ const constHeight = ref<HTMLElement>()
 const vListWrapper = ref<HTMLElement>()
 onMounted(() => {
     constHeight.value && constHeight.value.style.setProperty('height', totalHeight + 'px')
-    vListWrapper.value?.addEventListener('scroll', throttleScroller)
+    vListWrapper.value?.parentElement?.addEventListener('scroll', throttleScroller)
 })
 onUnmounted(() => {
-    vListWrapper.value?.removeEventListener('scroll', throttleScroller)
+    vListWrapper.value?.parentElement?.removeEventListener('scroll', throttleScroller)
 })
 
 
@@ -90,11 +90,6 @@ const getTransform = (idx: number) => `translateY(${idx > 0 ? accumulatedHeightA
 </template>
 
 <style scoped>
-.vList-wrapper {
-    overflow-y: auto;
-    height: 100%;
-}
-
 .item {
     position: absolute;
     will-change: transform;
