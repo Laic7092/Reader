@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import {  binarySearch, arraySumming } from '../modules/utils';
+import { binarySearch, arraySumming } from '../modules/utils';
 import { curChapterIdx, getCurBook } from '../modules/store';
 
 const props = defineProps<{
@@ -14,7 +14,7 @@ const accumulatedHeightArray = props.heightList.reduce((acc: Array<number>, curr
 }, []);
 
 
-const { catchNum, displayNum } = { catchNum: 15, displayNum: 30 }
+const { catchNum, displayNum } = { catchNum: 25, displayNum: 50 }
 const totalLen = props.list.length
 const totalHeight = arraySumming(props.heightList)
 
@@ -33,7 +33,7 @@ onUnmounted(() => {
 
 
 let _scrollTop = 0
-const CHUNK = (20 + 10) * 1.5 * catchNum
+const CHUNK = 20 * 1.5 * 2 * catchNum
 let preScrollTop = 0
 async function scrollHandler(e: Event) {
     const { scrollTop } = e.target as HTMLElement
@@ -97,7 +97,6 @@ const getTransform = (idx: number) => `translateY(${idx > 0 ? accumulatedHeightA
 <style scoped>
 .item {
     position: absolute;
-    will-change: transform;
     width: 100%;
     top: 0;
     left: 0;
