@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { throttled, binarySearch, arraySumming } from '../modules/utils';
+import {  binarySearch, arraySumming } from '../modules/utils';
 import { curChapterIdx, getCurBook } from '../modules/store';
 
 const props = defineProps<{
