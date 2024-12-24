@@ -181,3 +181,7 @@ ul {
   bottom: 0;
   overflow: hidden;
 }
+
+.absolute {
+  position: absolute;
+}

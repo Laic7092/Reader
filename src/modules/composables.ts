@@ -1,5 +1,6 @@
 import { onMounted, onUnmounted, ref, onActivated, onDeactivated, onUpdated } from 'vue'
 import { curChapterIdx } from './store';
+import { throttled } from './utils';
 
 export function useViewPortSize(el: HTMLElement | string, handler: (DOMRect: DOMRectReadOnly) => void) {
     // const rect = el.getBoundingClientRect()
@@ -72,18 +73,17 @@ export function usePagination(root: HTMLElement | string, heightArray: Array<num
     const curPage = ref(0)
     const total = ref(Math.ceil(heightArray.reduce((pre, cur) => pre + cur) / clientHeight))
 
-    const handler = (e: Event) => {
+    const handler = throttled((e: Event) => {
         const { scrollTop } = e.target as HTMLElement
         curPage.value = Math.floor(scrollTop / clientHeight) + 1
-    }
-
+    }, 200)
     onMounted(() => {
         _root.addEventListener('scroll', handler)
         const { scrollTop } = _root
         curPage.value = Math.floor(scrollTop / clientHeight) + 1
     })
     onUnmounted(() => _root.removeEventListener('scroll', handler))
-    
+
     return {
         total,
         curPage

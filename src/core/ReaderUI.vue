@@ -95,7 +95,7 @@ const realChapterIdx = computed(() => {
     return res
 })
 
-const { curPage, total } = usePagination('#reader-overlay', getCurBook().heightArr)
+const { curPage, total } = usePagination('.reader-wrapper', getCurBook().heightArr)
 </script>
 <template>
     <template v-if="curUILayer === UILayer.baseBtns">
