@@ -3,11 +3,21 @@ import { ref } from 'vue';
 const fileInput = ref<HTMLInputElement | null>(null)
 let moduleLoaded = false
 async function importBook() {
-    if (!moduleLoaded) {
-        const { handleBookChange } = await import('../modules/bookManager')
-        fileInput.value?.addEventListener('change', handleBookChange)
-        moduleLoaded = true
+    try {
+        if (!moduleLoaded) {
+            loadModule()
+        } else {
+            fileInput.value?.click()
+        }
+    } catch (error) {
+        loadModule()
     }
+}
+
+async function loadModule() {
+    const { handleBookChange } = await import('../modules/bookManager')
+    fileInput.value?.addEventListener('change', handleBookChange)
+    moduleLoaded = true
     fileInput.value?.click()
 }
 </script>
