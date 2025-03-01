@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { handleBookChange } from "../modules/bookManager"
+import { ref } from 'vue';
 const fileInput = ref<HTMLInputElement | null>(null)
-onMounted(() => {
-    fileInput.value?.addEventListener('change', handleBookChange)
-})
-function importBook() {
+let moduleLoaded = false
+async function importBook() {
+    if (!moduleLoaded) {
+        const { handleBookChange } = await import('../modules/bookManager')
+        fileInput.value?.addEventListener('change', handleBookChange)
+        moduleLoaded = true
+    }
     fileInput.value?.click()
 }
 </script>

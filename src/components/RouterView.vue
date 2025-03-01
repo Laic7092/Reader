@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineAsyncComponent } from 'vue'
 import type { Component } from 'vue'
 import Home from '../pages/Home.vue';
-import Read from '../pages/Read.vue';
-import Config from '../pages/Config.vue';
+
+const Read = defineAsyncComponent(() => import('../pages/Read.vue'))
+const Config = defineAsyncComponent(() => import('../pages/Config.vue'))
 
 window.location.hash = '#/'
 
