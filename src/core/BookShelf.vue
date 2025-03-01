@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import bus, { CRUD, STATUS } from '../modules/pubSub'
-import { readAll, remove, search } from "../modules/indexDb"
+import { readAll, remove, read } from "../modules/indexDb"
 import { Book } from './declare';
 import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
 import { setCurBook } from '../modules/store';
@@ -44,11 +44,9 @@ interface BookInShelf extends Book {
 }
 
 const books = ref<Array<BookInShelf>>([])
-// CWJ-TO 这里存在隐患，一开始就全部读取，绝对不合理，考虑再单独设一个表？
 function init() {
   readAll().then(res => {
     console.log('书架初始化完成', res);
-
     books.value = res.map((book) => ({
       ...book,
       selected: false
@@ -57,7 +55,7 @@ function init() {
 }
 
 async function pickBook(book: BookInShelf) {
-  setCurBook(await search(book.id))
+  setCurBook(await read(book.id))
   routeTo('/read')
 }
 

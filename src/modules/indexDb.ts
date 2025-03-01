@@ -2,7 +2,7 @@ import bus, { CRUD, STATUS } from "./pubSub";
 import { Book, Chapter } from "../core/declare";
 
 function busEmit(eventType: string, val?: any) {
-  bus.emit(eventType, val)
+  bus.emit(eventType, val);
 }
 
 const databaseName = 'library';
@@ -10,155 +10,195 @@ let db: IDBDatabase | null = null;
 
 (function openOrCreatIDB() {
   return new Promise((resolve, reject) => {
-    const request = window.indexedDB.open(databaseName);
+    const request = window.indexedDB.open(databaseName, 2); // 升级版本号
     request.onerror = function () {
       console.log('数据库打开报错');
       reject();
     };
     request.onsuccess = function () {
       db = request.result;
-      //通过request对象的result属性拿到数据库对象。
       console.log('数据库打开成功');
       resolve(db);
-      busEmit(STATUS.READY)
+      busEmit(STATUS.READY);
     };
     request.onupgradeneeded = function (event) {
-      //新建数据库也会触发,因为版本从无到有,而且是先触发升级版本,再触发打开成功
-      console.log("升级咯")
-      //如果要修改数据库结构（新增或删除表、索引或者主键），只能通过升级数据库版本完成。
       db = (event.target as any)?.result as IDBDatabase;
-      //这时通过事件对象的target.result属性，拿到数据库实例。
-      if (!db.objectStoreNames.contains('books')) {
-        let objectStore = null;
-        objectStore = db.createObjectStore('books', { keyPath: 'id' });
-        console.log(objectStore)
-        //主键也可以指定为下一层对象的属性{id:1,foo:{bar:1}} foo.bar
-        // let objectStore = db.createObjectStore(
-        //   'books',
-        //   { autoIncrement: true }
-        // );自动生成主键,递增数
-
-        // objectStore.createIndex('name', 'name', { unique: false });
-        // objectStore.createIndex('email', 'email', { unique: true });
-        //三个参数分别为索引名称、索引所在的属性、配置对象（说明该属性是否包含重复的值）
+      if (!db.objectStoreNames.contains('book_metadata')) {
+        // 创建 metadata store
+        const metadataStore = db.createObjectStore('book_metadata', { keyPath: 'id' });
+        metadataStore.createIndex('name', 'name', { unique: false }); // 为 name 字段创建索引
       }
-    }
-  })
-
-})()
+      if (!db.objectStoreNames.contains('book_files')) {
+        // 创建 files store
+        db.createObjectStore('book_files', { keyPath: 'id' });
+      }
+    };
+  });
+})();
 
 function add(bookData: Book) {
-  if (!db) return
-  let id = getRandomBookId()
-  bookData.id = id
-  const { name, heightArr, chapterArr, charSet, paraArr } = bookData
-  let request = db.transaction(['books'], 'readwrite')//新建事务,指定表名,以及操作readonly/readwrite
-    .objectStore('books')//上面的操作会创建一个IDBtransaction对象,通过这个对象的objectstore方法拿到IDBObjectstore对象
-    .add({ id, name, heightArr, chapterArr, charSet, paraArr });//最后通过表格对象的(add)方法,写入记录
+  if (!db) return;
+  let id = getRandomBookId();
+  bookData.id = id;
+  const { name, heightArr, chapterArr, charSet, paraArr } = bookData;
 
-  request.onsuccess = () => {
+  // 将 metadata 和 files 分开存储
+  const transaction = db.transaction(['book_metadata', 'book_files'], 'readwrite');
+  const metadataStore = transaction.objectStore('book_metadata');
+  const filesStore = transaction.objectStore('book_files');
+
+  // 存储 metadata
+  metadataStore.add({ id, name });
+
+  // 存储 files
+  filesStore.add({ id, heightArr, chapterArr, charSet, paraArr });
+
+  transaction.oncomplete = () => {
     console.log('数据写入成功');
-    busEmit(CRUD.ADD, bookData)
+    busEmit(CRUD.ADD, bookData);
   };
 
-  request.onerror = () => {
+  transaction.onerror = () => {
     console.log('数据写入失败');
-  }
+  };
 }
 
-function search(id: string): Promise<Book> {
-  return new Promise((resolve, reject) => {
-    if (!db) return
-    let transaction = db.transaction(['books']);
-    let objectStore = transaction.objectStore('books');
-    let request = objectStore.get(id);//参数是主键的值
-
-    request.onerror = function () {
-      reject(new Error())
-      console.log('事务失败');
-    };
-
-    request.onsuccess = function () {
-      if (request.result) {
-        resolve(request.result)
-      } else {
-        console.log('未获得数据记录');
-      }
-    };
-  })
-
-}
-
-function readAll(): Promise<Array<Book>> {
+function read(id: string): Promise<Book> {
   return new Promise((resolve, reject) => {
     if (!db) {
-      reject()
-      return
+      reject(new Error('数据库未初始化'));
+      return;
     }
-    let objectStore = db.transaction('books').objectStore('books');
-    let allBooks: Array<any> = [];
-    const openCursor = objectStore.openCursor();
-    openCursor.onsuccess = function (event) {//新建指针对象的openCursor()方法是一个异步操作
-      const target = event.target as IDBRequest
-      let cursor = target.result;
+
+    const transaction = db.transaction(['book_metadata', 'book_files']);
+    const metadataStore = transaction.objectStore('book_metadata');
+    const filesStore = transaction.objectStore('book_files');
+
+    // 读取 metadata
+    const metadataRequest = metadataStore.get(id);
+    const filesRequest = filesStore.get(id);
+
+    metadataRequest.onsuccess = () => {
+      if (!metadataRequest.result) {
+        reject(new Error('未找到书籍'));
+        return;
+      }
+
+      filesRequest.onsuccess = () => {
+        if (!filesRequest.result) {
+          reject(new Error('未找到书籍文件'));
+          return;
+        }
+
+        // 合并 metadata 和 files
+        resolve({
+          id: metadataRequest.result.id,
+          name: metadataRequest.result.name,
+          heightArr: filesRequest.result.heightArr,
+          chapterArr: filesRequest.result.chapterArr,
+          charSet: filesRequest.result.charSet,
+          paraArr: filesRequest.result.paraArr,
+        });
+      };
+
+      filesRequest.onerror = () => {
+        reject(new Error('读取书籍文件失败'));
+      };
+    };
+
+    metadataRequest.onerror = () => {
+      reject(new Error('读取书籍失败'));
+    };
+  });
+}
+
+function readAll(): Promise<Array<{ id: string; name: string }>> {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      reject(new Error('数据库未初始化'));
+      return;
+    }
+
+    const transaction = db.transaction('book_metadata', 'readonly');
+    const metadataStore = transaction.objectStore('book_metadata');
+    const allBooks: Array<{ id: string; name: string }> = [];
+
+    const openCursor = metadataStore.openCursor();
+    openCursor.onsuccess = (event) => {
+      const cursor = (event.target as IDBRequest).result;
       if (cursor) {
         allBooks.push({
-          name: cursor.value.name,
           id: cursor.value.id,
-        })
+          name: cursor.value.name,
+        });
         cursor.continue();
       } else {
-        // console.log('没有更多数据了！');
-        resolve(allBooks)
+        resolve(allBooks);
       }
     };
-    openCursor.onerror = function () {
-      console.log('迭代失败');
-      reject()
-    };
-  })
 
+    openCursor.onerror = () => {
+      reject(new Error('遍历数据失败'));
+    };
+  });
 }
 
 function update(id: string, bookData: Book) {
-  if (!db) return
-  let request = db.transaction(['books'], 'readwrite')
-    .objectStore('books')
-    .put({ id, bookData });
-  //put()方法自动更新了主键为1的记录
+  if (!db) return;
 
-  request.onsuccess = function () {
+  const transaction = db.transaction(['book_metadata', 'book_files'], 'readwrite');
+  const metadataStore = transaction.objectStore('book_metadata');
+  const filesStore = transaction.objectStore('book_files');
+
+  // 更新 metadata
+  metadataStore.put({ id, name: bookData.name });
+
+  // 更新 files
+  filesStore.put({
+    id,
+    heightArr: bookData.heightArr,
+    chapterArr: bookData.chapterArr,
+    charSet: bookData.charSet,
+    paraArr: bookData.paraArr,
+  });
+
+  transaction.oncomplete = () => {
     console.log('数据更新成功');
   };
 
-  request.onerror = function () {
+  transaction.onerror = () => {
     console.log('数据更新失败');
-  }
+  };
 }
 
 function remove(id: string) {
-  if (!db) return
-  let request = db.transaction(['books'], 'readwrite')
-    .objectStore('books')
-    .delete(id);//同样是传入主键
+  if (!db) return;
 
-  request.onsuccess = function () {
+  const transaction = db.transaction(['book_metadata', 'book_files'], 'readwrite');
+  const metadataStore = transaction.objectStore('book_metadata');
+  const filesStore = transaction.objectStore('book_files');
+
+  // 删除 metadata
+  metadataStore.delete(id);
+
+  // 删除 files
+  filesStore.delete(id);
+
+  transaction.oncomplete = () => {
     console.log('数据删除成功');
-    busEmit(CRUD.REMOVE, id)
+    busEmit(CRUD.REMOVE, id);
+  };
+
+  transaction.onerror = () => {
+    console.log('数据删除失败');
   };
 }
 
 function getRandomBookId() {
   const array = new Uint32Array(1);
   crypto.getRandomValues(array);
-  //因为是随机数字,所以直接换成string,避免后续不方便
-  return array[0] + ''
+  return array[0] + '';
 }
 
-
-//存?主键:随机生成?存
-export {
-  add, search, update, readAll, remove
-};
+export { add, read, update, readAll, remove };
 export type { Book, Chapter };
-
