@@ -7,7 +7,7 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'vite.svg'],
+      includeAssets: ["*.svg"],
       manifest: {
         "background_color": "#FFFFFF",
         "theme_color": "#FFFFFF",
