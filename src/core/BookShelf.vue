@@ -99,6 +99,7 @@ function removeSelection() {
             <input type="checkbox" class="checkbox" v-if="curMode === 'manage'" v-model="book.selected" />
           </div>
         </div>
+
         <div class="auto-Elliptical name" :title="book.name">
           {{ book.name }}
         </div>
@@ -125,9 +126,6 @@ function removeSelection() {
     .post {
       background-color: var(--fill-color);
       padding: 1em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
 
       .post-img {
         width: 5em;
