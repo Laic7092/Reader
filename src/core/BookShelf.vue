@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ImportBook from './ImportBook.vue';
 import bus, { CRUD, STATUS } from '../modules/pubSub'
 import { readAll, remove, read } from "../modules/indexDb"
 import { Book } from './declare';
@@ -82,14 +83,15 @@ function removeSelection() {
 }
 </script>
 <template>
+  <div class="top-right flex-r-sbc no-touch">
+    <button v-if="curMode === 'normal'" @click="changeMode('manage')">Manage Books</button>
+    <template v-else>
+      <button class="mr1" @click="changeMode('normal')">cancel</button>
+      <img @click="removeSelection" src="../assets/Delete.svg" class="svg-btn">
+    </template>
+    <ImportBook />
+  </div>
   <template v-if="books.length > 0">
-    <div class="tabs mb1 flex-r-cc top-right no-touch">
-      <button v-if="curMode === 'normal'" @click="changeMode('manage')">Manage Books</button>
-      <template v-else>
-        <button class="mr1" @click="changeMode('normal')">cancel</button>
-        <img @click="removeSelection" src="../assets/Delete.svg" class="svg-btn">
-      </template>
-    </div>
     <div class="container no-touch">
       <div class="book" v-for="book in books" :key="book.id"
         @click="() => curMode === 'normal' ? pickBook(book) : changeSelect(book)">
@@ -117,6 +119,8 @@ function removeSelection() {
   grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 1em;
   row-gap: 2em;
+  padding: 2rem;
+  margin-top: 3rem;
 
   /* 设置网格间隔 */
   .book {
@@ -147,9 +151,8 @@ function removeSelection() {
 
 .top-right {
   position: fixed;
-  top: 4em;
   left: 0;
   right: 0;
-  padding: 1em;
+  padding: 1rem;
 }
 </style>

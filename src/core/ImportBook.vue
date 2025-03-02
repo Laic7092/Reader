@@ -15,19 +15,8 @@ async function loadModule() {
 }
 </script>
 <template>
-    <div class="top-right no-touch">
-        <button @click="importBook">Import Book +</button>
+    <div class="no-touch">
+        <button @click="importBook">+</button>
         <input ref="fileInput" type="file" accept=".txt,.epub" multiple style="display: none;">
     </div>
 </template>
-
-<style scoped>
-.top-right {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 1em;
-    text-align: right;
-}
-</style>
