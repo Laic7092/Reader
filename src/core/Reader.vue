@@ -83,7 +83,6 @@ setCurBookUtils({
     p {
         font-size: 20px;
         margin: 0;
-        margin-bottom: 0.5em;
         text-indent: 2em;
         text-align: justify;
         word-break: break-all;

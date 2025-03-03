@@ -14,13 +14,11 @@ interface Config {
     lineHeight: number,
     fontSize: number,
     fontFamily: string,
-    step: number
 }
 
 let curBook;
 
 // 点号（顿号、逗号、句号、冒号、分号、叹号、问号）、结束引号、结束括号、结束双书名号（书名号乙式）、连接号、间隔号、分隔号不能出现在一行的开头。
-// 开始引号、开始括号、开始单双书名号等符号，不能出现在一行的结尾。这是最推荐的方法。
 const lineStartProhibition = new Set([
     "、", "，", "。", "：", "；", "！", "？",
     "」", "』", "”", "’",
@@ -30,6 +28,7 @@ const lineStartProhibition = new Set([
     "/", "／"
 ])
 
+// 开始引号、开始括号、开始单双书名号等符号，不能出现在一行的结尾。这是最推荐的方法。
 const lineEndProhibition = new Set([
     "“", "‘",
     "（", "〈", "《"
@@ -40,65 +39,42 @@ function measureWidthByCharMap(text: string, charWidthMap: Map<string, number>) 
     if (text === '') return 0
     return Array.from(text).map(char => charWidthMap.get(char)).reduce((pre, cur) => pre + cur)
 }
+function getPrefixSumByCharMap(text: string, charWidthMap: Map<string, number>) {
+    let sum = []
+    Array.from(text).forEach((char, idx) => {
+        sum.push((sum[idx - 1] || 0) + charWidthMap.get(char))
+    })
+    return sum
+}
+
 let ml = 0
 let lm = 0
 function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
 
-    const { maxWidth, lineHeight, fontSize, fontFamily, step, textIndent, isChapter, lineGap } = config
-    ctx.font = `${fontSize}px ${fontFamily}`;
+    const { maxWidth, lineHeight, textIndent, fontSize } = config
     const length = text.length
 
-    let _maxWidth = isChapter ? config.maxWidth : config.maxWidth - textIndent * fontSize
+    let _maxWidth = config.maxWidth - textIndent * fontSize
     const charWidthMap = curBook.charWidthMap
-
-    // start of curline
-    let p = 0
-    // start of nextline
-    let q = 0
+    const prefixSum = getPrefixSumByCharMap(text, charWidthMap)
 
     let lineCount = 0
-    let log = []
 
-    while (q <= length) {
-        q += step
-
-        const _width = measureWidthByCharMap(text.slice(p, q), charWidthMap)
-        const sub = _width - _maxWidth
-        const initQ = q
-        if (sub > 0) {
-            lm++
-            while (q > p) {
-                if (measureWidthByCharMap(text.slice(--q, initQ), charWidthMap) > sub) {
-                    while (lineStartProhibition.has(text[q]))
-                        q--
-                    break
-                }
-            }
+    let i = 0
+    // 下行行首
+    let lineHeadIndex = 0
+    while (i < length) {
+        if (prefixSum[i] - prefixSum[lineHeadIndex] < _maxWidth) {
+            i++
         } else {
-            ml++
-            while (q <= length) {
-                if (measureWidthByCharMap(text.slice(initQ, ++q), charWidthMap) > Math.abs(sub)) {
-                    while (q > initQ && lineStartProhibition.has(text[q--]));
-                    break
-                }
-            }
+            while (lineStartProhibition.has(text[i]) || lineEndProhibition.has(text[i - 1])) i--
+            lineCount === 0 && (_maxWidth = maxWidth)
+            lineCount++
+            lineHeadIndex = i
         }
-        if (lineEndProhibition.has(text[q - 1])) {
-            q--
-        }
-        if (lineStartProhibition.has(text[q])) {
-            q--
-        }
-        log.push({
-            content: text.slice(p, q),
-            width: measureWidthByCharMap(text.slice(p, q), charWidthMap),
-        })
-        lineCount === 0 && (_maxWidth = maxWidth)
-        lineCount++
-        p = q
     }
-    msContentArr.push(log)
-    return lineCount * fontSize * lineHeight + lineGap
+    i === length && lineCount++
+    return lineCount * fontSize * lineHeight
 }
 
 addEventListener('message', (evt) => {
@@ -115,9 +91,6 @@ addEventListener('message', (evt) => {
         lineHeight: 1.5,
         maxWidth: width - 4 * REM_PX,
         textIndent: 2,
-        step: Math.ceil((width - 4 * REM_PX) / 20),
-        lineGap: 10,
-        isChapter: false
     }
 
     console.time('charset')
@@ -135,10 +108,6 @@ addEventListener('message', (evt) => {
     let cnt: Array<number> = []
     let _height = config.fontSize
     paras.forEach((para: string, idx) => {
-        const isChapter = chapterIdxSet.has(idx)
-        config.isChapter = isChapter
-        // config.fontSize = isChapter ? 24 : 20
-        // config.lineGap = isChapter ? 12 : 10
         let cur = measureHeight(ctx, para, config)
         _height += cur
         cnt.push(cur)

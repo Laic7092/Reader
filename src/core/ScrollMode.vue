@@ -8,8 +8,10 @@ const props = defineProps<{
     heightList: Array<number>
 }>()
 
+const LINEGAP = 10
+
 const accumulatedHeightArray = props.heightList.reduce((acc: Array<number>, curr, index) => {
-    acc.push(index === 0 ? curr : acc[index - 1] + curr);
+    acc.push(index === 0 ? curr + LINEGAP : acc[index - 1] + curr + LINEGAP);
     return acc;
 }, []);
 
@@ -29,8 +31,6 @@ onMounted(() => {
 onUnmounted(() => {
     vListWrapper.value?.parentElement?.removeEventListener('scroll', throttleScroller)
 })
-
-
 
 let _scrollTop = 0
 const CHUNK = 20 * 1.5 * 2 * catchNum

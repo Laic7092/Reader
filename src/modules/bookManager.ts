@@ -73,6 +73,9 @@ function divideTxtContent(txtContent: string, name: string) {
   for (let index = 0; index < len; index++) {
     charSet.add(txtContent[index])
   }
+  for (const element of "Preface") {
+    charSet.add(element)
+  }
   if (typeof txtContent !== "string") return;
   let paraArr = txtContent.split(/[\r\n]+/).map(para => para.replace("<br />", '').trim()).filter(para => para);
   let chapterArr = []
