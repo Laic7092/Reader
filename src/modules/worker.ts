@@ -64,7 +64,7 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
     // 下行行首
     let lineHeadIndex = 0
     while (i < length) {
-        if (prefixSum[i] - prefixSum[lineHeadIndex] < _maxWidth) {
+        if (prefixSum[i] - (prefixSum[lineHeadIndex - 1] || 0) < _maxWidth) {
             i++
         } else {
             while (lineStartProhibition.has(text[i]) || lineEndProhibition.has(text[i - 1])) i--
