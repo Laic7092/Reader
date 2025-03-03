@@ -1,97 +1,110 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { binarySearch, arraySumming } from '../modules/utils';
+import { binarySearch } from '../modules/utils';
 import { curChapterIdx, getCurBook } from '../modules/store';
 
 const props = defineProps<{
     list: Array<any>,
     heightList: Array<number>
-}>()
+}>();
 
-const LINEGAP = 10
+const LINEGAP = 10;
 
-const accumulatedHeightArray = props.heightList.reduce((acc: Array<number>, curr, index) => {
-    acc.push(index === 0 ? curr + LINEGAP : acc[index - 1] + curr + LINEGAP);
-    return acc;
-}, []);
+// 计算累积高度数组
+const accumulatedHeightArray = computed(() => {
+    return props.heightList.reduce((acc: Array<number>, curr, index) => {
+        acc.push((index === 0 ? curr : acc[index - 1] + curr) + LINEGAP);
+        return acc;
+    }, []);
+});
 
+// 虚拟列表的配置
+const CATCH_NUM = 5; // 预加载的额外行数
+const DISPLAY_NUM = 30; // 可视区域的最大行数
+const totalLen = props.list.length;
+const totalHeight = computed(() => accumulatedHeightArray.value[totalLen - 1] || 0);
 
-const { catchNum, displayNum } = { catchNum: 15, displayNum: 30 }
-const totalLen = props.list.length
-const totalHeight = arraySumming(props.heightList)
+const startIndex = ref(0); // 当前渲染的起始索引
+const endIndex = computed(() => Math.min(startIndex.value + DISPLAY_NUM + CATCH_NUM * 2, totalLen));
 
-const start = ref(0)
+// 可视区域的 DOM 引用
+const constHeight = ref<HTMLElement>();
+const vListWrapper = ref<HTMLElement>();
 
-const constHeight = ref<HTMLElement>()
-const vListWrapper = ref<HTMLElement>()
-onMounted(() => {
-    constHeight.value && constHeight.value.style.setProperty('height', totalHeight + 'px')
-    vListWrapper.value?.parentElement?.addEventListener('scroll', throttleScroller)
-})
-onUnmounted(() => {
-    vListWrapper.value?.parentElement?.removeEventListener('scroll', throttleScroller)
-})
-
-let _scrollTop = 0
-const CHUNK = 20 * 1.5 * 2 * catchNum
-let preScrollTop = 0
-async function scrollHandler(e: Event) {
-    const { scrollTop } = e.target as HTMLElement
-    _scrollTop = scrollTop
-    if (Math.abs(preScrollTop - _scrollTop) < CHUNK) {
-        return
+// 更新起始索引
+function updateStartIndex(scrollTop: number) {
+    const idx = binarySearch(accumulatedHeightArray.value, scrollTop);
+    if (Math.abs(startIndex.value - idx) > CATCH_NUM) {
+        startIndex.value = idx;
+        updateCurrentChapter(idx);
     }
-    preScrollTop = scrollTop
-    const idx = binarySearch(accumulatedHeightArray, scrollTop) + 1
-    if (start.value === idx) return
-    setStart(idx)
 }
 
-const throttleScroller = scrollHandler
-
-function Limit(val: number) {
-    if (val < 0) {
-        return 0
-    } else if (val > totalLen) {
-        return totalLen
-    }
-    return val
-}
-
-const vList = computed(() => props.list.slice(Limit(start.value - catchNum), Limit(start.value + displayNum + catchNum)))
-
-const chapterArray = getCurBook()?.chapterArr
-
-const setStart = (idx: number) => {
-    start.value = idx
+// 更新当前章节
+function updateCurrentChapter(idx: number) {
+    const chapterArray = getCurBook()?.chapterArr;
     const chapterIdx = chapterArray?.find((chapter) => {
-        const { startLine, endLine } = chapter
-        return idx >= startLine && idx <= endLine
-    })?.idx
-    curChapterIdx.value = chapterIdx || 0
+        const { startLine, endLine } = chapter;
+        return idx >= startLine && idx <= endLine;
+    })?.idx;
+    curChapterIdx.value = chapterIdx || 0;
 }
 
+// 滚动事件处理
+let isScrolling = false;
+function handleScroll(e: Event) {
+    if (isScrolling) return;
+    isScrolling = true;
+
+    requestAnimationFrame(() => {
+        const { scrollTop } = e.target as HTMLElement;
+        updateStartIndex(scrollTop);
+        isScrolling = false;
+    });
+}
+
+onMounted(() => {
+    constHeight.value && constHeight.value.style.setProperty('height', totalHeight.value + 'px');
+    vListWrapper.value?.parentElement?.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+    vListWrapper.value?.parentElement?.removeEventListener('scroll', handleScroll);
+});
+
+// 计算当前需要渲染的列表项
+const visibleList = computed(() => {
+    const start = Math.max(0, startIndex.value - CATCH_NUM);
+    const end = Math.min(totalLen, endIndex.value);
+    return props.list.slice(start, end);
+});
+
+// 计算偏移量
+const transform = computed(() => {
+    const start = Math.max(0, startIndex.value - CATCH_NUM);
+    return `translateY(${start > 0 ? accumulatedHeightArray.value[start - 1] : 0}px)`;
+});
+
+// 暴露方法
 defineExpose({
     jump(index: number, scrollTop?: number) {
         vListWrapper.value?.parentElement?.scrollTo({
-            top: scrollTop ?? (index === 0 ? 0 : accumulatedHeightArray[index - 1]),
+            top: scrollTop ?? (index === 0 ? 0 : accumulatedHeightArray.value[index - 1]),
         })
     },
-    getStart: () => start.value,
-    getScrollTop: () => _scrollTop
-})
-
-const getTransform = (idx: number) => `translateY(${idx > 0 ? accumulatedHeightArray[idx - 1] : 0}px)`
+    getStart: () => startIndex.value,
+    getScrollTop: () => vListWrapper.value?.parentElement?.scrollTop
+});
 </script>
 
 <template>
-    <div ref="vListWrapper" class="vList-wrapper" id="reader-overlay">
-        <div ref="constHeight" style="position: relative;">
-            <template v-for="item in vList">
-                <slot v-bind="item" :style="{
-                    transform: getTransform(item.id)
-                }"></slot>
-            </template>
+    <div ref="vListWrapper" class="vList-wrapper">
+        <div ref="constHeight">
+            <div :style="{ transform: transform }">
+                <template v-for="item in visibleList" :key="item.id">
+                    <slot v-bind="item" :style="{ height: `${heightList[item.id]}px` }"></slot>
+                </template>
+            </div>
         </div>
     </div>
 </template>

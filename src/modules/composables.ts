@@ -71,7 +71,7 @@ export function usePagination(root: HTMLElement | string, heightArray: Array<num
     const _root = (typeof root === 'string' ? document.querySelector(root) : root) as HTMLElement
     const { clientHeight } = _root
     const curPage = ref(0)
-    const total = ref(Math.ceil(heightArray.reduce((pre, cur) => pre + cur) / clientHeight))
+    const total = ref(Math.ceil(heightArray.reduce((pre, cur) => pre + (cur + 10)) / clientHeight))
 
     const handler = throttled((e: Event) => {
         const { scrollTop } = e.target as HTMLElement
