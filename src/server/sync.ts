@@ -7,21 +7,21 @@ import { parseParasAndImportBook } from '../modules/bookManager';
 
 // const SYNC_RATE = 10 * 1000
 
-// let isOnline = window.navigator.onLine
+let isOnline = window.navigator.onLine
 // let timer = setInterval(sync, SYNC_RATE)
 // isOnline || clearInterval(timer)
 
-// window.ononline = () => {
-//     isOnline = true
-//     timer = setInterval(sync, SYNC_RATE)
-//     console.log("You are now connected to the network.", isOnline);
-// };
+window.ononline = () => {
+    isOnline = true
+    // timer = setInterval(sync, SYNC_RATE)
+    console.log("You are now connected to the network.", isOnline);
+};
 
-// window.onoffline = () => {
-//     isOnline = false
-//     timer && clearInterval(timer)
-//     console.log("You are now unconnected to the network.", isOnline);
-// }
+window.onoffline = () => {
+    isOnline = false
+    // timer && clearInterval(timer)
+    console.log("You are now unconnected to the network.", isOnline);
+}
 
 async function sync() {
     if (!isOnline) return
