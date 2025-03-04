@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import Reader from '../core/Reader.vue';
-import ReaderUI from '../core/ReaderUI.vue';
+import Reader from '../components/Reader.vue';
+import ReaderUI from '../components/ReaderUI.vue';
 import { getCurBook } from '../modules/store';
 import { onActivated, onDeactivated, ref } from 'vue';
-import { Book } from '../core/declare';
-import { useLockBody } from '../modules/composables';
+import { ClientBook } from '../core/declare';
+import { useLockBody } from '../utils/composables';
 
 useLockBody()
 
-const curBook = ref<Book>()
+const curBook = ref<ClientBook>()
 onActivated(() => {
     curBook.value = getCurBook()
 })

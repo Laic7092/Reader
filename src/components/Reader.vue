@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Book } from '../core/declare';
+import { ClientBook } from '../core/declare';
 import { routeBack } from '../modules/router';
 import DynamicHeightVList from './ScrollMode.vue';
-import { useTxtBook } from './book';
+import { useTxtBook } from '../core/book';
 import { setCurBookUtils } from '../modules/store';
 // import { useViewPortSize } from '../modules/composables';
 // import { debounced } from '../modules/utils';
 
 // 使 v-model 必填
 const props = defineProps<{
-    curBook: Book
+    curBook: ClientBook
 }>()
 
 // 提供一个默认值

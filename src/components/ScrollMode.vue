@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { binarySearch } from '../modules/utils';
+import { binarySearch } from '../utils/utils';
 import { curChapterIdx, getCurBook } from '../modules/store';
 
 const props = defineProps<{

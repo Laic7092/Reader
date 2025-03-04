@@ -1,12 +1,7 @@
-// interface Book {
-//     sections: Array<Section>
-//     metaData: MetaData
-// }
-
 export interface BookUtils {
     closeReader: () => void
     changeFontSize: (param: string) => void
-    getCurBook: () => Book
+    getCurBook: () => ClientBook
     jumpChapter: (index: number) => void
     getChapterIdx: () => number
 }
@@ -27,11 +22,24 @@ export interface BookMark {
 export interface Book {
     id: string
     name: string
-    chapterArr: Array<Chapter>
     paraArr: Array<string>
-    charSet: Set<string>
-    heightArr: Array<number>
+    chapterArr?: Array<Chapter>
+    charSet?: Set<string>
+    heightArr?: Array<number>
     bookMarks?: Array<BookMark>
+}
+
+export type ClientBook = Required<Omit<Book, 'bookMarks'>>
+
+export enum CRUD {
+    CREATE = 'CREATE',
+    READ = 'READ',
+    UPDATE = 'UPDATE',
+    DELETE = 'DELETE',
+}
+
+export enum STATUS {
+    READY = 'READY'
 }
 
 // interface MetaData {

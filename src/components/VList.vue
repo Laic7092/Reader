@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { throttled } from '../modules/utils';
+import { throttled } from '../utils/utils';
 
 interface Config {
     catchNum: number

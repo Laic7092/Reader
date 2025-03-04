@@ -1,13 +1,13 @@
 import { ref } from 'vue'
-import { Book, BookUtils } from '../core/declare'
+import { BookUtils, ClientBook } from '../core/declare'
 
-const curBook = ref<Book>()
+const curBook = ref<ClientBook>()
 
 export function getCurBook() {
     return curBook.value
 }
 
-export function setCurBook(book: Book) {
+export function setCurBook(book: ClientBook) {
     curBook.value = book
 }
 

@@ -1,7 +1,8 @@
-import bus, { CRUD, STATUS } from "./pubSub";
+import bus from "../utils/pubSub";
+import { ClientBook, CRUD, STATUS } from '../core/declare';
 import { Book, Chapter } from "../core/declare";
 
-function busEmit(eventType: string, val?: any) {
+function busEmit(eventType: string | number, val?: any) {
   bus.emit(eventType, val);
 }
 
@@ -36,9 +37,9 @@ let db: IDBDatabase | null = null;
   });
 })();
 
-function add(bookData: Book) {
+function create(bookData: Book) {
   if (!db) return;
-  let id = getRandomBookId();
+  let id = bookData.id || getRandomBookId();
   bookData.id = id;
   const { name, heightArr, chapterArr, charSet, paraArr } = bookData;
 
@@ -55,7 +56,7 @@ function add(bookData: Book) {
 
   transaction.oncomplete = () => {
     console.log('数据写入成功');
-    busEmit(CRUD.ADD, bookData);
+    busEmit(CRUD.CREATE, bookData);
   };
 
   transaction.onerror = () => {
@@ -63,7 +64,7 @@ function add(bookData: Book) {
   };
 }
 
-function read(id: string): Promise<Book> {
+function read(id: string): Promise<ClientBook> {
   return new Promise((resolve, reject) => {
     if (!db) {
       reject(new Error('数据库未初始化'));
@@ -186,7 +187,7 @@ function remove(id: string) {
 
   transaction.oncomplete = () => {
     console.log('数据删除成功');
-    busEmit(CRUD.REMOVE, id);
+    busEmit(CRUD.DELETE, id);
   };
 
   transaction.onerror = () => {
@@ -200,5 +201,5 @@ function getRandomBookId() {
   return array[0] + '';
 }
 
-export { add, read, update, readAll, remove };
+export { create, read, update, readAll, remove };
 export type { Book, Chapter };

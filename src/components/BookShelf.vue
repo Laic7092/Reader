@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import ImportBook from './ImportBook.vue';
-import bus, { CRUD, STATUS } from '../modules/pubSub'
+import ImportBook from '../components/ImportBook.vue';
+import bus from '../utils/pubSub'
+import { CRUD, STATUS } from '../core/declare';
 import { readAll, remove, read } from "../modules/indexDb"
-import { Book } from './declare';
+import { Book } from '../core/declare';
 import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
 import { setCurBook } from '../modules/store';
 import { routeTo } from '../modules/router';
+import { setBaseUrl } from '../server'
 
 interface SubMap {
   [key: string]: any
 }
 const subMap: SubMap = {
-  [CRUD.ADD]: (val: any) => {
+  [CRUD.CREATE]: (val: any) => {
     books.value.push(val)
   },
-  [CRUD.REMOVE]: (id: string) => {
+  [CRUD.DELETE]: (id: string) => {
     books.value.splice(books.value.findIndex((book) => book.id === id), 1)
   },
   // [CRUD.UPDATE]: (val: any) => {
@@ -89,6 +91,7 @@ function removeSelection() {
       <button class="mr1" @click="changeMode('normal')">cancel</button>
       <img @click="removeSelection" src="../assets/Delete.svg" class="svg-btn">
     </template>
+    <button @click="setBaseUrl">同步</button>
     <ImportBook />
   </div>
   <template v-if="books.length > 0">

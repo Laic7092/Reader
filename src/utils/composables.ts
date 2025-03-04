@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted, ref, onActivated, onDeactivated, onUpdated } from 'vue'
-import { curChapterIdx } from './store';
+import { curChapterIdx } from '../modules/store';
 import { throttled } from './utils';
 
 export function useViewPortSize(el: HTMLElement | string, handler: (DOMRect: DOMRectReadOnly) => void) {

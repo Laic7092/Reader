@@ -1,7 +1,9 @@
 type Handler = (args?: any) => any
 
-function PubSub(all = new Map<string, Array<Handler>>()) {
-    function on(type: string, handler: Handler) {
+type BusKey = string | number
+
+function PubSub(all = new Map<BusKey, Array<Handler>>()) {
+    function on(type: BusKey, handler: Handler) {
         const handlers = all.get(type)
         if (handlers) {
             handlers.push(handler)
@@ -9,7 +11,7 @@ function PubSub(all = new Map<string, Array<Handler>>()) {
             all.set(type, [handler])
         }
     }
-    function off(type: string, handler: Handler) {
+    function off(type: BusKey, handler: Handler) {
         const handlers = all.get(type)
         if (handlers) {
             if (handler) {
@@ -17,7 +19,7 @@ function PubSub(all = new Map<string, Array<Handler>>()) {
             }
         }
     }
-    function emit(type: string, evt: any) {
+    function emit(type: BusKey, evt: any) {
         const handlers = all.get(type)
         if (handlers) {
             handlers.slice().map(handler => handler(evt))
@@ -30,17 +32,6 @@ function PubSub(all = new Map<string, Array<Handler>>()) {
         off,
         emit
     }
-}
-
-export enum CRUD {
-    ADD = 'add',
-    REMOVE = 'remove',
-    UPDATE = 'update',
-    SEARCH = 'search'
-}
-
-export enum STATUS {
-    READY = 'ready'
 }
 
 const bus = PubSub();

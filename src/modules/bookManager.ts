@@ -1,12 +1,13 @@
-import { add as addToLibrary } from "./indexDb";
+import { create } from "./indexDb";
 import { Chapter } from "../core/declare";
+import { Book } from "../core/declare";
 import chardet from 'chardet';
 import worker from './worker.js?worker'
 
 const fileTypes = "text/plain";
 
 let fileList: FileList | null = null
-function handleBookChange(event: Event) {
+export function handleBookChange(event: Event) {
   const fileInput = event.target as HTMLInputElement;
   fileList = fileInput.files
   if (!fileList) return;
@@ -24,6 +25,21 @@ function handleBookChange(event: Event) {
   Promise.all(allPromise).then(() => {
     fileInput.value = ''
   })
+}
+
+export function parseParasAndImportBook(book: Book) {
+  const { id, name, paraArr } = book
+  const charSet: Set<string> = new Set()
+  paraArr.forEach(para => {
+    for (const char of para) {
+      charSet.has(char) && charSet.add(char)
+    }
+  })
+  for (const element of "Preface") {
+    charSet.add(element)
+  }
+  const chapterArr = divideByChapter(paraArr)
+  useWorker({ chapterArr, paraArr, charSet, name, id })
 }
 
 
@@ -111,13 +127,13 @@ function divideByChapter(paraArr: Array<string>) {
 }
 
 
-function useWorker(book: any) {
+function useWorker(book: Book) {
   const myWorker = new worker();
   myWorker.onmessage = (ev) => {
     console.log('msg-from-worker', ev.data)
     const { key, val } = ev.data
     if (key === 'msHeightArr') {
-      addToLibrary({ ...book, heightArr: val })
+      create({ ...book, heightArr: val })
     }
     if (key)
       window[key] = val
@@ -134,8 +150,4 @@ function useWorker(book: any) {
     canvas: offscreen,
     book
   }, [offscreen]);
-}
-
-export {
-  handleBookChange
 }

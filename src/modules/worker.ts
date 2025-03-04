@@ -1,22 +1,20 @@
-// @ts-nocheck
+import { Book, Chapter } from "./indexDb";
+
 addEventListener('message', (e) => {
     globalThis.postMessage('You said: ' + e.data);
 });
 
 const REM_PX = 16
 
-function count(s: string, c: string) {
-    return (s.match(new RegExp(c, 'g')) || []).length;
-}
-
 interface Config {
     maxWidth: number,
     lineHeight: number,
     fontSize: number,
     fontFamily: string,
+    textIndent: number
 }
 
-let curBook;
+let curBook: any;
 
 // 点号（顿号、逗号、句号、冒号、分号、叹号、问号）、结束引号、结束括号、结束双书名号（书名号乙式）、连接号、间隔号、分隔号不能出现在一行的开头。
 const lineStartProhibition = new Set([
@@ -35,21 +33,17 @@ const lineEndProhibition = new Set([
 ])
 
 const msContentArr: Array<any> = []
-function measureWidthByCharMap(text: string, charWidthMap: Map<string, number>) {
-    if (text === '') return 0
-    return Array.from(text).map(char => charWidthMap.get(char)).reduce((pre, cur) => pre + cur)
-}
 function getPrefixSumByCharMap(text: string, charWidthMap: Map<string, number>) {
-    let sum = []
+    let sum: number[] = []
     Array.from(text).forEach((char, idx) => {
-        sum.push((sum[idx - 1] || 0) + charWidthMap.get(char))
+        sum.push((sum[idx - 1] || 0) + (charWidthMap.get(char) || 0))
     })
     return sum
 }
 
 let ml = 0
 let lm = 0
-function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, config: Config) {
+function measureHeight(text: string, config: Config) {
 
     const { maxWidth, lineHeight, textIndent, fontSize } = config
     const length = text.length
@@ -78,7 +72,7 @@ function measureHeight(ctx: OffscreenCanvasRenderingContext2D, text: string, con
 }
 
 addEventListener('message', (evt) => {
-    const { canvas, width, height, book } = evt.data as { height: number, width: number, canvas: OffscreenCanvas };
+    const { canvas, width, height, book } = evt.data as { height: number, width: number, canvas: OffscreenCanvas, book: Book };
     curBook = book
     canvas.height = height
     canvas.width = width
@@ -104,11 +98,11 @@ addEventListener('message', (evt) => {
     console.time('msHeight')
     let paras = curBook.paraArr
     let chapterIdxSet = new Set()
-    curBook.chapterArr.forEach(chapter => chapterIdxSet.add(chapter.idx))
+    curBook.chapterArr.forEach((chapter: Chapter) => chapterIdxSet.add(chapter.idx))
     let cnt: Array<number> = []
     let _height = config.fontSize
-    paras.forEach((para: string, idx) => {
-        let cur = measureHeight(ctx, para, config)
+    paras.forEach((para: string) => {
+        let cur = measureHeight(para, config)
         _height += cur
         cnt.push(cur)
     });
@@ -125,15 +119,3 @@ addEventListener('message', (evt) => {
         val: cnt
     });
 })
-
-function compare() {
-    const p = document.querySelectorAll('p')
-    const realHeightArr = []
-    p.forEach(ele => realHeightArr.push(ele.clientHeight))
-    for (let i = 0; i < 1000; i++) {
-        if (realHeightArr[i] !== msHeightArr[i]) {
-            console.log(i, realHeightArr[i], msHeightArr[i], realHeightArr[i] > msHeightArr[i])
-            console.log(p[i], msContentArr[i])
-        }
-    }
-}

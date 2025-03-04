@@ -3,8 +3,8 @@ import Drawer from '../components/Drawer.vue';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import VList from '../components/VList.vue';
 import { getCurBookUtils, curChapterIdx } from '../modules/store';
-import { BookUtils } from './declare';
-import { usePagination } from '../modules/composables';
+import { BookUtils } from '../core/declare';
+import { usePagination } from '../utils/composables';
 
 const { closeReader, changeFontSize, getCurBook, jumpChapter } = getCurBookUtils() as BookUtils
 

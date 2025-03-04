@@ -4,7 +4,6 @@ import type { Component } from 'vue'
 import Home from '../pages/Home.vue';
 
 const Read = defineAsyncComponent(() => import('../pages/Read.vue'))
-const Config = defineAsyncComponent(() => import('../pages/Config.vue'))
 
 window.location.hash = '#/'
 
@@ -14,7 +13,6 @@ interface Routes {
 const routes: Routes = {
     '/': Home,
     '/read': Read,
-    '/config': Config
 }
 const currentPath = ref(window.location.hash)
 window.addEventListener('hashchange', () => {

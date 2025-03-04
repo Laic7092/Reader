@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import { lockBody, unLockBody, isInReader } from '../modules/utils';
+import { lockBody, unLockBody, isInReader } from '../utils/utils';
 
 const model = defineModel({ required: true })
 
