@@ -7,7 +7,7 @@ import { Book } from '../core/declare';
 import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
 import { setCurBook } from '../modules/store';
 import { routeTo } from '../modules/router';
-import { setBaseUrl } from '../server'
+// import { setBaseUrl } from '../server/index'
 
 interface SubMap {
   [key: string]: any
@@ -91,7 +91,7 @@ function removeSelection() {
       <button class="mr1" @click="changeMode('normal')">cancel</button>
       <img @click="removeSelection" src="../assets/Delete.svg" class="svg-btn">
     </template>
-    <button @click="setBaseUrl">同步</button>
+    <!-- <button @click="setBaseUrl">同步</button>/ -->
     <ImportBook />
   </div>
   <template v-if="books.length > 0">
