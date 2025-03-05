@@ -1,4 +1,4 @@
-type Handler = (args?: any) => any
+type Handler = (...args: any) => any
 
 type BusKey = string | number
 
@@ -19,10 +19,10 @@ function PubSub(all = new Map<BusKey, Array<Handler>>()) {
             }
         }
     }
-    function emit(type: BusKey, evt: any) {
+    function emit(type: BusKey, ...evt: any) {
         const handlers = all.get(type)
         if (handlers) {
-            handlers.slice().map(handler => handler(evt))
+            handlers.slice().map(handler => handler(...evt))
         }
     }
 

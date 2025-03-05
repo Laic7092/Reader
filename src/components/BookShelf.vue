@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ImportBook from '../components/ImportBook.vue';
 import bus from '../utils/pubSub'
-import { CRUD, STATUS } from '../core/declare';
+import { CRUD, Origin, STATUS } from '../core/declare';
 import { readAll, remove, read } from "../modules/indexDb"
 import { Book } from '../core/declare';
 import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
@@ -63,7 +63,7 @@ async function pickBook(book: BookInShelf) {
 }
 
 function removeBook(id: string) {
-  remove(id)
+  remove(id, Origin.client)
 }
 
 const curMode = ref('normal')

@@ -1,5 +1,5 @@
 import { create } from "./indexDb";
-import { Chapter } from "../core/declare";
+import { Chapter, Origin } from "../core/declare";
 import { Book } from "../core/declare";
 import chardet from 'chardet';
 import worker from './worker.js?worker'
@@ -27,19 +27,23 @@ export function handleBookChange(event: Event) {
   })
 }
 
-export function parseParasAndImportBook(book: Book) {
-  const { id, name, paraArr } = book
-  const charSet: Set<string> = new Set()
-  paraArr.forEach(para => {
-    for (const char of para) {
-      charSet.has(char) && charSet.add(char)
-    }
-  })
-  for (const element of "Preface") {
-    charSet.add(element)
-  }
-  const chapterArr = divideByChapter(paraArr)
-  useWorker({ chapterArr, paraArr, charSet, name, id })
+// export function parseParasAndImportBook(book: Book) {
+//   const { id, name, paraArr } = book
+//   const charSet: Set<string> = new Set()
+//   paraArr.forEach(para => {
+//     for (const char of para) {
+//       charSet.has(char) && charSet.add(char)
+//     }
+//   })
+//   for (const element of "Preface") {
+//     charSet.add(element)
+//   }
+//   const chapterArr = divideByChapter(paraArr)
+//   useWorker({ chapterArr, paraArr, charSet, name, id })
+// }
+
+export function createMetaBook(book: Book, origin: Origin) {
+  create(book, origin)
 }
 
 

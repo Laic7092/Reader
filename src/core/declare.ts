@@ -22,7 +22,7 @@ export interface BookMark {
 export interface Book {
     id: string
     name: string
-    paraArr: Array<string>
+    paraArr?: Array<string>
     chapterArr?: Array<Chapter>
     charSet?: Set<string>
     heightArr?: Array<number>
@@ -40,6 +40,11 @@ export enum CRUD {
 
 export enum STATUS {
     READY = 'READY'
+}
+
+export enum Origin {
+    client,
+    server
 }
 
 // interface MetaData {

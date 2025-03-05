@@ -1,10 +1,6 @@
 import bus from "../utils/pubSub";
-import { ClientBook, CRUD, STATUS } from '../core/declare';
+import { ClientBook, CRUD, Origin, STATUS } from '../core/declare';
 import { Book, Chapter } from "../core/declare";
-
-function busEmit(eventType: string | number, val?: any) {
-  bus.emit(eventType, val);
-}
 
 const databaseName = 'library';
 let db: IDBDatabase | null = null;
@@ -20,7 +16,7 @@ let db: IDBDatabase | null = null;
       db = request.result;
       console.log('数据库打开成功');
       resolve(db);
-      busEmit(STATUS.READY);
+      bus.emit(STATUS.READY);
     };
     request.onupgradeneeded = function (event) {
       db = (event.target as any)?.result as IDBDatabase;
@@ -37,7 +33,7 @@ let db: IDBDatabase | null = null;
   });
 })();
 
-function create(bookData: Book) {
+function create(bookData: Book, origin: Origin = Origin.client) {
   if (!db) return;
   let id = bookData.id || getRandomBookId();
   bookData.id = id;
@@ -56,7 +52,7 @@ function create(bookData: Book) {
 
   transaction.oncomplete = () => {
     console.log('数据写入成功');
-    busEmit(CRUD.CREATE, bookData);
+    bus.emit(CRUD.CREATE, bookData, origin);
   };
 
   transaction.onerror = () => {
@@ -172,7 +168,7 @@ function update(id: string, bookData: Book) {
   };
 }
 
-function remove(id: string) {
+function remove(id: string, origin: Origin = Origin.client) {
   if (!db) return;
 
   const transaction = db.transaction(['book_metadata', 'book_files'], 'readwrite');
@@ -187,7 +183,7 @@ function remove(id: string) {
 
   transaction.oncomplete = () => {
     console.log('数据删除成功');
-    busEmit(CRUD.DELETE, id);
+    bus.emit(CRUD.DELETE, id, origin);
   };
 
   transaction.onerror = () => {

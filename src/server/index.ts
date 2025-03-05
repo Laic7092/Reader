@@ -15,7 +15,7 @@ export function setBaseUrl() {
 }
 
 interface Log {
-    id: string,
+    id_ref: string,
     timestamp: number
     type: string
 }
