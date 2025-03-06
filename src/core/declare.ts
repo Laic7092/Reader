@@ -22,8 +22,11 @@ export interface BookMark {
 export interface Book {
     id: string
     name: string
+    chapterArr: Array<Chapter>
+    createTm: number
+    chunkNum: number
+    updateTm?: number
     lineArr?: Array<string>
-    chapterArr?: Array<Chapter>
     charSet?: Set<string>
     heightArr?: Array<number>
     bookMarks?: Array<BookMark>

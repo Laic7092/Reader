@@ -3,6 +3,7 @@ import { Book, CRUD, Log, Origin, STATUS } from '../core/declare';
 import { createBook, deleteBook, readBook, readAllBook, uploadChunks } from './book'
 import { checkConfig, getOperateLog } from './index'
 import { readAllMetadata, deleteMetadata, readMetadata, createMetadata, readFileChunk } from '../modules/indexDb';
+import { serverImport } from '../modules/bookManager';
 
 const SYNC_RATE = 15 * 1000
 
@@ -57,12 +58,9 @@ async function sync() {
     }
     checkConfig()
     const localBooks = await readAllMetadata()
-    const serverIds = serverBooks.map(book => book.id)
-    const localIds = localBooks.map(book => book.id)
 
-    console.log('server', serverIds);
-    console.log('client', localIds);
-
+    console.log('server', serverBooks);
+    console.log('client', localBooks);
 
     const logs = deduplicateRecords(await getOperateLog())
 
@@ -74,8 +72,7 @@ async function sync() {
     console.log('delete', deleteId);
     console.log('update', updateId);
 
-
-    localIds.forEach(async (id) => {
+    localBooks.forEach(async ({ id, createTm }) => {
         if (!createId.has(id) && !deleteId.has(id)) {
             // c有s没有没删除
             const bookData = await readMetadata(id)
@@ -84,16 +81,15 @@ async function sync() {
             uploadChunks(id, chunks)
         } else if (deleteId.has(id)) {
             // c有s已删除
-            debugger
             deleteMetadata(id, Origin.server)
         }
     })
-    serverIds.forEach(async (id) => {
-        if (!deleteId.has(id) && !localIds.includes(id)) {
+    serverBooks.forEach(async ({ id }) => {
+        if (!deleteId.has(id) && localBooks.findIndex(({ id: _id }) => id === _id) === -1) {
             // s有c没有没删除
             const bookData = await readBook(id)
             console.log(bookData);
-            createMetadata(bookData, Origin.server)
+            serverImport(bookData)
         }
     })
 }
@@ -102,8 +98,8 @@ bus.on(STATUS.READY, sync)
 
 bus.on(CRUD.CREATE, (bookData, origin) => {
     if (origin === Origin.client) {
-        const { id, name } = bookData
-        createBook({ id, name })
+        const { id, chapterArr } = bookData
+        createBook({ ...bookData, chapters: JSON.stringify(chapterArr), chapterArr: void (0) })
         readFileChunk(id).then(chunks => uploadChunks(id, chunks))
     }
 })

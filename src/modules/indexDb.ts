@@ -48,7 +48,7 @@ function createMetadata(bookData: Book, origin: Origin = Origin.client) {
   const metadataStore = transaction.objectStore('book_metadata');
 
   // 存储 metadata
-  metadataStore.add({ id, name: bookData.name });
+  metadataStore.add(bookData);
 
   transaction.oncomplete = () => {
     console.log('metadata 写入成功');
@@ -108,7 +108,7 @@ function readMetadata(id: string): Promise<ClientBook> {
 }
 
 // 读取所有书籍 metadata
-function readAllMetadata(): Promise<Array<{ id: string; name: string }>> {
+function readAllMetadata(): Promise<Book[]> {
   return new Promise((resolve, reject) => {
     if (!db) {
       reject(new Error('数据库未初始化'));
@@ -117,16 +117,13 @@ function readAllMetadata(): Promise<Array<{ id: string; name: string }>> {
 
     const transaction = db.transaction('book_metadata', 'readonly');
     const metadataStore = transaction.objectStore('book_metadata');
-    const allBooks: Array<{ id: string; name: string }> = [];
+    const allBooks: Array<Book> = [];
 
     const openCursor = metadataStore.openCursor();
     openCursor.onsuccess = (event) => {
       const cursor = (event.target as IDBRequest).result;
       if (cursor) {
-        allBooks.push({
-          id: cursor.value.id,
-          name: cursor.value.name,
-        });
+        allBooks.push(cursor.value);
         cursor.continue();
       } else {
         resolve(allBooks);
@@ -147,7 +144,7 @@ function updateMetadata(id: string, name: string) {
   const metadataStore = transaction.objectStore('book_metadata');
 
   // 更新 metadata
-  metadataStore.put({ id, name });
+  metadataStore.put({ id, name, updateTm: Date.now() });
 
   transaction.oncomplete = () => {
     console.log('metadata 更新成功');
@@ -209,7 +206,7 @@ function deleteMetadata(id: string, origin: Origin = Origin.client) {
 }
 
 // 添加书籍文件分块
-function addFileChunk(id: string, chunk: string, chunkIndex: number) {
+function addFileChunk(id: string, chunk: ArrayBuffer, chunkIndex: number) {
   if (!db) return;
 
   const transaction = db.transaction('book_files', 'readwrite');

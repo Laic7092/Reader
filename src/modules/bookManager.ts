@@ -1,10 +1,9 @@
 import { createMetadata, addFileChunk, addParseData } from "./indexDb";
-import type { Chapter } from "../core/declare";
-import chardet from 'chardet';
+import { Origin, type Book, type Chapter } from "../core/declare";
 import worker from './worker.js?worker'
-import { sha1 } from 'js-sha1';
+import { getCharCode, calculateHash, splitTextFileByLine } from "../utils/utils";
+import { getChunk } from "../server/book";
 
-const DEFAULT_CHARCODE = 'UTF-8'
 const REM_PX = 16
 
 let fileList: FileList | null = null
@@ -25,8 +24,11 @@ export function handleBookChange(event: Event) {
 }
 
 // 客户端导入-全部解析并且存库
-async function clientImport(file: File) {
-  return Promise.all([calculateHash(file), getCharCode(file)]).then(([hash, encoding]) => {
+async function clientImport(file: File, origin = Origin.client) {
+  const buffer = await file.arrayBuffer()
+  console.warn('bufferSize', buffer.byteLength);
+
+  return Promise.all([calculateHash(buffer), getCharCode(buffer)]).then(([hash, encoding]) => {
     const fileReader = new FileReader();
     fileReader.readAsText(file, encoding);
     fileReader.onload = async (event) => {
@@ -35,132 +37,25 @@ async function clientImport(file: File) {
         const lineArr = getLineArrByText(result)
         const chapterArr = getChapterArrByLineArr(lineArr)
         const charSet = getCharSetByText(result)
-        const chunks = await splitFileByLinesAndSize(file, 1024 * 32, encoding)
+        const chunks = await splitTextFileByLine(file, 1024 * 256, encoding)
         chunks.forEach((chunk, index) => addFileChunk(hash, chunk, index))
         const heightArr = await getHeightArrByLineArr(lineArr, charSet)
         addParseData(hash, { heightArr, chapterArr, lineArr })
-        createMetadata({ id: hash, name: file.name })
+        createMetadata({ id: hash, name: file.name, createTm: Date.now(), chapterArr, chunkNum: chunks.length }, origin)
       }
     }
 
   })
 }
 
-// 文件分块
-async function splitFileByLinesAndSize(file: File, blockSize: number, encoding: string = 'utf-8'): Promise<string[]> {
-  console.time('splitFileByLinesAndSize');
-
-  return new Promise((resolve, reject) => {
-    const chunks: string[] = [];
-    let buffer = '';
-    let offset = 0;
-
-    const reader = new FileReader();
-    const textDecoder = new TextDecoder(encoding);
-
-    reader.onload = () => {
-      if (!(reader.result instanceof ArrayBuffer)) {
-        reject(new Error('Failed to read file as ArrayBuffer.'));
-        return;
-      }
-
-      // 使用 TextDecoder 解码 ArrayBuffer
-      const text = textDecoder.decode(reader.result, { stream: true });
-      buffer += text;
-
-      // 检查缓冲区是否超过块大小
-      while (buffer.length >= blockSize) {
-        // 查找最后一个换行符的位置
-        let lastNewlineIndex = buffer.lastIndexOf('\n', blockSize);
-        if (lastNewlineIndex === -1) {
-          lastNewlineIndex = buffer.lastIndexOf('\r\n', blockSize);
-        }
-
-        // 如果找到换行符，切割并生成一个块
-        if (lastNewlineIndex !== -1) {
-          const validChunk = buffer.slice(0, lastNewlineIndex + 1);
-          chunks.push(validChunk);
-          buffer = buffer.slice(lastNewlineIndex + 1); // 保留剩余部分
-        } else {
-          // 如果没有找到换行符，直接按块大小切割（可能破坏行完整性）
-          const validChunk = buffer.slice(0, blockSize);
-          chunks.push(validChunk);
-          buffer = buffer.slice(blockSize);
-        }
-      }
-
-      // 继续读取下一块
-      offset += blockSize;
-      if (offset < file.size) {
-        const blob = file.slice(offset, offset + blockSize);
-        reader.readAsArrayBuffer(blob);
-      } else {
-        // 返回剩余的缓冲区内容
-        if (buffer) {
-          chunks.push(buffer);
-        }
-        resolve(chunks);
-        console.timeEnd('splitFileByLinesAndSize');
-      }
-    };
-
-    reader.onerror = () => {
-      reject(new Error('Failed to read file.'));
-    };
-
-    // 开始读取第一块
-    const blob = file.slice(offset, offset + blockSize);
-    reader.readAsArrayBuffer(blob);
-  });
-}
-
-// 计算文件hash
-async function calculateHash(file: File): Promise<string> {
-  console.time('hash')
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (reader.result instanceof ArrayBuffer) {
-        try {
-          const hash = sha1(reader.result)
-          resolve(hash);
-        } catch (error) {
-          console.error(error)
-          reject(new Error('Failed to calculate SHA-1 hash.'));
-        }
-      } else {
-        reject(new Error('Failed to read file as ArrayBuffer.'));
-      }
-    };
-
-    reader.onerror = () => {
-      reject(new Error('Failed to read file.'));
-    };
-
-    // 读取整个文件为 ArrayBuffer
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-async function getCharCode(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const fileReader = new FileReader();
-    fileReader.onload = (event) => {
-      const buffer = event.target?.result;
-      if (buffer instanceof ArrayBuffer) {
-        const analyse = chardet.analyse(new Uint8Array(buffer.byteLength > 1024 ? buffer.slice(0, 1024) : buffer))
-        resolve(analyse.length > 0 ? analyse[0].name : DEFAULT_CHARCODE)
-      } else {
-        resolve(DEFAULT_CHARCODE)
-      }
-    };
-    fileReader.onerror = (event) => {
-      reject(event)
-    }
-    fileReader.readAsArrayBuffer(file)
-  })
-
+export async function serverImport(metadata: Book) {
+  const { chunkNum, id } = metadata
+  const buffers = []
+  for (let index = 0; index < chunkNum; index++) {
+    const buffer = await getChunk(id, index)
+    buffers.push(buffer)
+  }
+  clientImport(new File(buffers, metadata.name), Origin.server)
 }
 
 // 从text获取所有line

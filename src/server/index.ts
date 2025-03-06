@@ -14,18 +14,18 @@ export function checkConfig() {
 }
 
 export const myFetch = (url: string, init?: RequestInit): Promise<Response> => {
-    if (localStorage.getItem(AUTH_KEY) === null) {
-        const token = window.prompt('请输入Basic ')
-        token && localStorage.setItem(AUTH_KEY, token)
-    }
-    let _init = init || {}
-    _init.headers = {
-        ...(_init.headers || {}),
-    }
-    // @ts-ignore
-    _init.headers[AUTH_KEY] = localStorage.getItem(AUTH_KEY)
-    // @ts-ignore
-    delete init.headers.credentials
+    // if (localStorage.getItem(AUTH_KEY) === null) {
+    //     const token = window.prompt('请输入Basic ')
+    //     token && localStorage.setItem(AUTH_KEY, token)
+    // }
+    // let _init = init || {}
+    // _init.headers = {
+    //     ...(_init.headers || {}),
+    // }
+    // // @ts-ignore
+    // _init.headers[AUTH_KEY] = localStorage.getItem(AUTH_KEY)
+    // // @ts-ignore
+    // delete init.headers.credentials
     return fetch(url, init)
 }
 

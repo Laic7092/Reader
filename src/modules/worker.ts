@@ -28,7 +28,14 @@ const lineEndProhibition = new Set([
     "（", "〈", "《"
 ])
 
-const msContentArr: Array<any> = []
+const findValidBreakPoint = (text: string, i: number, minIndex: number) => {
+    const oi = i
+    while (i > minIndex &&
+        (lineStartProhibition.has(text[i]) || lineEndProhibition.has(text[i - 1]))
+    ) i--
+    return i > minIndex ? i : oi
+}
+
 const charWidthMap = new Map()
 function getPrefixSumByCharMap(text: string, charWidthMap: Map<string, number>) {
     let sum: number[] = []
@@ -38,8 +45,6 @@ function getPrefixSumByCharMap(text: string, charWidthMap: Map<string, number>) 
     return sum
 }
 
-let ml = 0
-let lm = 0
 function measureHeight(text: string, config: Config) {
 
     const { maxWidth, lineHeight, textIndent, fontSize } = config
@@ -57,7 +62,7 @@ function measureHeight(text: string, config: Config) {
         if (prefixSum[i] - (prefixSum[lineHeadIndex - 1] || 0) < _maxWidth) {
             i++
         } else {
-            while (lineStartProhibition.has(text[i]) || lineEndProhibition.has(text[i - 1])) i--
+            i = findValidBreakPoint(text, i, lineHeadIndex)
             lineCount === 0 && (_maxWidth = maxWidth)
             lineCount++
             lineHeadIndex = i
@@ -85,7 +90,6 @@ addEventListener('message', (evt) => {
     console.time('charset')
     ctx.font = `${config.fontSize}px ${config.fontFamily}`;
     charSet.forEach(char => charWidthMap.set(char, ctx.measureText(char).width))
-    console.log(charWidthMap)
     console.timeEnd('charset')
     console.time('msHeight')
     let cnt: Array<number> = []
@@ -95,14 +99,8 @@ addEventListener('message', (evt) => {
         _height += cur
         cnt.push(cur)
     });
-    console.log(lm, ml);
-
     console.timeEnd('msHeight')
 
-    globalThis.postMessage({
-        key: 'msContentArr',
-        val: msContentArr
-    });
     globalThis.postMessage({
         key: 'msHeightArr',
         val: cnt

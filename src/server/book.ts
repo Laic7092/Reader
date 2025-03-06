@@ -105,12 +105,12 @@ export const deleteBook = async (id: string): Promise<void> => {
 export const uploadChunks = async (id: string, chunks: Chunk[]) => {
     chunks.forEach(async ({ chunk, chunkIndex }) => {
         try {
-            const response = await myFetch(`${API_BASE_URL}/book-files/${id}`, {
+            const response = await myFetch(`${API_BASE_URL}/book-files/${id}/${chunkIndex}`, {
                 method: 'POST',
+                body: chunk,
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/octet-stream', // 必须设置
                 },
-                body: JSON.stringify({ data: chunk, chunkIndex }),
                 credentials: 'include', // 确保浏览器发送认证信息
             });
 
@@ -137,7 +137,7 @@ export const getChunk = async (id: string, chunkIndex: number) => {
             throw new Error(`Failed to add book: ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const data = await response.arrayBuffer();
         return data;
     } catch (error) {
         console.error('Error adding book:', error);
