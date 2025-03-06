@@ -102,7 +102,7 @@ export async function getCharCode(buffer: ArrayBuffer): Promise<string> {
     })
 }
 
-export async function splitTextFileByLine(_buffer: ArrayBuffer, chunkSize: number, encoding = 'utf-8', logText = false) {
+export function splitTextFileByLine(_buffer: ArrayBuffer, chunkSize: number, encoding = 'utf-8', logText = false) {
     console.time('chunk')
     const chunks = [];
     const chunkTexts = []
