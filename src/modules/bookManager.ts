@@ -37,7 +37,7 @@ async function clientImport(file: File, origin = Origin.client) {
         const lineArr = getLineArrByText(result)
         const chapterArr = getChapterArrByLineArr(lineArr)
         const charSet = getCharSetByText(result)
-        const chunks = await splitTextFileByLine(file, 1024 * 256, encoding)
+        const chunks = await splitTextFileByLine(buffer, 1024 * 256, encoding)
         chunks.forEach((chunk, index) => addFileChunk(hash, chunk, index))
         const heightArr = await getHeightArrByLineArr(lineArr, charSet)
         addParseData(hash, { heightArr, chapterArr, lineArr })

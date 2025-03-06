@@ -102,20 +102,20 @@ export async function getCharCode(buffer: ArrayBuffer): Promise<string> {
     })
 }
 
-export async function splitTextFileByLine(file: File, chunkSize: number, encoding = 'utf-8', logText = false) {
+export async function splitTextFileByLine(_buffer: ArrayBuffer, chunkSize: number, encoding = 'utf-8', logText = false) {
     console.time('chunk')
     const chunks = [];
     const chunkTexts = []
     let offset = 0;
+    const byteLength = _buffer.byteLength
 
-    while (offset < file.size) {
+    while (offset < byteLength) {
         // 读取当前块
-        const blob = file.slice(offset, offset + chunkSize);
-        const buffer = await blob.arrayBuffer();
+        const buffer = _buffer.slice(offset, offset + chunkSize)
         const uint8Array = new Uint8Array(buffer);
 
         // 最后的分块
-        if (offset + chunkSize >= file.size) {
+        if (offset + chunkSize >= byteLength) {
             logText && chunkTexts.push(new TextDecoder(encoding).decode(buffer))
             chunks.push(buffer);
             offset += uint8Array.length;
