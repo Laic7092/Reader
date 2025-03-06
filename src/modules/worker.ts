@@ -1,10 +1,8 @@
-import { Book, Chapter } from "./indexDb";
+import type { Msg } from "../core/declare";
 
 addEventListener('message', (e) => {
     globalThis.postMessage('You said: ' + e.data);
 });
-
-const REM_PX = 16
 
 interface Config {
     maxWidth: number,
@@ -13,8 +11,6 @@ interface Config {
     fontFamily: string,
     textIndent: number
 }
-
-let curBook: any;
 
 // 点号（顿号、逗号、句号、冒号、分号、叹号、问号）、结束引号、结束括号、结束双书名号（书名号乙式）、连接号、间隔号、分隔号不能出现在一行的开头。
 const lineStartProhibition = new Set([
@@ -33,6 +29,7 @@ const lineEndProhibition = new Set([
 ])
 
 const msContentArr: Array<any> = []
+const charWidthMap = new Map()
 function getPrefixSumByCharMap(text: string, charWidthMap: Map<string, number>) {
     let sum: number[] = []
     Array.from(text).forEach((char, idx) => {
@@ -49,7 +46,6 @@ function measureHeight(text: string, config: Config) {
     const length = text.length
 
     let _maxWidth = config.maxWidth - textIndent * fontSize
-    const charWidthMap = curBook.charWidthMap
     const prefixSum = getPrefixSumByCharMap(text, charWidthMap)
 
     let lineCount = 0
@@ -72,8 +68,7 @@ function measureHeight(text: string, config: Config) {
 }
 
 addEventListener('message', (evt) => {
-    const { canvas, width, height, book } = evt.data as { height: number, width: number, canvas: OffscreenCanvas, book: Book };
-    curBook = book
+    const { canvas, width, height, lineArr, charSet } = evt.data as Msg;
     canvas.height = height
     canvas.width = width
     const ctx: OffscreenCanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -83,25 +78,19 @@ addEventListener('message', (evt) => {
         fontSize: 20,
         fontFamily: 'system-ui',
         lineHeight: 1.5,
-        maxWidth: width - 4 * REM_PX,
+        maxWidth: width,
         textIndent: 2,
     }
 
     console.time('charset')
     ctx.font = `${config.fontSize}px ${config.fontFamily}`;
-    const charSet = curBook.charSet as Set<string>
-    const charWidthMap = new Map()
     charSet.forEach(char => charWidthMap.set(char, ctx.measureText(char).width))
     console.log(charWidthMap)
-    curBook.charWidthMap = charWidthMap
     console.timeEnd('charset')
     console.time('msHeight')
-    let paras = curBook.paraArr
-    let chapterIdxSet = new Set()
-    curBook.chapterArr.forEach((chapter: Chapter) => chapterIdxSet.add(chapter.idx))
     let cnt: Array<number> = []
     let _height = config.fontSize
-    paras.forEach((para: string) => {
+    lineArr.forEach((para: string) => {
         let cur = measureHeight(para, config)
         _height += cur
         cnt.push(cur)

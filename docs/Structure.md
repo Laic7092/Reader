@@ -110,7 +110,31 @@ Reader，毋庸置疑的核心之一，首要功能：
 
 ## epub格式到底如何支持？
 现在有两个选择，一个可能简单点。
-先说简单的，导入epub并解析整个目录以及内容，按照现有的Book接口，提取`chapterArray`,`paraArray`,并且按照默认配置计算出`heightArray`。做完这些，就可以把这个epub当作和txt一样的东西，完全兼容现在的txt格式阅读。
+先说简单的，导入epub并解析整个目录以及内容，按照现有的Book接口，提取`chapterArray`,`lineArray`,并且按照默认配置计算出`heightArray`。做完这些，就可以把这个epub当作和txt一样的东西，完全兼容现在的txt格式阅读。
 但是这个简单的方法，有一个明显的缺点。它不再是完整的epub，而是提取了目录和内容的epub，并且还会有部分隐患。如果epub内部存在图片等非纯文本内容，这也会导致内容不完整。还有就是epub本分附带的css也会随之消失，这很不epub。
 再说难弄点的，就是按照之前写的demo，重写`loader`,`render`，并且现有的高度计算方案又完全行不通了，需要另外考虑。
 
+## 同步-流程分析梳理(2025-03-05)
+脑袋昏昏的，修改了数据库结构，现在支持分块了，所以先整理一下这个`book`到底要怎么玩。
+先考虑`client only`
+1. 用户导入书籍
+    1. 计算hash，创建`metaBook`，存如`metaData store`
+    2. 源文件分块，存入`file store`
+    3. 源文件解析，得到`lineArr`,`charSet`,`chapterArr`，随后调用`worker`计算出`heightArr`，存入`parseData store`
+2. 用户删除书籍，简单来说，根据id，删除三个`store`中的数据。
+3. 用户更新书籍，即更新`metaData`，暂无。。。
+4. 用户阅读书籍，即从`parseData store`里面取数据
+
+再加上`server`
+1. 导入完成后，两个接口，`createBook`仅传入`metaData`，紧接是`uploadBookFileChunks`，上传分块。
+2. 删除略
+3. 更新同理,仅更新`metaData`
+4. 阅读算是重点，即使同步仅仅维护`meatData`，当用户点击一本在本地不存在的书籍
+    1. 调用`getBookChunkByIdAndChunkIndex`，通过`id`和`chunkIndex`，从`server`获取分块文件
+    2. 接下来是解析，同客户端的1.3
+
+因为之前没有考虑到这些，我的数据库，阅读器全都还不太能支持分块，需要重新设计下结构。
+从`parseData`的角度来看：
+1. `charSet`,`lineArr`,可以分块都可以解析得并单独计算出`heightArr`
+2. `chapterArr`，不能完全依靠分块，考虑移到`metaData`，并关联行号，或者再加上分块号？
+3. 对于分块没有加载完全的book，滚动条的总高度应该渐进增加，并在分块加载完全后，达到现有状态。（充分利用vue响应式）

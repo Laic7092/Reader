@@ -1,13 +1,14 @@
 import bus from "../utils/pubSub";
-import { ClientBook, CRUD, Origin, STATUS } from '../core/declare';
-import { Book, Chapter } from "../core/declare";
+import type { Book, Chapter, ClientBook, Chunk } from "../core/declare";
+import { CRUD, Origin, STATUS } from "../core/declare"
 
 const databaseName = 'library';
 let db: IDBDatabase | null = null;
 
-(function openOrCreatIDB() {
+// 初始化 IndexedDB
+(function openOrCreateIDB() {
   return new Promise((resolve, reject) => {
-    const request = window.indexedDB.open(databaseName, 2); // 升级版本号
+    const request = window.indexedDB.open(databaseName);
     request.onerror = function () {
       console.log('数据库打开报错');
       reject();
@@ -22,94 +23,92 @@ let db: IDBDatabase | null = null;
       db = (event.target as any)?.result as IDBDatabase;
       if (!db.objectStoreNames.contains('book_metadata')) {
         // 创建 metadata store
-        const metadataStore = db.createObjectStore('book_metadata', { keyPath: 'id' });
-        metadataStore.createIndex('name', 'name', { unique: false }); // 为 name 字段创建索引
+        db.createObjectStore('book_metadata', { keyPath: 'id' });
       }
       if (!db.objectStoreNames.contains('book_files')) {
         // 创建 files store
-        db.createObjectStore('book_files', { keyPath: 'id' });
+        const filesStore = db.createObjectStore('book_files', { autoIncrement: true });
+        filesStore.createIndex('id', 'id', { unique: false }); // 添加 id 索引
+      }
+      if (!db.objectStoreNames.contains('book_parseData')) {
+        // 创建 parseData store
+        db.createObjectStore('book_parseData', { keyPath: 'id' });
       }
     };
   });
 })();
 
-function create(bookData: Book, origin: Origin = Origin.client) {
+// 创建书籍 metadata
+function createMetadata(bookData: Book, origin: Origin = Origin.client) {
   if (!db) return;
-  let id = bookData.id || getRandomBookId();
+  const id = bookData.id || getRandomBookId();
   bookData.id = id;
-  const { name, heightArr, chapterArr, charSet, paraArr } = bookData;
 
-  // 将 metadata 和 files 分开存储
-  const transaction = db.transaction(['book_metadata', 'book_files'], 'readwrite');
+  const transaction = db.transaction('book_metadata', 'readwrite');
   const metadataStore = transaction.objectStore('book_metadata');
-  const filesStore = transaction.objectStore('book_files');
 
   // 存储 metadata
-  metadataStore.add({ id, name });
-
-  // 存储 files
-  filesStore.add({ id, heightArr, chapterArr, charSet, paraArr });
+  metadataStore.add({ id, name: bookData.name });
 
   transaction.oncomplete = () => {
-    console.log('数据写入成功');
+    console.log('metadata 写入成功');
     bus.emit(CRUD.CREATE, bookData, origin);
   };
 
   transaction.onerror = () => {
-    console.log('数据写入失败');
+    console.log('metadata 写入失败');
   };
 }
 
-function read(id: string): Promise<ClientBook> {
+// 读取书籍 metadata
+function readMetadata(id: string): Promise<ClientBook> {
   return new Promise((resolve, reject) => {
     if (!db) {
       reject(new Error('数据库未初始化'));
       return;
     }
 
-    const transaction = db.transaction(['book_metadata', 'book_files']);
+    const transaction = db.transaction(['book_metadata', 'book_parseData'], 'readonly');
     const metadataStore = transaction.objectStore('book_metadata');
-    const filesStore = transaction.objectStore('book_files');
+    const parseDataStore = transaction.objectStore('book_parseData');
+
+    const book: any = {}
 
     // 读取 metadata
     const metadataRequest = metadataStore.get(id);
-    const filesRequest = filesStore.get(id);
-
     metadataRequest.onsuccess = () => {
       if (!metadataRequest.result) {
-        reject(new Error('未找到书籍'));
+        reject(new Error('未找到书籍 metadata'));
         return;
       }
-
-      filesRequest.onsuccess = () => {
-        if (!filesRequest.result) {
-          reject(new Error('未找到书籍文件'));
-          return;
-        }
-
-        // 合并 metadata 和 files
-        resolve({
-          id: metadataRequest.result.id,
-          name: metadataRequest.result.name,
-          heightArr: filesRequest.result.heightArr,
-          chapterArr: filesRequest.result.chapterArr,
-          charSet: filesRequest.result.charSet,
-          paraArr: filesRequest.result.paraArr,
-        });
-      };
-
-      filesRequest.onerror = () => {
-        reject(new Error('读取书籍文件失败'));
-      };
+      book.metadata = metadataRequest.result;
     };
 
-    metadataRequest.onerror = () => {
-      reject(new Error('读取书籍失败'));
+    // 读取 parseData
+    const parseDataRequest = parseDataStore.get(id);
+    parseDataRequest.onsuccess = () => {
+      if (!parseDataRequest.result) {
+        reject(new Error('未找到书籍 parseData'));
+        return;
+      }
+      book.parseData = parseDataRequest.result;
+    };
+
+    transaction.oncomplete = () => {
+      resolve({
+        ...book.metadata,
+        ...book.parseData
+      });
+    };
+
+    transaction.onerror = () => {
+      reject(new Error('读取书籍数据失败'));
     };
   });
 }
 
-function readAll(): Promise<Array<{ id: string; name: string }>> {
+// 读取所有书籍 metadata
+function readAllMetadata(): Promise<Array<{ id: string; name: string }>> {
   return new Promise((resolve, reject) => {
     if (!db) {
       reject(new Error('数据库未初始化'));
@@ -140,62 +139,183 @@ function readAll(): Promise<Array<{ id: string; name: string }>> {
   });
 }
 
-function update(id: string, bookData: Book) {
+// 更新书籍 metadata
+function updateMetadata(id: string, name: string) {
   if (!db) return;
 
-  const transaction = db.transaction(['book_metadata', 'book_files'], 'readwrite');
+  const transaction = db.transaction('book_metadata', 'readwrite');
   const metadataStore = transaction.objectStore('book_metadata');
-  const filesStore = transaction.objectStore('book_files');
 
   // 更新 metadata
-  metadataStore.put({ id, name: bookData.name });
-
-  // 更新 files
-  filesStore.put({
-    id,
-    heightArr: bookData.heightArr,
-    chapterArr: bookData.chapterArr,
-    charSet: bookData.charSet,
-    paraArr: bookData.paraArr,
-  });
+  metadataStore.put({ id, name });
 
   transaction.oncomplete = () => {
-    console.log('数据更新成功');
+    console.log('metadata 更新成功');
   };
 
   transaction.onerror = () => {
-    console.log('数据更新失败');
+    console.log('metadata 更新失败');
   };
 }
 
-function remove(id: string, origin: Origin = Origin.client) {
+// 删除书籍 metadata
+function deleteMetadata(id: string, origin: Origin = Origin.client) {
   if (!db) return;
 
-  const transaction = db.transaction(['book_metadata', 'book_files'], 'readwrite');
+  const transaction = db.transaction(['book_metadata', 'book_files', 'book_parseData'], 'readwrite');
   const metadataStore = transaction.objectStore('book_metadata');
   const filesStore = transaction.objectStore('book_files');
+  const parseDataStore = transaction.objectStore('book_parseData');
 
   // 删除 metadata
-  metadataStore.delete(id);
+  const metadataRequest = metadataStore.delete(id);
+  metadataRequest.onsuccess = () => {
+    console.log('metadata 删除成功');
+  };
+  metadataRequest.onerror = () => {
+    console.log('metadata 删除失败');
+  };
 
   // 删除 files
-  filesStore.delete(id);
+  const filesRequest = filesStore.index('id').openCursor(IDBKeyRange.only(id));
+  filesRequest.onsuccess = (event) => {
+    const cursor = (event.target as IDBRequest).result;
+    if (cursor) {
+      cursor.delete();
+      cursor.continue();
+    }
+  };
+  filesRequest.onerror = () => {
+    console.log('files 删除失败');
+  };
+
+  // 删除 parseData
+  const parseDataRequest = parseDataStore.delete(id);
+  parseDataRequest.onsuccess = () => {
+    console.log('parseData 删除成功');
+  };
+  parseDataRequest.onerror = () => {
+    console.log('parseData 删除失败');
+  };
 
   transaction.oncomplete = () => {
-    console.log('数据删除成功');
+    console.log('书籍数据删除成功');
     bus.emit(CRUD.DELETE, id, origin);
   };
 
   transaction.onerror = () => {
-    console.log('数据删除失败');
+    console.log('书籍数据删除失败');
   };
 }
 
+// 添加书籍文件分块
+function addFileChunk(id: string, chunk: string, chunkIndex: number) {
+  if (!db) return;
+
+  const transaction = db.transaction('book_files', 'readwrite');
+  const filesStore = transaction.objectStore('book_files');
+
+  // 存储文件分块
+  filesStore.add({ id, chunk, chunkIndex });
+
+  transaction.oncomplete = () => {
+    console.log('文件分块写入成功');
+  };
+
+  transaction.onerror = () => {
+    console.log('文件分块写入失败');
+  };
+}
+
+// 读取书籍文件分块
+function readFileChunk(id: string, chunkIndex: number): Promise<Chunk>;
+function readFileChunk(id: string): Promise<Chunk[]>;
+function readFileChunk(id: string, chunkIndex?: number): Promise<Chunk | Chunk[]> {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      reject(new Error('数据库未初始化'));
+      return;
+    }
+
+    const transaction = db.transaction('book_files', 'readonly');
+    const filesStore = transaction.objectStore('book_files');
+
+    const index = filesStore.index('id');
+    const request = index.getAll(IDBKeyRange.only(id));
+
+    request.onsuccess = () => {
+      resolve(chunkIndex
+        ? request.result.find(chunk => chunk.chunkIndex === chunkIndex)
+        : request.result
+      );
+    };
+
+    request.onerror = () => {
+      reject(new Error('读取文件分块失败'));
+    };
+  });
+}
+
+// 添加解析数据
+function addParseData(id: string, parseData: { lineArr: string[], heightArr: number[], chapterArr: Chapter[] }) {
+  if (!db) return;
+
+  const transaction = db.transaction('book_parseData', 'readwrite');
+  const parseDataStore = transaction.objectStore('book_parseData');
+
+  // 存储解析数据
+  parseDataStore.add({ ...parseData, id });
+
+  transaction.oncomplete = () => {
+    console.log('解析数据写入成功');
+  };
+
+  transaction.onerror = () => {
+    console.log('解析数据写入失败');
+  };
+}
+
+// 读取解析数据
+function readParseData(id: string): Promise<ClientBook> {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      reject(new Error('数据库未初始化'));
+      return;
+    }
+
+    const transaction = db.transaction('book_parseData', 'readonly');
+    const parseDataStore = transaction.objectStore('book_parseData');
+
+    const request = parseDataStore.get(id);
+    request.onsuccess = () => {
+      if (!request.result) {
+        reject(new Error('未找到解析数据'));
+        return;
+      }
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(new Error('读取解析数据失败'));
+    };
+  });
+}
+
+// 生成随机书籍 ID
 function getRandomBookId() {
   const array = new Uint32Array(1);
   crypto.getRandomValues(array);
   return array[0] + '';
 }
 
-export { create, read, update, readAll, remove };
-export type { Book, Chapter };
+export {
+  createMetadata,
+  readMetadata,
+  updateMetadata,
+  deleteMetadata,
+  readAllMetadata,
+  addFileChunk,
+  readFileChunk,
+  addParseData,
+  readParseData,
+};

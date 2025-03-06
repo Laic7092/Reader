@@ -3,7 +3,7 @@
 ## 分为三个store，都以id为key
 1. book_metadata: 存放name,bookMark,readRecord
 2. book_file: 存放源文件
-3. book_parseData: 存放paraArr,chapterArr,charSet,heightArr,客户端解析后的数据
+3. book_parseData: 存放lineArr,chapterArr,charSet,heightArr,客户端解析后的数据
 ## 参与同步的库
 1. meatData 轻量 全量同步就好
 2. bookFile 固定 占用大 缓存加唯一标识减少压力

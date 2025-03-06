@@ -1,11 +1,11 @@
-import { Book } from "../core/declare";
-import { API_BASE_URL } from "./index";
+import { Book, Chunk } from "../core/declare";
+import { API_BASE_URL, myFetch } from "./index";
 
 const MODULE_NAME = '/books'
 const BASE_URL = API_BASE_URL + MODULE_NAME
 export const readAllBook = async (): Promise<Book[]> => {
     try {
-        const response = await fetch(BASE_URL, {
+        const response = await myFetch(BASE_URL, {
             credentials: 'include', // 确保浏览器发送认证信息
         });
 
@@ -24,7 +24,7 @@ export const readAllBook = async (): Promise<Book[]> => {
 
 export const readBook = async (id: string): Promise<Book> => {
     try {
-        const response = await fetch(`${BASE_URL}/${id}`, {
+        const response = await myFetch(`${BASE_URL}/${id}`, {
             credentials: 'include', // 确保浏览器发送认证信息
         });
 
@@ -42,7 +42,7 @@ export const readBook = async (id: string): Promise<Book> => {
 
 export const createBook = async (book: Book): Promise<Book> => {
     try {
-        const response = await fetch(BASE_URL, {
+        const response = await myFetch(BASE_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export const createBook = async (book: Book): Promise<Book> => {
 
 export const updateBook = async (id: string, book: Partial<Book>): Promise<Book> => {
     try {
-        const response = await fetch(`${BASE_URL}/${id}`, {
+        const response = await myFetch(`${BASE_URL}/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export const updateBook = async (id: string, book: Partial<Book>): Promise<Book>
 
 export const deleteBook = async (id: string): Promise<void> => {
     try {
-        const response = await fetch(`${BASE_URL}/${id}`, {
+        const response = await myFetch(`${BASE_URL}/${id}`, {
             method: 'DELETE',
             credentials: 'include', // 确保浏览器发送认证信息
         });
@@ -101,3 +101,46 @@ export const deleteBook = async (id: string): Promise<void> => {
         throw error;
     }
 };
+
+export const uploadChunks = async (id: string, chunks: Chunk[]) => {
+    chunks.forEach(async ({ chunk, chunkIndex }) => {
+        try {
+            const response = await myFetch(`${API_BASE_URL}/book-files/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ data: chunk, chunkIndex }),
+                credentials: 'include', // 确保浏览器发送认证信息
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to add book: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error adding book:', error);
+            throw error;
+        }
+    })
+}
+
+export const getChunk = async (id: string, chunkIndex: number) => {
+    try {
+        const response = await myFetch(`${API_BASE_URL}/book-files/${id}/${chunkIndex}`, {
+            credentials: 'include', // 确保浏览器发送认证信息
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to add book: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error adding book:', error);
+        throw error;
+    }
+}

@@ -1,9 +1,8 @@
 import bus from '../utils/pubSub'
-import { Book, CRUD, Origin, STATUS } from '../core/declare';
-import { createBook, deleteBook, readBook, readAllBook } from './book'
+import { Book, CRUD, Log, Origin, STATUS } from '../core/declare';
+import { createBook, deleteBook, readBook, readAllBook, uploadChunks } from './book'
 import { checkConfig, getOperateLog } from './index'
-import { readAll, read, remove } from '../modules/indexDb';
-import { createMetaBook } from '../modules/bookManager';
+import { readAllMetadata, deleteMetadata, readMetadata, createMetadata, readFileChunk } from '../modules/indexDb';
 
 const SYNC_RATE = 15 * 1000
 
@@ -24,6 +23,26 @@ window.onoffline = () => {
 }
 
 
+
+function deduplicateRecords(records: Log[]): Log[] {
+    const recordMap = new Map<string, Log>();
+
+    for (const record of records) {
+        const existingRecord = recordMap.get(record.id_ref);
+
+        // 如果当前记录比已存在的记录更新，则替换
+        if (
+            !existingRecord ||
+            new Date(record.timestamp) > new Date(existingRecord.timestamp)
+        ) {
+            recordMap.set(record.id_ref, record);
+        }
+    }
+
+    // 将 Map 转换为数组并返回
+    return Array.from(recordMap.values());
+}
+
 async function sync() {
     if (!isOnline) return
     let serverBooks: Book[]
@@ -37,7 +56,7 @@ async function sync() {
         return
     }
     checkConfig()
-    const localBooks = await readAll()
+    const localBooks = await readAllMetadata()
     const serverIds = serverBooks.map(book => book.id)
     const localIds = localBooks.map(book => book.id)
 
@@ -45,11 +64,11 @@ async function sync() {
     console.log('client', localIds);
 
 
-    const logs = (await getOperateLog()).map(log => ({ ...log, id: log.id_ref }))
+    const logs = deduplicateRecords(await getOperateLog())
 
-    const createId = new Set(logs.filter(log => log.type === 'CREATE').map(log => log.id))
-    const deleteId = new Set(logs.filter(log => log.type === 'DELETE').map(log => log.id))
-    const updateId = new Set(logs.filter(log => log.type === 'UPDATE').map(log => log.id))
+    const createId = new Set(logs.filter(log => log.type === 'CREATE').map(log => log.id_ref || log.id))
+    const deleteId = new Set(logs.filter(log => log.type === 'DELETE').map(log => log.id_ref || log.id))
+    const updateId = new Set(logs.filter(log => log.type === 'UPDATE').map(log => log.id_ref || log.id))
 
     console.log('create', createId);
     console.log('delete', deleteId);
@@ -59,11 +78,14 @@ async function sync() {
     localIds.forEach(async (id) => {
         if (!createId.has(id) && !deleteId.has(id)) {
             // c有s没有没删除
-            const bookData = await read(id)
+            const bookData = await readMetadata(id)
             createBook(bookData)
+            const chunks = await readFileChunk(id)
+            uploadChunks(id, chunks)
         } else if (deleteId.has(id)) {
             // c有s已删除
-            remove(id, Origin.server)
+            debugger
+            deleteMetadata(id, Origin.server)
         }
     })
     serverIds.forEach(async (id) => {
@@ -71,7 +93,7 @@ async function sync() {
             // s有c没有没删除
             const bookData = await readBook(id)
             console.log(bookData);
-            createMetaBook(bookData, Origin.server)
+            createMetadata(bookData, Origin.server)
         }
     })
 }
@@ -80,8 +102,9 @@ bus.on(STATUS.READY, sync)
 
 bus.on(CRUD.CREATE, (bookData, origin) => {
     if (origin === Origin.client) {
-        const { id, name, paraArr } = bookData
-        createBook({ id, name, paraArr })
+        const { id, name } = bookData
+        createBook({ id, name })
+        readFileChunk(id).then(chunks => uploadChunks(id, chunks))
     }
 })
 bus.on(CRUD.DELETE, (id, origin) => {

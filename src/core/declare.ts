@@ -22,7 +22,7 @@ export interface BookMark {
 export interface Book {
     id: string
     name: string
-    paraArr?: Array<string>
+    lineArr?: Array<string>
     chapterArr?: Array<Chapter>
     charSet?: Set<string>
     heightArr?: Array<number>
@@ -45,6 +45,29 @@ export enum STATUS {
 export enum Origin {
     client,
     server
+}
+
+export interface Msg {
+    height: number,
+    width: number,
+    canvas: OffscreenCanvas,
+    lineArr: string[],
+    charSet: Set<string>
+}
+
+export interface Chunk {
+    id: string
+    chunk: string
+    chunkIndex: number
+}
+
+export interface Log {
+    type: "CREATE" | "DELETE" | "UPDATE";
+    collection: string;
+    id_ref: string;
+    id: string;
+    timestamp: string;
+    details: string | null;
 }
 
 // interface MetaData {

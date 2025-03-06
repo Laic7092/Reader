@@ -55,7 +55,7 @@ setCurBookUtils({
 </script>
 <template>
     <div class="reader-wrapper" :style="style">
-        <DynamicHeightVList class="reader" ref="DVList" :list="curBook.paraArr.map((text, id) => ({ text, id }))"
+        <DynamicHeightVList class="reader" ref="DVList" :list="curBook.lineArr.map((text, id) => ({ text, id }))"
             :height-list="curBook.heightArr">
             <template v-slot="{ text, id, style }">
                 <p :class="{ 'chapter': chapterIdxArr.includes(id) }" :style="style">

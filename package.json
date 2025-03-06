@@ -11,6 +11,7 @@
   "dependencies": {
     "@zip.js/zip.js": "^2.7.52",
     "chardet": "^2.0.0",
+    "js-sha1": "^0.7.0",
     "vue": "^3.5.12"
   },
   "devDependencies": {

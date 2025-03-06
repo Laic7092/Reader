@@ -2,12 +2,11 @@
 import ImportBook from '../components/ImportBook.vue';
 import bus from '../utils/pubSub'
 import { CRUD, Origin, STATUS } from '../core/declare';
-import { readAll, remove, read } from "../modules/indexDb"
+import { readAllMetadata, deleteMetadata, readMetadata } from "../modules/indexDb"
 import { Book } from '../core/declare';
 import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
 import { setCurBook } from '../modules/store';
 import { routeTo } from '../modules/router';
-// import { setBaseUrl } from '../server/index'
 
 interface SubMap {
   [key: string]: any
@@ -48,7 +47,7 @@ interface BookInShelf extends Book {
 
 const books = ref<Array<BookInShelf>>([])
 function init() {
-  readAll().then(res => {
+  readAllMetadata().then(res => {
     console.log('书架初始化完成', res);
     books.value = res.map((book) => ({
       ...book,
@@ -58,12 +57,12 @@ function init() {
 }
 
 async function pickBook(book: BookInShelf) {
-  setCurBook(await read(book.id))
+  setCurBook(await readMetadata(book.id))
   routeTo('/read')
 }
 
 function removeBook(id: string) {
-  remove(id, Origin.client)
+  deleteMetadata(id, Origin.client)
 }
 
 const curMode = ref('normal')
