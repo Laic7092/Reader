@@ -1,6 +1,6 @@
 import type { Log } from "../core/declare"
 
-const AUTH_KEY = 'Authorization'
+// const AUTH_KEY = 'Authorization'
 
 export let API_BASE_URL = localStorage.getItem('API_BASE_URL') || ''
 if (!API_BASE_URL) {

@@ -2,7 +2,7 @@ import bus from '../utils/pubSub'
 import { Book, CRUD, Log, Origin, STATUS } from '../core/declare';
 import { createBook, deleteBook, readBook, readAllBook, uploadChunks } from './book'
 import { checkConfig, getOperateLog } from './index'
-import { readAllMetadata, deleteMetadata, readMetadata, createMetadata, readFileChunk } from '../modules/indexDb';
+import { readAllMetadata, deleteMetadata, readMetadata, readFileChunk } from '../modules/indexDb';
 import { serverImport } from '../modules/bookManager';
 
 const SYNC_RATE = 15 * 1000
@@ -72,7 +72,7 @@ async function sync() {
     console.log('delete', deleteId);
     console.log('update', updateId);
 
-    localBooks.forEach(async ({ id, createTm }) => {
+    localBooks.forEach(async ({ id }) => {
         if (!createId.has(id) && !deleteId.has(id)) {
             // c有s没有没删除
             const bookData = await readMetadata(id)
