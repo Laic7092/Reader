@@ -56,9 +56,11 @@ export async function serverImport(metadata: Book) {
   clientImport(new File(buffers, metadata.name), Origin.server)
 }
 
+const linehandler = (line: string) => line.replace(/<br \/>/g, '').replace(/\s+/g, ' ').trim()
+
 // 从text获取所有line
 function getLineArrByText(text: string) {
-  return text.split(/[\r\n]+/).map(para => para.replace("<br />", '').trim()).filter(para => para);
+  return text.split(/[\r\n]+/).map(linehandler).filter(para => para);
 }
 
 // 从text获取charSet
@@ -103,7 +105,8 @@ function getChapterArrByLineArr(lineArr: Array<string>) {
 // 根据设备宽度以及默认样式计算每行的渲染高度
 async function getHeightArrByLineArr(lineArr: string[], charSet: Set<string>): Promise<number[]> {
   return new Promise((resolve) => {
-    const width = Math.min(window.innerWidth - 4 * REM_PX, 720)
+    const width = getComputedStyle(document.documentElement).width
+    const maxWidth = Math.min(parseFloat(width) - 4 * REM_PX, 720)
     const height = window.innerHeight
     const htmlCanvas = document.createElement("canvas");
     const offscreen = htmlCanvas?.transferControlToOffscreen();
@@ -113,9 +116,8 @@ async function getHeightArrByLineArr(lineArr: string[], charSet: Set<string>): P
       const { key, val } = ev.data
       key === 'msHeightArr' && resolve(val)
     }
-
     myWorker.postMessage({
-      width,
+      width: maxWidth,
       height,
       canvas: offscreen,
       lineArr,
