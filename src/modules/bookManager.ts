@@ -103,7 +103,7 @@ function getChapterArrByLineArr(lineArr: Array<string>) {
 // 根据设备宽度以及默认样式计算每行的渲染高度
 async function getHeightArrByLineArr(lineArr: string[], charSet: Set<string>): Promise<number[]> {
   return new Promise((resolve) => {
-    const width = window.innerWidth - 4 * REM_PX
+    const width = Math.min(window.innerWidth - 4 * REM_PX, 720)
     const height = window.innerHeight
     const htmlCanvas = document.createElement("canvas");
     const offscreen = htmlCanvas?.transferControlToOffscreen();
