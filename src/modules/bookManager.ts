@@ -35,10 +35,10 @@ async function clientImport(file: File, origin = Origin.client) {
         const lineArr = getLineArrByText(result)
         const chapterArr = getChapterArrByLineArr(lineArr)
         const charSet = getCharSetByText(result)
-        const chunks =  splitTextFileByLine(buffer, 1024 * 256, encoding)
+        const chunks = splitTextFileByLine(buffer, 1024 * 256, encoding)
         chunks.forEach((chunk, index) => addFileChunk(hash, chunk, index))
         const heightArr = await getHeightArrByLineArr(lineArr, charSet)
-        addParseData(hash, { heightArr, chapterArr, lineArr })
+        addParseData(hash, { heightArr, lineArr })
         createMetadata({ id: hash, name: file.name, createTm: Date.now(), chapterArr, chunkNum: chunks.length }, origin)
       }
     }
@@ -112,8 +112,6 @@ async function getHeightArrByLineArr(lineArr: string[], charSet: Set<string>): P
     myWorker.onmessage = (ev) => {
       const { key, val } = ev.data
       key === 'msHeightArr' && resolve(val)
-      key && (window[key] = val)
-      console.log('msg-from-worker', ev.data)
     }
 
     myWorker.postMessage({

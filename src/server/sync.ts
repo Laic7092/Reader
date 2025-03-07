@@ -14,13 +14,11 @@ isOnline || clearInterval(timer)
 window.ononline = () => {
     isOnline = true
     timer = setInterval(sync, SYNC_RATE)
-    console.log("You are now connected to the network.", isOnline);
 };
 
 window.onoffline = () => {
     isOnline = false
     timer && clearInterval(timer)
-    console.log("You are now unconnected to the network.", isOnline);
 }
 
 

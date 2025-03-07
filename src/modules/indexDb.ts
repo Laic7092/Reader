@@ -1,5 +1,5 @@
 import bus from "../utils/pubSub";
-import type { Book, Chapter, ClientBook, Chunk } from "../core/declare";
+import type { Book, ClientBook, Chunk } from "../core/declare";
 import { CRUD, Origin, STATUS } from "../core/declare"
 
 const databaseName = 'library';
@@ -10,12 +10,11 @@ let db: IDBDatabase | null = null;
   return new Promise((resolve, reject) => {
     const request = window.indexedDB.open(databaseName);
     request.onerror = function () {
-      console.log('数据库打开报错');
+      console.error('数据库打开失败');
       reject();
     };
     request.onsuccess = function () {
       db = request.result;
-      console.log('数据库打开成功');
       resolve(db);
       bus.emit(STATUS.READY);
     };
@@ -51,12 +50,11 @@ function createMetadata(bookData: Book, origin: Origin = Origin.client) {
   metadataStore.add(bookData);
 
   transaction.oncomplete = () => {
-    console.log('metadata 写入成功');
     bus.emit(CRUD.CREATE, bookData, origin);
   };
 
   transaction.onerror = () => {
-    console.log('metadata 写入失败');
+    console.error('metadata 写入失败');
   };
 }
 
@@ -147,11 +145,10 @@ function updateMetadata(id: string, name: string) {
   metadataStore.put({ id, name, updateTm: Date.now() });
 
   transaction.oncomplete = () => {
-    console.log('metadata 更新成功');
   };
 
   transaction.onerror = () => {
-    console.log('metadata 更新失败');
+    console.error('metadata 更新失败');
   };
 }
 
@@ -167,10 +164,9 @@ function deleteMetadata(id: string, origin: Origin = Origin.client) {
   // 删除 metadata
   const metadataRequest = metadataStore.delete(id);
   metadataRequest.onsuccess = () => {
-    console.log('metadata 删除成功');
   };
   metadataRequest.onerror = () => {
-    console.log('metadata 删除失败');
+    console.error('metadata 删除失败');
   };
 
   // 删除 files
@@ -183,25 +179,23 @@ function deleteMetadata(id: string, origin: Origin = Origin.client) {
     }
   };
   filesRequest.onerror = () => {
-    console.log('files 删除失败');
+    console.error('files 删除失败');
   };
 
   // 删除 parseData
   const parseDataRequest = parseDataStore.delete(id);
   parseDataRequest.onsuccess = () => {
-    console.log('parseData 删除成功');
   };
   parseDataRequest.onerror = () => {
-    console.log('parseData 删除失败');
+    console.error('parseData 删除失败');
   };
 
   transaction.oncomplete = () => {
-    console.log('书籍数据删除成功');
     bus.emit(CRUD.DELETE, id, origin);
   };
 
   transaction.onerror = () => {
-    console.log('书籍数据删除失败');
+    console.error('书籍数据删除失败');
   };
 }
 
@@ -216,11 +210,10 @@ function addFileChunk(id: string, chunk: ArrayBuffer, chunkIndex: number) {
   filesStore.add({ id, chunk, chunkIndex });
 
   transaction.oncomplete = () => {
-    console.log('文件分块写入成功');
   };
 
   transaction.onerror = () => {
-    console.log('文件分块写入失败');
+    console.error('文件分块写入失败');
   };
 }
 
@@ -254,7 +247,7 @@ function readFileChunk(id: string, chunkIndex?: number): Promise<Chunk | Chunk[]
 }
 
 // 添加解析数据
-function addParseData(id: string, parseData: { lineArr: string[], heightArr: number[], chapterArr: Chapter[] }) {
+function addParseData(id: string, parseData: { lineArr: string[], heightArr: number[] }) {
   if (!db) return;
 
   const transaction = db.transaction('book_parseData', 'readwrite');
@@ -264,11 +257,10 @@ function addParseData(id: string, parseData: { lineArr: string[], heightArr: num
   parseDataStore.add({ ...parseData, id });
 
   transaction.oncomplete = () => {
-    console.log('解析数据写入成功');
   };
 
   transaction.onerror = () => {
-    console.log('解析数据写入失败');
+    console.error('解析数据写入失败');
   };
 }
 

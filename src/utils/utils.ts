@@ -91,8 +91,9 @@ export async function getCharCode(buffer: ArrayBuffer): Promise<string> {
     const chardet = await import('chardet')
     return new Promise((resolve, reject) => {
         try {
-            const analyse = chardet.analyse(new Uint8Array(buffer.byteLength > 1024 ? buffer.slice(0, 1024) : buffer))
-            resolve(analyse.length > 0 ? analyse[0].name : DEFAULT_CHARCODE)
+            const encode = chardet.detect(new Uint8Array(buffer, 0, 1024))
+            console.log('charCode:', encode);
+            resolve(encode || DEFAULT_CHARCODE)
         } catch (error) {
             console.error(error)
             reject
@@ -151,12 +152,14 @@ export function splitTextFileByLine(_buffer: ArrayBuffer, chunkSize: number, enc
 
 // 计算文件hash
 export async function calculateHash(buffer: ArrayBuffer): Promise<string> {
+    const xxhash = await import('xxhash-wasm');
+    const { h32Raw } = await xxhash.default()
     console.time('hash')
-    const { sha1 } = await import('js-sha1')
     return new Promise((resolve, reject) => {
         try {
-            const hash = sha1(buffer)
-            resolve(hash);
+            const hash = h32Raw(new Uint8Array(buffer))
+            console.log('hash', hash)
+            resolve(String(hash));
         } catch (error) {
             console.error(error)
             reject(new Error('Failed to calculate SHA-1 hash.'));

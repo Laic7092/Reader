@@ -47,12 +47,8 @@ interface BookInShelf extends Book {
 
 const books = ref<Array<BookInShelf>>([])
 function init() {
-  readAllMetadata().then(res => {
-    console.log('书架初始化完成', res);
-    books.value = res.map((book) => ({
-      ...book,
-      selected: false
-    }) as BookInShelf)
+  readAllMetadata().then(bks => {
+    books.value = bks.map(book => ({ ...book, selected: false }))
   })
 }
 
