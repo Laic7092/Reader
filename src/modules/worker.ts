@@ -1,9 +1,5 @@
 import type { Msg } from "../core/declare";
 
-addEventListener('message', (e) => {
-    globalThis.postMessage('You said: ' + e.data);
-});
-
 interface Config {
     maxWidth: number,
     lineHeight: number,
@@ -28,47 +24,48 @@ const lineEndProhibition = new Set([
     "（", "〈", "《"
 ])
 
-const findValidBreakPoint = (text: string, i: number, minIndex: number) => {
-    const oi = i
-    while (i > minIndex &&
-        (lineStartProhibition.has(text[i]) || lineEndProhibition.has(text[i - 1]))
-    ) i--
-    return i > minIndex ? i : oi
-}
-
-const charWidthMap = new Map()
-function getPrefixSumByCharMap(text: string, charWidthMap: Map<string, number>) {
-    let sum: number[] = []
-    Array.from(text).forEach((char, idx) => {
-        sum.push((sum[idx - 1] || 0) + (charWidthMap.get(char) || 0))
-    })
-    return sum
-}
-
+const charWidthMap = new Float32Array(65536)
 function measureHeight(text: string, config: Config) {
-
     const { maxWidth, lineHeight, textIndent, fontSize } = config
     const length = text.length
 
-    let _maxWidth = config.maxWidth - textIndent * fontSize
-    const prefixSum = getPrefixSumByCharMap(text, charWidthMap)
-
+    let _maxWidth = maxWidth - textIndent * fontSize // 第一行的最大宽度
     let lineCount = 0
-
-    let i = 0
-    // 下行行首
     let lineHeadIndex = 0
-    while (i < length) {
-        if (prefixSum[i] - (prefixSum[lineHeadIndex - 1] || 0) < _maxWidth) {
-            i++
-        } else {
-            i = findValidBreakPoint(text, i, lineHeadIndex)
-            lineCount === 0 && (_maxWidth = maxWidth)
-            lineCount++
-            lineHeadIndex = i
+    let currentWidth = 0
+
+    for (let i = 0; i < length; i++) {
+        // 更新当前行宽度
+        currentWidth += (charWidthMap[text.charCodeAt(i)] || 0)
+
+        // 如果当前行超出最大宽度，尝试换行
+        if (currentWidth > _maxWidth) {
+            // 从当前位置向前查找最近的合法换行点
+            let breakPoint = i
+            while (
+                breakPoint > lineHeadIndex &&
+                (lineStartProhibition.has(text[breakPoint]) ||
+                    lineEndProhibition.has(text[breakPoint - 1]))
+            ) {
+                breakPoint--
+            }
+
+            // 如果找到合法换行点，则换行
+            if (breakPoint > lineHeadIndex) {
+                lineCount++
+                lineHeadIndex = breakPoint
+                currentWidth = 0
+                _maxWidth = maxWidth // 从第二行开始使用完整的 maxWidth
+                i = breakPoint - 1 // 从换行点重新开始
+            }
         }
     }
-    i === length && lineCount++
+
+    // 如果最后一行有内容，增加一行
+    if (currentWidth > 0) {
+        lineCount++
+    }
+
     return lineCount * fontSize * lineHeight
 }
 
@@ -89,14 +86,19 @@ addEventListener('message', (evt) => {
 
     console.time('charset')
     ctx.font = `${config.fontSize}px ${config.fontFamily}`;
-    charSet.forEach(char => charWidthMap.set(char, ctx.measureText(char).width))
+    const charCodeSet = new Set()
+    charSet.forEach(char => {
+        charCodeSet.add(char.charCodeAt(0))
+        charWidthMap[char.charCodeAt(0)] = ctx.measureText(char).width
+    })
+    console.log(charSet, charCodeSet);
+    console.log(charWidthMap);
+
     console.timeEnd('charset')
     console.time('msHeight')
     let cnt: Array<number> = []
-    let _height = config.fontSize
     lineArr.forEach((para: string) => {
         let cur = measureHeight(para, config)
-        _height += cur
         cnt.push(cur)
     });
     console.timeEnd('msHeight')

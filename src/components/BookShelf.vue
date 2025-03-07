@@ -134,8 +134,7 @@ function removeSelection() {
       padding: 1em;
 
       .post-img {
-        width: 5em;
-        height: 5em;
+        width: 80%;
       }
     }
 

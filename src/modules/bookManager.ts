@@ -26,8 +26,6 @@ export function handleBookChange(event: Event) {
 // 客户端导入-全部解析并且存库
 async function clientImport(file: File, origin = Origin.client) {
   const buffer = await file.arrayBuffer()
-  console.warn('bufferSize', buffer.byteLength);
-
   return Promise.all([calculateHash(buffer), getCharCode(buffer)]).then(([hash, encoding]) => {
     const fileReader = new FileReader();
     fileReader.readAsText(file, encoding);
