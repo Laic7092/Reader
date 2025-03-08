@@ -37,7 +37,8 @@ async function clientImport(file: File, origin = Origin.client) {
         const charSet = getCharSetByText(result)
         const chunks = splitTextFileByLine(buffer, 1024 * 256, encoding)
         chunks.forEach((chunk, index) => addFileChunk(hash, chunk, index))
-        const heightArr = await getHeightArrByLineArr(lineArr, charSet)
+        const chapterIdxSet = new Set(chapterArr.map(chapter => chapter.idx))
+        const heightArr = await getHeightArrByLineArr(lineArr, charSet, chapterIdxSet)
         addParseData(hash, { heightArr, lineArr })
         createMetadata({ id: hash, name: file.name, createTm: Date.now(), chapterArr, chunkNum: chunks.length }, origin)
       }
@@ -56,12 +57,16 @@ export async function serverImport(metadata: Book) {
   clientImport(new File(buffers, metadata.name), Origin.server)
 }
 
-const linehandler = (line: string) => line.replace(/<br \/>/g, '').replace(/\s+/g, ' ').trim()
+const linehandler = (line: string) =>
+  line.replace(/<br\s*\/?>/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-// 从text获取所有line
-function getLineArrByText(text: string) {
-  return text.split(/[\r\n]+/).map(linehandler).filter(para => para);
-}
+// 从 text 获取所有 line
+const getLineArrByText = (text: string) =>
+  text.split(/[\r\n]+/)
+    .map(linehandler)
+    .filter(para => para)
 
 // 从text获取charSet
 function getCharSetByText(text: string): Set<string> {
@@ -103,7 +108,7 @@ function getChapterArrByLineArr(lineArr: Array<string>) {
 }
 
 // 根据设备宽度以及默认样式计算每行的渲染高度
-async function getHeightArrByLineArr(lineArr: string[], charSet: Set<string>): Promise<number[]> {
+async function getHeightArrByLineArr(lineArr: string[], charSet: Set<string>, chapterIdxSet: Set<number>): Promise<number[]> {
   return new Promise((resolve) => {
     const width = getComputedStyle(document.documentElement).width
     const maxWidth = Math.min(parseFloat(width) - 4 * REM_PX, 720)
@@ -121,6 +126,7 @@ async function getHeightArrByLineArr(lineArr: string[], charSet: Set<string>): P
       height,
       canvas: offscreen,
       lineArr,
+      chapterIdxSet,
       charSet
     }, [offscreen]);
   })

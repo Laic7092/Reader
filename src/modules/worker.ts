@@ -11,18 +11,20 @@ interface Config {
 // 点号（顿号、逗号、句号、冒号、分号、叹号、问号）、结束引号、结束括号、结束双书名号（书名号乙式）、连接号、间隔号、分隔号不能出现在一行的开头。
 const lineStartProhibition = new Set([
     "\u3002", "\uFF0E", "\uFF0C", "\u3001", "\uFF1A", "\uFF1B", "\uFF01", "\u203C", "\uFF1F", "\u2047",
-    "\u201C", "\u2018", // ???
+    // "\u201C", "\u2018", // ???
     "\u300D", "\u300F", "\u201D", "\u2019",
     "\uFF09", "\u300B", "\u3009",
     "\uFF5E", "\u002D", "\u2013", "\u2014",
     "\u00B7", "\u30FB", "\u2027",
     "\u002F", "\uFF0F",
-    "\u3011", "\u3017", "\u3015", "\uFF3D", "\uFF5D"
+    "\u3011", "\u3017", "\u3015", "\uFF3D", "\uFF5D",
+    // 省略号-破折号不可分割
+    "\u2014", "\u2026", "\u22EF"
 ])
 
 // 开始引号、开始括号、开始单双书名号等符号，不能出现在一行的结尾。这是最推荐的方法。
 const lineEndProhibition = new Set([
-    "\u201D", "\u2019", // ???
+    // "\u201D", "\u2019", // ???
     "\u201C", "\u2018",
     "\uFF08",
     "\u300A",
@@ -78,7 +80,7 @@ function measureHeight(text: string, config: Config) {
 }
 
 addEventListener('message', (evt) => {
-    const { canvas, width, height, lineArr, charSet } = evt.data as Msg;
+    const { canvas, width, height, lineArr, charSet, chapterIdxSet } = evt.data as Msg;
     canvas.height = height
     canvas.width = width
     const ctx: OffscreenCanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -105,8 +107,9 @@ addEventListener('message', (evt) => {
     console.timeEnd('charset')
     console.time('msHeight')
     let cnt: Array<number> = []
-    lineArr.forEach((para: string) => {
-        let cur = measureHeight(para, config)
+    lineArr.forEach((para: string, idx) => {
+        const isChapter = chapterIdxSet.has(idx)
+        let cur = isChapter ? measureHeight(para.slice(2), config) * 1.2 : measureHeight(para, config)
         cnt.push(cur)
     });
     console.timeEnd('msHeight')

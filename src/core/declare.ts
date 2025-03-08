@@ -56,6 +56,7 @@ export interface Msg {
     canvas: OffscreenCanvas,
     lineArr: string[],
     charSet: Set<string>
+    chapterIdxSet: Set<number>
 }
 
 export interface Chunk {

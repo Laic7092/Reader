@@ -77,7 +77,7 @@ setCurBookUtils({
     .chapter {
         font-weight: 600;
         text-indent: 0;
-        /* font-size: 1.5em; */
+        font-size: 1.5em;
     }
 
     p {
@@ -89,7 +89,8 @@ setCurBookUtils({
         text-align: justify;
         word-break: break-all;
         word-wrap: anywhere;
-        line-break: loose;
+        overflow-wrap: anywhere;
+        line-break: normal;
     }
 }
 
