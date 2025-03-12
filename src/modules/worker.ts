@@ -11,7 +11,7 @@ interface Config {
 // 点号（顿号、逗号、句号、冒号、分号、叹号、问号）、结束引号、结束括号、结束双书名号（书名号乙式）、连接号、间隔号、分隔号不能出现在一行的开头。
 const lineStartProhibition = new Set([
     "\u3002", "\uFF0E", "\uFF0C", "\u3001", "\uFF1A", "\uFF1B", "\uFF01", "\u203C", "\uFF1F", "\u2047",
-    // "\u201C", "\u2018", // ???
+    "\u201C", "\u2018", // ???
     "\u300D", "\u300F", "\u201D", "\u2019",
     "\uFF09", "\u300B", "\u3009",
     "\uFF5E", "\u002D", "\u2013", //"\u2014",
@@ -53,13 +53,13 @@ function measureHeight(text: string, config: Config) {
         if (currentWidth > _maxWidth) {
             // 从当前位置向前查找最近的合法换行点
             let breakPoint = i
-            while (
-                breakPoint > lineHeadIndex &&
-                (lineStartProhibition.has(text[breakPoint]) ||
-                    lineEndProhibition.has(text[breakPoint - 1]))
-            ) {
-                breakPoint--
-            }
+            // while (
+            //     breakPoint > lineHeadIndex &&
+            //     (lineStartProhibition.has(text[breakPoint]) ||
+            //         lineEndProhibition.has(text[breakPoint - 1]))
+            // ) {
+            //     breakPoint--
+            // }
 
             // 如果找到合法换行点，则换行
             if (breakPoint > lineHeadIndex) {
@@ -80,7 +80,7 @@ function measureHeight(text: string, config: Config) {
     if (currentWidth > 0) {
         lineCount++
     }
-    console.log(bps);
+    // console.log(bps);
 
     return lineCount * fontSize * lineHeight
 }

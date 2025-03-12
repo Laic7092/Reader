@@ -88,11 +88,11 @@ setCurBookUtils({
         text-indent: 2em;
         text-align: justify;
         /* text-align: start; */
-        word-break: break-all;
-        word-wrap: anywhere;
-        overflow-wrap: anywhere;
-        line-break: normal;
-        font-kerning: none;
+        /* word-break: break-all; */
+        /* word-wrap: anywhere; */
+        /* overflow-wrap: anywhere; */
+        /* line-break: normal; */
+        /* font-kerning: none; */
     }
 }
 
