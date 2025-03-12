@@ -94,7 +94,7 @@ addEventListener('message', (evt) => {
 
     const config: Config = {
         fontSize: 20,
-        fontFamily: 'system-ui',
+        fontFamily: 'PingFang SC, system-ui',
         lineHeight: 1.5,
         maxWidth: width,
         textIndent: 2,
