@@ -1,8 +1,9 @@
 import { createMetadata, addFileChunk, addParseData } from "./indexDb";
 import { Origin, type Book, type Chapter } from "../core/declare";
-import worker from './worker.js?worker'
+// import worker from './worker.js?worker'
 import { getCharCode, calculateHash, splitTextFileByLine } from "../utils/utils";
 import { getChunk } from "../server/book";
+import { createHeightCalculator } from "./calc";
 
 const REM_PX = 16
 
@@ -38,6 +39,7 @@ async function clientImport(file: File, origin = Origin.client) {
         const chunks = splitTextFileByLine(buffer, 1024 * 256, encoding)
         chunks.forEach((chunk, index) => addFileChunk(hash, chunk, index))
         const chapterIdxSet = new Set(chapterArr.map(chapter => chapter.idx))
+        // const heightArr = await getHeightArrByLineArr(lineArr, charSet, chapterIdxSet)
         const heightArr = await getHeightArrByLineArr(lineArr, charSet, chapterIdxSet)
         addParseData(hash, { heightArr, lineArr })
         createMetadata({ id: hash, name: file.name, createTm: Date.now(), chapterArr, chunkNum: chunks.length }, origin)
@@ -110,24 +112,40 @@ function getChapterArrByLineArr(lineArr: Array<string>) {
 // 根据设备宽度以及默认样式计算每行的渲染高度
 async function getHeightArrByLineArr(lineArr: string[], charSet: Set<string>, chapterIdxSet: Set<number>): Promise<number[]> {
   return new Promise((resolve) => {
+    console.log(charSet, chapterIdxSet);
+
     const width = getComputedStyle(document.documentElement).width
     const maxWidth = Math.min(parseFloat(width) - 4 * REM_PX, 720)
     const height = window.innerHeight
-    const htmlCanvas = document.createElement("canvas");
-    const offscreen = htmlCanvas?.transferControlToOffscreen();
 
-    const myWorker = new worker();
-    myWorker.onmessage = (ev) => {
-      const { key, val } = ev.data
-      key === 'msHeightArr' && resolve(val)
-    }
-    myWorker.postMessage({
-      width: maxWidth,
-      height,
-      canvas: offscreen,
-      lineArr,
+    createHeightCalculator({
+      lineArray: lineArr,
       chapterIdxSet,
-      charSet
-    }, [offscreen]);
+      styleConfig: {
+        fontSize: 20,
+        lineHeight: 1.5
+      },
+      deviceSize: {
+        width: maxWidth,
+        height
+      }
+    }).then(resolve)
+
+    // const htmlCanvas = document.createElement("canvas");
+    // const offscreen = htmlCanvas?.transferControlToOffscreen();
+
+    // const myWorker = new worker();
+    // myWorker.onmessage = (ev) => {
+    //   const { key, val } = ev.data
+    //   key === 'msHeightArr' && resolve(val)
+    // }
+    // myWorker.postMessage({
+    //   width: maxWidth,
+    //   height,
+    //   canvas: offscreen,
+    //   lineArr,
+    //   chapterIdxSet,
+    //   charSet
+    // }, [offscreen]);
   })
 }

@@ -19,7 +19,7 @@ const accumulatedHeightArray = computed(() => {
 });
 
 // 虚拟列表的配置
-const CATCH_NUM = 5; // 预加载的额外行数
+const CATCH_NUM = 100; // 预加载的额外行数
 const DISPLAY_NUM = 30; // 可视区域的最大行数
 const totalLen = props.list.length;
 const totalHeight = computed(() => accumulatedHeightArray.value[totalLen - 1] || 0);
@@ -102,7 +102,7 @@ defineExpose({
         <div ref="constHeight">
             <div :style="{ transform: transform }">
                 <template v-for="item in visibleList" :key="item.id">
-                    <slot v-bind="item" :style="{ height: `${heightList[item.id]}px` }"></slot>
+                    <slot v-bind="item"></slot>
                 </template>
             </div>
         </div>
