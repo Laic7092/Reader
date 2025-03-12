@@ -97,7 +97,7 @@ setCurBookUtils({
 }
 
 .reader-wrapper {
-		ooverflow-x: hidden;
+	overflow-x: hidden;
     overflow-y: auto;
     height: 100%;
 }
