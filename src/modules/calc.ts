@@ -33,6 +33,7 @@ const initStyles = (deviceSize: DeviceSize, styleConfig: StyleConfig) => {
         }
     `;
     document.head.appendChild(style);
+    return style
 };
 
 
@@ -97,10 +98,11 @@ export const createHeightCalculator = (options: HeightCalculatorOptions): Promis
 
     return new Promise((resolve) => {
         // 初始化样式
-        initStyles(deviceSize, styleConfig);
+        const style = initStyles(deviceSize, styleConfig);
 
         // 开始计算高度
         calculateHeights(lineArray, chapterIdxSet, (heights) => {
+            document.head.removeChild(style);
             console.timeEnd()
             resolve(heights);
         },);
