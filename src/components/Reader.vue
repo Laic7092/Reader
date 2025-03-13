@@ -90,7 +90,7 @@ setCurBookUtils({
         /* text-align: start; */
         /* word-break: break-all; */
         /* word-wrap: anywhere; */
-        /* overflow-wrap: anywhere; */
+        overflow-wrap: break-word;
         /* line-break: normal; */
         /* font-kerning: none; */
     }

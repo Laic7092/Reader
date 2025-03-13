@@ -22,6 +22,7 @@ const initStyles = (deviceSize: DeviceSize, styleConfig: StyleConfig) => {
         p {
             visibility: hidden;
             text-indent: 2em;
+            overflow-wrap: break-word;
             width: ${deviceSize.width}px;
             font-size: ${styleConfig.fontSize}px;
             line-height: ${styleConfig.lineHeight};
